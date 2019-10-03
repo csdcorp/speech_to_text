@@ -12,8 +12,8 @@ import android.speech.RecognitionListener
 import android.speech.SpeechRecognizer.createSpeechRecognizer
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
