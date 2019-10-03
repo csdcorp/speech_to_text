@@ -1,4 +1,4 @@
-group 'com.example.speech_to_text'
+group 'com.csdcorp.speech_to_text'
 version '1.0-SNAPSHOT'
 
 buildscript {

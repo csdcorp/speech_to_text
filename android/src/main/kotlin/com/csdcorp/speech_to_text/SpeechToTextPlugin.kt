@@ -1,4 +1,4 @@
-package com.example.speech_to_text
+package com.csdcorp.speech_to_text
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

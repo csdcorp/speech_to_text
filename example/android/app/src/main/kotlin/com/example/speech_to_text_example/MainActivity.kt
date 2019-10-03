@@ -1,4 +1,4 @@
-package com.example.speech_to_text_example
+package com.csdcorp.speech_to_text_example
 
 import android.os.Bundle
 
