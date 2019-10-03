@@ -1,14 +1,42 @@
 # speech_to_text
 
-A new flutter plugin project.
+A library that exposes device specific text to speech recognition capability.
 
-## Getting Started
+This plugin contains a set of classes that make it easy to use the speech recognition 
+capabilities of the mobile device in Flutter. It supports both Android and iOS. 
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+*Note*: This plugin is under development and will be extended over the coming weeks. 
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## Using
+
+To recognize text from the microphone import the package and call the plugin, like so: 
+
+```dart
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+    SpeechToText speech = stt.SpeechToText();
+    bool available = await speech.initialize();
+    if ( available ) {
+        speech.listen( resultListener: onResults );
+    }
+    else {
+        print("The user has denied the use of speech recognition.");
+    }
+```
+
+## Permissions
+
+Applications using this plugin require user permissions. 
+### iOS
+
+Add the following keys to your _Info.plist_ file, located in `<project root>/ios/Runner/Info.plist`:
+
+* `NSSpeechRecognitionUsageDescription` - describe why your app uses speech recognition. This is called _Privacy - Speech Recognition Usage Description_ in the visual editor.
+* `NSMicrophoneUsageDescription` - describe why your app needs access to the microphone. This is called _Privacy - Microphone Usage Description_ in the visual editor.
+
+### Android
+
+Add the record audio permission to your _AndroidManifest.xml_ file, located in `<project root>/android/app/src/main/AndroidManifest.xml`.
+
+* `android.permission.RECORD_AUDIO` - describe why your app needs access to the microphone. This is called _Privacy - Microphone Usage Description_ in the visual editor.
+
