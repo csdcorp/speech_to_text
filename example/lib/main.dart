@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,6 +15,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _hasSpeech = false;
   String lastWords = "";
+  String lastError = "";
   final SpeechToText speech = SpeechToText();
 
   @override
@@ -26,7 +28,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initPlatformState() async {
     bool hasSpeech;
     // Platform messages may fail, so we use a try/catch PlatformException.
-    hasSpeech = await speech.initialize();
+    hasSpeech = await speech.initialize(onError: errorListener );
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -68,8 +70,27 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
                 Expanded(
-                  child: Center(
-                    child: Text(lastWords),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text('Recognized Words'),
+                      ),
+                      Center(
+                        child: Text(lastWords),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text('Error'),
+                      ),
+                      Center(
+                        child: Text(lastError),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
@@ -78,13 +99,13 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
               ])
-            : Text('Speech recognition unavailable'),
+            : Center( child: Text('Speech recognition unavailable', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold))),
       ),
     );
   }
 
   void startListening() async {
-    speech.listen(resultListener: resultListener );
+    speech.listen(onResult: resultListener );
     setState(() {
       
     });
@@ -100,6 +121,12 @@ class _MyAppState extends State<MyApp> {
   void resultListener(SpeechRecognitionResult result) {
     setState(() {
       lastWords = "${result.recognizedWords} - ${result.finalResult}";
+    });
+  }
+
+  void errorListener(SpeechRecognitionError error ) {
+    setState(() {
+      lastError = "${error.errorMsg} - ${error.permanent}";
     });
   }
 }

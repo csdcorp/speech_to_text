@@ -38,5 +38,6 @@ Add the following keys to your _Info.plist_ file, located in `<project root>/ios
 
 Add the record audio permission to your _AndroidManifest.xml_ file, located in `<project root>/android/app/src/main/AndroidManifest.xml`.
 
-* `android.permission.RECORD_AUDIO` - describe why your app needs access to the microphone. This is called _Privacy - Microphone Usage Description_ in the visual editor.
+* `android.permission.RECORD_AUDIO` - this permission is required for microphone access.
+* `android.permission.INTERNET` - this permission is required because speech recognition may use remote services.
 

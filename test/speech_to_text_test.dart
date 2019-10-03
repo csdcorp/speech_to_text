@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -9,13 +10,19 @@ void main() {
   bool listenInvoked;
   bool cancelInvoked;
   TestSpeechListener listener;
+  TestErrorListener errors;
   SpeechToText speech;
   final String firstRecognizedWords = 'hello';
   final String secondRecognizedWords = 'hello there';
-  final String firstRecognizedJson = '{"recognizedWords":"$firstRecognizedWords","finalResult":false}';
-  final String secondRecognizedJson = '{"recognizedWords":"$secondRecognizedWords","finalResult":false}';
-  final SpeechRecognitionResult firstRecognizedResult = SpeechRecognitionResult(firstRecognizedWords, false );
-  final SpeechRecognitionResult secondRecognizedResult = SpeechRecognitionResult(secondRecognizedWords, false );
+  final String firstRecognizedJson =
+      '{"recognizedWords":"$firstRecognizedWords","finalResult":false}';
+  final String secondRecognizedJson =
+      '{"recognizedWords":"$secondRecognizedWords","finalResult":false}';
+  final SpeechRecognitionResult firstRecognizedResult =
+      SpeechRecognitionResult(firstRecognizedWords, false);
+  final SpeechRecognitionResult secondRecognizedResult =
+      SpeechRecognitionResult(secondRecognizedWords, false);
+  final String transientErrorJson = '{"errorMsg":"network","permanent":false}';
 
   setUp(() {
     initResult = true;
@@ -23,7 +30,8 @@ void main() {
     listenInvoked = false;
     cancelInvoked = false;
     listener = TestSpeechListener();
-    speech = SpeechToText();
+    errors = TestErrorListener();
+    speech = SpeechToText.withMethodChannel(SpeechToText.speechChannel);
     speech.channel.setMockMethodCallHandler((MethodCall methodCall) async {
       switch (methodCall.method) {
         case "initialize":
@@ -51,7 +59,7 @@ void main() {
   group('init', () {
     test('succeeds on platform success', () async {
       expect(await speech.initialize(), true);
-      expect( initInvoked, true );
+      expect(initInvoked, true);
     });
     test('fails on platform failure', () async {
       initResult = false;
@@ -81,35 +89,46 @@ void main() {
     test('invokes listen after successful init', () async {
       await speech.initialize();
       speech.listen();
-      expect( listenInvoked, true );
+      expect(listenInvoked, true);
     });
     test('calls speech listener', () async {
       await speech.initialize();
-      await speech.listen( resultListener: listener.onSpeechResult );
-      await speech.processMethodCall( MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson ));
-      expect( listener.speechResults, 1 );
-      expect( listener.results, [firstRecognizedResult]);
+      await speech.listen(onResult: listener.onSpeechResult);
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson));
+      expect(listener.speechResults, 1);
+      expect(listener.results, [firstRecognizedResult]);
     });
     test('calls speech listener with multiple', () async {
       await speech.initialize();
-      await speech.listen( resultListener: listener.onSpeechResult );
-      await speech.processMethodCall( MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson ));
-      await speech.processMethodCall( MethodCall(SpeechToText.textRecognitionMethod, secondRecognizedJson ));
-      expect( listener.speechResults, 2 );
-      expect( listener.results, [firstRecognizedResult, secondRecognizedResult ]);
+      await speech.listen(onResult: listener.onSpeechResult);
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson));
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.textRecognitionMethod, secondRecognizedJson));
+      expect(listener.speechResults, 2);
+      expect(listener.results, [firstRecognizedResult, secondRecognizedResult]);
     });
-
   });
 
   group('cancel', () {
     test('does nothing if not initialized', () async {
       speech.cancel();
+      expect(cancelInvoked, false);
     });
     test('cancels an active listen', () async {
       await speech.initialize();
       speech.listen();
       speech.cancel();
-      expect( cancelInvoked, true );
+      expect(cancelInvoked, true);
+    });
+  });
+  group('error', () {
+    test('notifies handler with transient', () async {
+      await speech.initialize( onError: errors.onSpeechError );
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
+      expect( errors.speechErrors, 1 );
     });
   });
 }
@@ -118,8 +137,18 @@ class TestSpeechListener {
   int speechResults = 0;
   List<SpeechRecognitionResult> results = [];
 
-  void onSpeechResult( SpeechRecognitionResult result ) {
+  void onSpeechResult(SpeechRecognitionResult result) {
     ++speechResults;
     results.add(result);
+  }
+}
+
+class TestErrorListener {
+  int speechErrors = 0;
+  List<SpeechRecognitionError> errors = [];
+
+  void onSpeechError(SpeechRecognitionError errorResult) {
+    ++speechErrors;
+    errors.add(errorResult);
   }
 }

@@ -3,67 +3,109 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 /// Notified as words are recognized with the current set of recognized words.
 typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
+/// Notified if errors occur during recognition or intialization.
+typedef SpeechErrorListener = void Function(SpeechRecognitionError errorNotification );
 
 /// An interface to device specific speech recognition services.
+/// 
+/// The general flow of a speech recognition session is as follows:
+/// ```Dart
+/// SpeechToText speech = SpeechToText();
+/// bool isReady = await speech.initialize();
+/// if ( isReady ) {
+///   await speech.listen( resultListener: resultListener );
+/// }
+/// ...
+/// // At some point later
+/// speech.stop();
+/// ```
 class SpeechToText {
   static const String textRecognitionMethod = 'textRecognition';
-  static const MethodChannel _kChannel =
+  static const String notifyErrorMethod = 'notifyError';
+  static const MethodChannel speechChannel =
       const MethodChannel('plugin.csdcorp.com/speech_to_text');
   static final SpeechToText _instance =
-      SpeechToText.withMethodChannel(_kChannel);
+      SpeechToText.withMethodChannel(speechChannel);
   bool _initWorked = false;
   bool _recognized = false;
+  SpeechRecognitionError _lastError;
   bool _listening = false;
   String _lastRecognized = "";
   SpeechResultListener _resultListener;
+  SpeechErrorListener errorListener;
 
   final MethodChannel channel;
   factory SpeechToText() => _instance;
   @visibleForTesting
   SpeechToText.withMethodChannel(this.channel);
 
+  /// True if words have been recognized during the current [listen] call.
+  /// 
+  /// Goes false as soon as [cancel] is called. 
   bool get hasRecognized => _recognized;
+  /// The last set of recognized words received. 
+  /// 
+  /// This is maintained across [cancel] calls but cleared on the next
+  /// [listen]. 
   String get lastRecognizedWords => _lastRecognized;
+  /// True if [initialize] succeeded
   bool get isAvailable => _initWorked;
+  /// True if [listen] succeeded and [cancel] has not been called.
   bool get isListening => _listening;
+  /// The last error received or null if none
+  SpeechRecognitionError get lastError => _lastError;
+  /// True if an error has been received, see [lastError] for details
+  bool get hasError => null != lastError;
 
   /// Initialize speech recognition services, returns true if
   /// successful, false if failed.
   ///
   /// This method must be called before any other speech functions.
   /// If this method returns false no further [SpeechToText] methods
-  /// should be used.
-  Future<bool> initialize() async {
+  /// should be used. Should only be called once but does protect 
+  /// itself if called repeatedly. 
+  Future<bool> initialize({SpeechErrorListener onError }) async {
+    if (_initWorked) {
+      return Future.value(_initWorked);
+    }
     channel.setMethodCallHandler(_handleCallbacks);
+    if ( null != onError ) {
+      errorListener = onError;
+    }
     _initWorked = await channel.invokeMethod('initialize');
     return _initWorked;
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
+  /// 
+  /// Cannot be used until a successful [initialize] call. Should only be 
+  /// used after a successful [listen] call. 
   void cancel() {
+    if (!_initWorked) {
+      return;
+    }
     channel.invokeMethod('cancel');
     _listening = false;
+    _recognized = false;
   }
 
   /// Listen for speech and convert to text invoking the provided [interimListener]
   /// as words are recognized.
-  Future listen({SpeechResultListener resultListener}) async {
+  /// 
+  /// Cannot be used until a successful [initialize] call. 
+  Future listen({SpeechResultListener onResult}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
     _recognized = false;
     _listening = true;
-    _resultListener = resultListener;
+    _resultListener = onResult;
     channel.invokeMethod('listen');
-  }
-
-  @visibleForTesting
-  Future processMethodCall(MethodCall call) async {
-    return _handleCallbacks(call);
   }
 
   Future _handleCallbacks(MethodCall call) async {
@@ -72,6 +114,11 @@ class SpeechToText {
       case textRecognitionMethod:
         if (call.arguments is String) {
           _onTextRecognition(call.arguments);
+        }
+        break;
+      case notifyErrorMethod:
+        if (call.arguments is String) {
+          _onNotifyError(call.arguments);
         }
         break;
       default:
@@ -88,6 +135,22 @@ class SpeechToText {
       _resultListener(speechResult);
     }
   }
+
+  void _onNotifyError(String errorJson) {
+    Map<String, dynamic> errorMap = jsonDecode(errorJson);
+    SpeechRecognitionError speechError = SpeechRecognitionError.fromJson(errorMap);
+    _lastError = speechError;
+    if (null != errorListener) {
+      errorListener(speechError);
+    }
+  }
+
+  @visibleForTesting
+  Future processMethodCall(MethodCall call) async {
+    return _handleCallbacks(call);
+  }
 }
 
+/// Thrown when a method is called that requires successful 
+/// initialization first. See [initialize]
 class SpeechToTextNotInitializedException implements Exception {}
