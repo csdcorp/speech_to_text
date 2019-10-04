@@ -36,4 +36,7 @@ class SpeechRecognitionResult {
             recognizedWords == other.recognizedWords &&
             finalResult == other.finalResult;
   }
+
+  @override
+  int get hashCode => recognizedWords.hashCode;
 }

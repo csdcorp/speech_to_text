@@ -38,4 +38,7 @@ class SpeechRecognitionError {
             errorMsg == other.errorMsg &&
             permanent == other.permanent;
   }
+  
+  @override
+  int get hashCode => errorMsg.hashCode;
 }
