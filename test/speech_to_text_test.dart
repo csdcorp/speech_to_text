@@ -125,10 +125,10 @@ void main() {
   });
   group('error', () {
     test('notifies handler with transient', () async {
-      await speech.initialize( onError: errors.onSpeechError );
+      await speech.initialize(onError: errors.onSpeechError);
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
-      expect( errors.speechErrors, 1 );
+      expect(errors.speechErrors, 1);
     });
   });
 }

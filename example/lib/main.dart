@@ -26,7 +26,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initSpeechState() async {
-    bool hasSpeech = await speech.initialize(onError: errorListener, onStatus: statusListener );
+    bool hasSpeech = await speech.initialize(
+        onError: errorListener, onStatus: statusListener);
 
     if (!mounted) return;
     setState(() {
@@ -62,7 +63,7 @@ class _MyAppState extends State<MyApp> {
                       ),
                       FlatButton(
                         child: Text('Cancel'),
-                        onPressed:cancelListening,
+                        onPressed: cancelListening,
                       ),
                     ],
                   ),
@@ -93,11 +94,16 @@ class _MyAppState extends State<MyApp> {
                 ),
                 Expanded(
                   child: Center(
-                    child: speech.isListening ? Text("I'm listening...") : Text( 'Not listening' ),
+                    child: speech.isListening
+                        ? Text("I'm listening...")
+                        : Text('Not listening'),
                   ),
                 ),
               ])
-            : Center( child: Text('Speech recognition unavailable', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold))),
+            : Center(
+                child: Text('Speech recognition unavailable',
+                    style: TextStyle(
+                        fontSize: 20.0, fontWeight: FontWeight.bold))),
       ),
     );
   }
@@ -105,24 +111,18 @@ class _MyAppState extends State<MyApp> {
   void startListening() {
     lastWords = "";
     lastError = "";
-    speech.listen(onResult: resultListener );
-    setState(() {
-      
-    });
+    speech.listen(onResult: resultListener);
+    setState(() {});
   }
 
   void stopListening() {
-    speech.stop( );
-    setState(() {
-      
-    });
+    speech.stop();
+    setState(() {});
   }
 
   void cancelListening() {
-    speech.cancel( );
-    setState(() {
-      
-    });
+    speech.cancel();
+    setState(() {});
   }
 
   void resultListener(SpeechRecognitionResult result) {
@@ -131,12 +131,13 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void errorListener(SpeechRecognitionError error ) {
+  void errorListener(SpeechRecognitionError error) {
     setState(() {
       lastError = "${error.errorMsg} - ${error.permanent}";
     });
   }
-  void statusListener(String status ) {
+
+  void statusListener(String status) {
     setState(() {
       lastStatus = "$status";
     });

@@ -8,13 +8,16 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 
 /// Notified as words are recognized with the current set of recognized words.
 typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
+
 /// Notified if errors occur during recognition or intialization.
-typedef SpeechErrorListener = void Function(SpeechRecognitionError errorNotification );
+typedef SpeechErrorListener = void Function(
+    SpeechRecognitionError errorNotification);
+
 /// Notified when recognition status changes.
-typedef SpeechStatusListener = void Function(String status );
+typedef SpeechStatusListener = void Function(String status);
 
 /// An interface to device specific speech recognition services.
-/// 
+///
 /// The general flow of a speech recognition session is as follows:
 /// ```Dart
 /// SpeechToText speech = SpeechToText();
@@ -53,22 +56,28 @@ class SpeechToText {
   SpeechToText.withMethodChannel(this.channel);
 
   /// True if words have been recognized during the current [listen] call.
-  /// 
-  /// Goes false as soon as [cancel] is called. 
+  ///
+  /// Goes false as soon as [cancel] is called.
   bool get hasRecognized => _recognized;
-  /// The last set of recognized words received. 
-  /// 
+
+  /// The last set of recognized words received.
+  ///
   /// This is maintained across [cancel] calls but cleared on the next
-  /// [listen]. 
+  /// [listen].
   String get lastRecognizedWords => _lastRecognized;
+
   /// The last status update received
   String get lastStatus => _lastStatus;
+
   /// True if [initialize] succeeded
   bool get isAvailable => _initWorked;
+
   /// True if [listen] succeeded and [cancel] has not been called.
   bool get isListening => _listening;
+
   /// The last error received or null if none
   SpeechRecognitionError get lastError => _lastError;
+
   /// True if an error has been received, see [lastError] for details
   bool get hasError => null != lastError;
 
@@ -77,14 +86,15 @@ class SpeechToText {
   ///
   /// This method must be called before any other speech functions.
   /// If this method returns false no further [SpeechToText] methods
-  /// should be used. Should only be called once but does protect 
-  /// itself if called repeatedly. 
-  Future<bool> initialize({SpeechErrorListener onError, SpeechStatusListener onStatus }) async {
+  /// should be used. Should only be called once but does protect
+  /// itself if called repeatedly.
+  Future<bool> initialize(
+      {SpeechErrorListener onError, SpeechStatusListener onStatus}) async {
     if (_initWorked) {
       return Future.value(_initWorked);
     }
     channel.setMethodCallHandler(_handleCallbacks);
-    if ( null != onError ) {
+    if (null != onError) {
       errorListener = onError;
     }
     _initWorked = await channel.invokeMethod('initialize');
@@ -92,10 +102,10 @@ class SpeechToText {
   }
 
   /// Stops the current listen for speech if active, does nothing if not.
-  /// 
-  /// Stopping a listen will cause a final result to be sent. *Note:* Cannot 
-  /// be used until a successful [initialize] call. Should only be 
-  /// used after a successful [listen] call. 
+  ///
+  /// Stopping a listen will cause a final result to be sent. *Note:* Cannot
+  /// be used until a successful [initialize] call. Should only be
+  /// used after a successful [listen] call.
   void stop() {
     if (!_initWorked) {
       return;
@@ -106,10 +116,10 @@ class SpeechToText {
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
-  /// 
-  /// Canceling means that there will be no final result returned from the 
-  /// recognizer. *Note* Cannot be used until a successful [initialize] call. 
-  /// Should only be used after a successful [listen] call. 
+  ///
+  /// Canceling means that there will be no final result returned from the
+  /// recognizer. *Note* Cannot be used until a successful [initialize] call.
+  /// Should only be used after a successful [listen] call.
   void cancel() {
     if (!_initWorked) {
       return;
@@ -121,8 +131,8 @@ class SpeechToText {
 
   /// Listen for speech and convert to text invoking the provided [interimListener]
   /// as words are recognized.
-  /// 
-  /// Cannot be used until a successful [initialize] call. 
+  ///
+  /// Cannot be used until a successful [initialize] call.
   Future listen({SpeechResultListener onResult}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
@@ -157,7 +167,8 @@ class SpeechToText {
   void _onTextRecognition(String resultJson) {
     _recognized = true;
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
-    SpeechRecognitionResult speechResult = SpeechRecognitionResult.fromJson(resultMap);
+    SpeechRecognitionResult speechResult =
+        SpeechRecognitionResult.fromJson(resultMap);
 
     _lastRecognized = speechResult.recognizedWords;
     if (null != _resultListener) {
@@ -167,14 +178,15 @@ class SpeechToText {
 
   void _onNotifyError(String errorJson) {
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
-    SpeechRecognitionError speechError = SpeechRecognitionError.fromJson(errorMap);
+    SpeechRecognitionError speechError =
+        SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
     if (null != errorListener) {
       errorListener(speechError);
     }
   }
 
-  void _onNotifyStatus(String status ) {
+  void _onNotifyStatus(String status) {
     _lastStatus = status;
     _listening = status == listeningStatus;
     if (null != statusListener) {
@@ -188,6 +200,6 @@ class SpeechToText {
   }
 }
 
-/// Thrown when a method is called that requires successful 
+/// Thrown when a method is called that requires successful
 /// initialization first. See [initialize]
 class SpeechToTextNotInitializedException implements Exception {}
