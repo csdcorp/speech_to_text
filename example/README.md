@@ -16,9 +16,11 @@ import 'package:speech_to_text/speech_to_text.dart';
 void main() async {
   print('In main.');
   SpeechToText speech = SpeechToText();
-  bool available = await speech.initialize();
+  bool available = await speech.initialize( onStatus: statusLisener);
   if ( available ) {
-      
+      speech.listen( onResult: resultListener );
   }
+  // Some time later...
+  speech.stop();
 }
 ```

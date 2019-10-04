@@ -14,14 +14,16 @@ To recognize text from the microphone import the package and call the plugin, li
 ```dart
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
-    SpeechToText speech = stt.SpeechToText();
-    bool available = await speech.initialize();
+    stt.SpeechToText speech = stt.SpeechToText();
+    bool available = await speech.initialize( onStatus: statusListener, onError: errorListener );
     if ( available ) {
-        speech.listen( resultListener: onResults );
+        speech.listen( onResult: resultListener );
     }
     else {
         print("The user has denied the use of speech recognition.");
     }
+    // some time later...
+    speec.stop()
 ```
 
 ## Permissions

@@ -90,9 +90,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     }
     
     fileprivate func setupListeningSound() {
-        listeningSound = loadSound("assets/sounds/speech_to_text_listening.m4a")
-        successSound = loadSound("assets/sounds/speech_to_text_success.m4a")
-        cancelSound = loadSound("assets/sounds/speech_to_text_cancel.m4a")
+        listeningSound = loadSound("assets/sounds/speech_to_text_listening.m4r")
+        successSound = loadSound("assets/sounds/speech_to_text_success.m4r")
+        cancelSound = loadSound("assets/sounds/speech_to_text_stopped.m4r")
     }
     
     fileprivate func loadSound( _ soundPath: String ) -> AVAudioPlayer? {
@@ -125,25 +125,20 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     }
     
     private func stopSpeech( _ result: @escaping FlutterResult) {
-        stopCurrentListen()
+        successSound?.play()
+        currentTask?.finish()
+        stopCurrentListen( )
         result( true )
     }
     
     private func cancelSpeech( _ result: @escaping FlutterResult) {
         cancelSound?.play()
         currentTask?.cancel()
-        stopCurrentListen()
+        stopCurrentListen( )
         result( true )
     }
     
-    private func stopCurrentListen() {
-        guard let task = currentTask else {
-            return
-        }
-        if ( !task.isCancelled ) {
-            successSound?.play()
-            task.finish()
-        }
+    private func stopCurrentListen( ) {
         currentRequest?.endAudio()
         audioEngine.stop()
         let inputNode = audioEngine.inputNode
@@ -215,7 +210,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishSuccessfully successfully: Bool) {
-        stopCurrentListen()
+        stopCurrentListen( )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didHypothesizeTranscription transcription: SFTranscription) {
