@@ -29,7 +29,15 @@ enum class SpeechToTextErrors {
 
 enum class SpeechToTextCallbackMethods {
   textRecognition,
+  notifyStatus,
   notifyError,
+}
+
+enum class SpeechToTextStatus {
+  listening,
+  notListening,
+  unavailable,
+  available,
 }
 
 @TargetApi(8)
@@ -60,7 +68,8 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     when (call.method) {
       "initialize" ->  initialize( result )
       "listen" ->  startListening( result )
-      "cancel" ->  stopListening( result )
+      "stop" -> stopListening( result )
+      "cancel" ->  cancelListening( result )
       else -> result.notImplemented()
     }
   }
@@ -111,7 +120,21 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     result.success(true)
   }
 
+  fun cancelListening(result: Result) {
+    if ( sdkVersionTooLow( result ) || isNotInitialized( result )) {
+      return
+    }
+    speechRecognizer?.cancel()
+    notifyListening(isRecording = false)
+    result.success(true)
+  }
+
   private fun notifyListening(isRecording: Boolean) {
+    val status = when (isRecording) {
+      true -> SpeechToTextStatus.listening.name
+      false -> SpeechToTextStatus.notListening.name
+    }
+    channel.invokeMethod( SpeechToTextCallbackMethods.notifyStatus.name, status )
   }
 
   private fun updateResults(speechBundle: Bundle?, isFinal: Boolean ) {

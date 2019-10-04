@@ -10,6 +10,8 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
 /// Notified if errors occur during recognition or intialization.
 typedef SpeechErrorListener = void Function(SpeechRecognitionError errorNotification );
+/// Notified when recognition status changes.
+typedef SpeechStatusListener = void Function(String status );
 
 /// An interface to device specific speech recognition services.
 /// 
@@ -27,6 +29,10 @@ typedef SpeechErrorListener = void Function(SpeechRecognitionError errorNotifica
 class SpeechToText {
   static const String textRecognitionMethod = 'textRecognition';
   static const String notifyErrorMethod = 'notifyError';
+  static const String notifyStatusMethod = 'notifyStatus';
+  static const String notListeningStatus = "notListening";
+  static const String listeningStatus = "listening";
+
   static const MethodChannel speechChannel =
       const MethodChannel('plugin.csdcorp.com/speech_to_text');
   static final SpeechToText _instance =
@@ -36,8 +42,10 @@ class SpeechToText {
   SpeechRecognitionError _lastError;
   bool _listening = false;
   String _lastRecognized = "";
+  String _lastStatus = "";
   SpeechResultListener _resultListener;
   SpeechErrorListener errorListener;
+  SpeechStatusListener statusListener;
 
   final MethodChannel channel;
   factory SpeechToText() => _instance;
@@ -53,6 +61,8 @@ class SpeechToText {
   /// This is maintained across [cancel] calls but cleared on the next
   /// [listen]. 
   String get lastRecognizedWords => _lastRecognized;
+  /// The last status update received
+  String get lastStatus => _lastStatus;
   /// True if [initialize] succeeded
   bool get isAvailable => _initWorked;
   /// True if [listen] succeeded and [cancel] has not been called.
@@ -69,7 +79,7 @@ class SpeechToText {
   /// If this method returns false no further [SpeechToText] methods
   /// should be used. Should only be called once but does protect 
   /// itself if called repeatedly. 
-  Future<bool> initialize({SpeechErrorListener onError }) async {
+  Future<bool> initialize({SpeechErrorListener onError, SpeechStatusListener onStatus }) async {
     if (_initWorked) {
       return Future.value(_initWorked);
     }
@@ -81,10 +91,25 @@ class SpeechToText {
     return _initWorked;
   }
 
+  /// Stops the current listen for speech if active, does nothing if not.
+  /// 
+  /// Stopping a listen will cause a final result to be sent. *Note:* Cannot 
+  /// be used until a successful [initialize] call. Should only be 
+  /// used after a successful [listen] call. 
+  void stop() {
+    if (!_initWorked) {
+      return;
+    }
+    channel.invokeMethod('stop');
+    _listening = false;
+    _recognized = false;
+  }
+
   /// Cancels the current listen for speech if active, does nothing if not.
   /// 
-  /// Cannot be used until a successful [initialize] call. Should only be 
-  /// used after a successful [listen] call. 
+  /// Canceling means that there will be no final result returned from the 
+  /// recognizer. *Note* Cannot be used until a successful [initialize] call. 
+  /// Should only be used after a successful [listen] call. 
   void cancel() {
     if (!_initWorked) {
       return;
@@ -103,7 +128,6 @@ class SpeechToText {
       throw SpeechToTextNotInitializedException();
     }
     _recognized = false;
-    _listening = true;
     _resultListener = onResult;
     channel.invokeMethod('listen');
   }
@@ -119,6 +143,11 @@ class SpeechToText {
       case notifyErrorMethod:
         if (call.arguments is String) {
           _onNotifyError(call.arguments);
+        }
+        break;
+      case notifyStatusMethod:
+        if (call.arguments is String) {
+          _onNotifyStatus(call.arguments);
         }
         break;
       default:
@@ -142,6 +171,14 @@ class SpeechToText {
     _lastError = speechError;
     if (null != errorListener) {
       errorListener(speechError);
+    }
+  }
+
+  void _onNotifyStatus(String status ) {
+    _lastStatus = status;
+    _listening = status == listeningStatus;
+    if (null != statusListener) {
+      statusListener(status);
     }
   }
 

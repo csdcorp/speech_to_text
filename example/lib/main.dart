@@ -16,6 +16,7 @@ class _MyAppState extends State<MyApp> {
   bool _hasSpeech = false;
   String lastWords = "";
   String lastError = "";
+  String lastStatus = "";
   final SpeechToText speech = SpeechToText();
 
   @override
@@ -28,7 +29,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initPlatformState() async {
     bool hasSpeech;
     // Platform messages may fail, so we use a try/catch PlatformException.
-    hasSpeech = await speech.initialize(onError: errorListener );
+    hasSpeech = await speech.initialize(onError: errorListener, onStatus: statusListener );
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -65,6 +66,10 @@ class _MyAppState extends State<MyApp> {
                       FlatButton(
                         child: Text('Stop'),
                         onPressed: stopListening,
+                      ),
+                      FlatButton(
+                        child: Text('Cancel'),
+                        onPressed:cancelListening,
                       ),
                     ],
                   ),
@@ -105,6 +110,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void startListening() async {
+    lastWords = "";
+    lastError = "";
     speech.listen(onResult: resultListener );
     setState(() {
       
@@ -112,6 +119,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   void stopListening() async {
+    speech.stop( );
+    setState(() {
+      
+    });
+  }
+
+  void cancelListening() async {
     speech.cancel( );
     setState(() {
       
@@ -127,6 +141,11 @@ class _MyAppState extends State<MyApp> {
   void errorListener(SpeechRecognitionError error ) {
     setState(() {
       lastError = "${error.errorMsg} - ${error.permanent}";
+    });
+  }
+  void statusListener(String status ) {
+    setState(() {
+      lastStatus = "$status";
     });
   }
 }
