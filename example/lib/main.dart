@@ -22,20 +22,13 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    initSpeechState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    bool hasSpeech;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    hasSpeech = await speech.initialize(onError: errorListener, onStatus: statusListener );
+  Future<void> initSpeechState() async {
+    bool hasSpeech = await speech.initialize(onError: errorListener, onStatus: statusListener );
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
-
     setState(() {
       _hasSpeech = hasSpeech;
     });
@@ -109,7 +102,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void startListening() async {
+  void startListening() {
     lastWords = "";
     lastError = "";
     speech.listen(onResult: resultListener );
@@ -118,14 +111,14 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void stopListening() async {
+  void stopListening() {
     speech.stop( );
     setState(() {
       
     });
   }
 
-  void cancelListening() async {
+  void cancelListening() {
     speech.cancel( );
     setState(() {
       
