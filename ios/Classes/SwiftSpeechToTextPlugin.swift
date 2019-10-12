@@ -38,6 +38,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     private var listeningSound: AVAudioPlayer?
     private var successSound: AVAudioPlayer?
     private var cancelSound: AVAudioPlayer?
+    private var rememberedAudioCategory: String?
     private let audioSession = AVAudioSession.sharedInstance()
     private let audioEngine = AVAudioEngine()
     private let jsonEncoder = JSONEncoder()
@@ -143,6 +144,13 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
         audioEngine.stop()
         let inputNode = audioEngine.inputNode
         inputNode.removeTap(onBus: busForNodeTap);
+        do {
+            if let rememberedAudioCategory = rememberedAudioCategory {
+                try self.audioSession.setCategory(rememberedAudioCategory)
+            }
+        }
+        catch {
+        }
         currentRequest = nil
         currentTask = nil
     }
@@ -152,6 +160,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
             return
         }
         do {
+            rememberedAudioCategory = self.audioSession.category
             try self.audioSession.setCategory(AVAudioSessionCategoryRecord)
             try self.audioSession.setMode(AVAudioSessionModeMeasurement)
             try self.audioSession.setActive(true, with: .notifyOthersOnDeactivation)

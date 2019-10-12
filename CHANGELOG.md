@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1
+
+* Fixes a problem where the recognizer left the AVAudioSession in record mode which meant that subsequent sounds couldn't be played. 
+
 ## 0.5.0
 
 Initial draft with limited functionality, supports:
