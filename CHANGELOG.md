@@ -1,11 +1,26 @@
 # Changelog
 
-## 0.5.1
+## 0.6.0
+___
+### Breaking
 
-* Fixes a problem where the recognizer left the AVAudioSession in record mode which meant that subsequent sounds couldn't be played. 
+  * The filenames for the optional sounds for iOS have changed. 
+   
+### New
+
+  * Added an optional listenFor parameter to set a max duration to listen for speech and then automatically cancel. 
+
+### Fix
+
+  * Was failing to play sounds because of record mode. Now plays sounds before going into record mode and after coming out. 
+  * Status listener was being ignored, now properly notifies on status changes.
+  
+## 0.5.1
+---
+  * Fixes a problem where the recognizer left the AVAudioSession in record mode which meant that subsequent sounds couldn't be played. 
 
 ## 0.5.0
-
+---
 Initial draft with limited functionality, supports:
   * initializing speech recognition
   * asking the user for permission if required

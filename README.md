@@ -5,6 +5,10 @@ A library that exposes device specific text to speech recognition capability.
 This plugin contains a set of classes that make it easy to use the speech recognition 
 capabilities of the mobile device in Flutter. It supports both Android and iOS. 
 
+## Recent Updates
+The 0.6.0 version added a Duration parameter to the listen method to set a maximum time 
+to listen before automatically cancelling. 
+
 *Note*: This plugin is under development and will be extended over the coming weeks. 
 
 ## Using
@@ -23,7 +27,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
         print("The user has denied the use of speech recognition.");
     }
     // some time later...
-    speec.stop()
+    speech.stop()
 ```
 
 ## Permissions
@@ -42,4 +46,17 @@ Add the record audio permission to your _AndroidManifest.xml_ file, located in `
 
 * `android.permission.RECORD_AUDIO` - this permission is required for microphone access.
 * `android.permission.INTERNET` - this permission is required because speech recognition may use remote services.
+
+## Adding Sounds for iOS (optional)
+
+Android automatically plays system sounds when speech listening starts or stops but iOS does not. This plugin supports playing sounds to indicate listening status on iOS if sound files are available as assets in the application. To enable sounds in an application using this plugin add the sound files to the project and reference them in the assets section of the application `pubspec.yaml`. The location and filenames of the sound files must exactly match or they will not be found. The example application for the plugin shows the usage. 
+```yaml
+  assets:
+  - assets/sounds/speech_to_text_listening.m4r
+  - assets/sounds/speech_to_text_cancel.m4r
+  - assets/sounds/speech_to_text_stop.m4r
+```
+* `speech_to_text_listening.m4r` - played when the listen method is called.
+* `speech_to_text_cancel.m4r` - played when the cancel method is called.
+* `speech_to_text_stop.m4r` - played when the stop method is called.
 
