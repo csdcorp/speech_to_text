@@ -92,8 +92,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     
     fileprivate func setupListeningSound() {
         listeningSound = loadSound("assets/sounds/speech_to_text_listening.m4r")
-        successSound = loadSound("assets/sounds/speech_to_text_success.m4r")
-        cancelSound = loadSound("assets/sounds/speech_to_text_stopped.m4r")
+        successSound = loadSound("assets/sounds/speech_to_text_stop.m4r")
+        cancelSound = loadSound("assets/sounds/speech_to_text_cancel.m4r")
     }
     
     fileprivate func loadSound( _ soundPath: String ) -> AVAudioPlayer? {
@@ -126,16 +126,16 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     }
     
     private func stopSpeech( _ result: @escaping FlutterResult) {
-        successSound?.play()
         currentTask?.finish()
         stopCurrentListen( )
+        successSound?.play()
         result( true )
     }
     
     private func cancelSpeech( _ result: @escaping FlutterResult) {
-        cancelSound?.play()
         currentTask?.cancel()
         stopCurrentListen( )
+        cancelSound?.play()
         result( true )
     }
     
@@ -160,6 +160,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
             return
         }
         do {
+            listeningSound?.play()
             rememberedAudioCategory = self.audioSession.category
             try self.audioSession.setCategory(AVAudioSessionCategoryRecord)
             try self.audioSession.setMode(AVAudioSessionModeMeasurement)
@@ -180,7 +181,6 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
             self.audioEngine.prepare()
             try self.audioEngine.start()
             self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
-            listeningSound?.play()
         }
         catch {
             result( false )
