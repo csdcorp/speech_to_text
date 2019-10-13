@@ -10,8 +10,8 @@ void main() {
   bool listenInvoked;
   bool cancelInvoked;
   TestSpeechListener listener;
-  TestErrorListener errors;
   SpeechToText speech;
+  final String listeningStatus = "listening";
   final String firstRecognizedWords = 'hello';
   final String secondRecognizedWords = 'hello there';
   final String firstRecognizedJson =
@@ -30,7 +30,6 @@ void main() {
     listenInvoked = false;
     cancelInvoked = false;
     listener = TestSpeechListener();
-    errors = TestErrorListener();
     speech = SpeechToText.withMethodChannel(SpeechToText.speechChannel);
     speech.channel.setMockMethodCallHandler((MethodCall methodCall) async {
       switch (methodCall.method) {
@@ -111,6 +110,17 @@ void main() {
     });
   });
 
+  group('status callback', () {
+    test('invoked on listen', () async {
+      await speech.initialize(
+          onError: listener.onSpeechError, onStatus: listener.onSpeechStatus);
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyStatusMethod, listeningStatus));
+      expect(listener.speechStatus, 1);
+      expect(listener.statuses.contains(listeningStatus), true);
+    });
+  });
+
   group('cancel', () {
     test('does nothing if not initialized', () async {
       speech.cancel();
@@ -125,10 +135,10 @@ void main() {
   });
   group('error', () {
     test('notifies handler with transient', () async {
-      await speech.initialize(onError: errors.onSpeechError);
+      await speech.initialize(onError: listener.onSpeechError);
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
-      expect(errors.speechErrors, 1);
+      expect(listener.speechErrors, 1);
     });
   });
 }
@@ -136,19 +146,23 @@ void main() {
 class TestSpeechListener {
   int speechResults = 0;
   List<SpeechRecognitionResult> results = [];
+  int speechErrors = 0;
+  List<SpeechRecognitionError> errors = [];
+  int speechStatus = 0;
+  List<String> statuses = [];
 
   void onSpeechResult(SpeechRecognitionResult result) {
     ++speechResults;
     results.add(result);
   }
-}
-
-class TestErrorListener {
-  int speechErrors = 0;
-  List<SpeechRecognitionError> errors = [];
 
   void onSpeechError(SpeechRecognitionError errorResult) {
     ++speechErrors;
     errors.add(errorResult);
+  }
+
+  void onSpeechStatus(String status) {
+    ++speechStatus;
+    statuses.add(status);
   }
 }

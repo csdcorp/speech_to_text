@@ -111,7 +111,7 @@ class _MyAppState extends State<MyApp> {
   void startListening() {
     lastWords = "";
     lastError = "";
-    speech.listen(onResult: resultListener);
+    speech.listen(onResult: resultListener, listenFor: Duration(seconds: 10));
     setState(() {});
   }
 

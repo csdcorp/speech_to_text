@@ -42,10 +42,11 @@ class SpeechToText {
       SpeechToText.withMethodChannel(speechChannel);
   bool _initWorked = false;
   bool _recognized = false;
-  SpeechRecognitionError _lastError;
   bool _listening = false;
   String _lastRecognized = "";
   String _lastStatus = "";
+  Timer _listenTimer;
+  SpeechRecognitionError _lastError;
   SpeechResultListener _resultListener;
   SpeechErrorListener errorListener;
   SpeechStatusListener statusListener;
@@ -93,10 +94,9 @@ class SpeechToText {
     if (_initWorked) {
       return Future.value(_initWorked);
     }
+    errorListener = onError;
+    statusListener = onStatus;
     channel.setMethodCallHandler(_handleCallbacks);
-    if (null != onError) {
-      errorListener = onError;
-    }
     _initWorked = await channel.invokeMethod('initialize');
     return _initWorked;
   }
@@ -111,8 +111,7 @@ class SpeechToText {
       return;
     }
     channel.invokeMethod('stop');
-    _listening = false;
-    _recognized = false;
+    _shutdownListener();
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
@@ -125,21 +124,25 @@ class SpeechToText {
       return;
     }
     channel.invokeMethod('cancel');
-    _listening = false;
-    _recognized = false;
+    _shutdownListener();
   }
 
   /// Listen for speech and convert to text invoking the provided [interimListener]
   /// as words are recognized.
   ///
   /// Cannot be used until a successful [initialize] call.
-  Future listen({SpeechResultListener onResult}) async {
+  Future listen({SpeechResultListener onResult, Duration listenFor}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
     _recognized = false;
     _resultListener = onResult;
     channel.invokeMethod('listen');
+    if (null != listenFor) {
+      _listenTimer = Timer(listenFor, () {
+        cancel();
+      });
+    }
   }
 
   Future _handleCallbacks(MethodCall call) async {
@@ -192,6 +195,13 @@ class SpeechToText {
     if (null != statusListener) {
       statusListener(status);
     }
+  }
+
+  _shutdownListener() {
+    _listening = false;
+    _recognized = false;
+    _listenTimer?.cancel();
+    _listenTimer = null;
   }
 
   @visibleForTesting
