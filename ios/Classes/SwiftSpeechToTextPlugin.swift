@@ -29,7 +29,7 @@ struct SpeechRecognitionResult : Codable {
 }
 
 @available(iOS 10.0, *)
-public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognizerDelegate, SFSpeechRecognitionTaskDelegate {
+public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var channel: FlutterMethodChannel
     private var registrar: FlutterPluginRegistrar
     private var recognizer: SFSpeechRecognizer?
@@ -162,7 +162,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
         do {
             listeningSound?.play()
             rememberedAudioCategory = self.audioSession.category
-            try self.audioSession.setCategory(AVAudioSessionCategoryRecord)
+            try self.audioSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
             try self.audioSession.setMode(AVAudioSessionModeMeasurement)
             try self.audioSession.setActive(true, with: .notifyOthersOnDeactivation)
             let inputNode = self.audioEngine.inputNode
@@ -200,12 +200,19 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     private func invokeFlutter( _ method: SwiftSpeechToTextCallbackMethods, arguments: Any? ) {
         channel.invokeMethod( method.rawValue, arguments: arguments )
     }
-    
+        
+}
+
+@available(iOS 10.0, *)
+extension SwiftSpeechToTextPlugin : SFSpeechRecognizerDelegate {
     private func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
         let availability = available ? SpeechToTextStatus.available : SpeechToTextStatus.unavailable
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: availability )
     }
-    
+}
+
+@available(iOS 10.0, *)
+extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
     public func speechRecognitionDidDetectSpeech(_ task: SFSpeechRecognitionTask) {
         // Do nothing for now
     }
@@ -229,5 +236,15 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin, SFSpeechRecognize
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishRecognition recognitionResult: SFSpeechRecognitionResult) {
         let isFinal = recognitionResult.isFinal
         handleResult( recognitionResult.bestTranscription.formattedString, isFinal: isFinal )
+    }
+    
+}
+
+@available(iOS 10.0, *)
+extension SwiftSpeechToTextPlugin : AVAudioPlayerDelegate {
+    
+    private func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer,
+                                     successfully flag: Bool) {
+        
     }
 }
