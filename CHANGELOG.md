@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.6.0
+## 0.6.1
+___
+
+### Fix
+
+  * listening sound was failing due to timing, now uses play and record mode on iOS. 
+   
+  ## 0.6.0
 ___
 ### Breaking
 
