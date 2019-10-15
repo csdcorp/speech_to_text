@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.2
+___
+
+### Fix
+
+  * channel invoke wasn't being done on the main thread in iOS
+  
 ## 0.6.1
 ___
 

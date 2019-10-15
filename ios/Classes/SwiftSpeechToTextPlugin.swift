@@ -81,12 +81,18 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                     self.setupSpeechRecognition(result)
                 }
                 else {
-                    result( false )
+                    self.initResult( false, result );
                 }
             });
         }
         else {
             setupSpeechRecognition(result)
+        }
+    }
+    
+    fileprivate func initResult( _ value: Bool, _ result: @escaping FlutterResult) {
+        DispatchQueue.main.async {
+            result( value )
         }
     }
     
@@ -116,13 +122,13 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private func setupSpeechRecognition( _ result: @escaping FlutterResult) {
         recognizer = SFSpeechRecognizer()
         guard recognizer != nil else {
-            result( false )
+            initResult( false, result );
             return
         }
         recognizer?.delegate = self
         setupListeningSound()
 
-        result( true )
+        initResult( true, result );
     }
     
     private func stopSpeech( _ result: @escaping FlutterResult) {
@@ -198,7 +204,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     }
     
     private func invokeFlutter( _ method: SwiftSpeechToTextCallbackMethods, arguments: Any? ) {
-        channel.invokeMethod( method.rawValue, arguments: arguments )
+        DispatchQueue.main.async {
+            self.channel.invokeMethod( method.rawValue, arguments: arguments )
+        }
     }
         
 }
