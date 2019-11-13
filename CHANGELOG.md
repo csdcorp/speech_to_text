@@ -1,21 +1,24 @@
 # Changelog
 
+## 0.6.3
+
+### Fix
+
+  * request permission fix on Android to ensure it doesn't conflict with other requests
+  
 ## 0.6.2
-___
 
 ### Fix
 
   * channel invoke wasn't being done on the main thread in iOS
   
 ## 0.6.1
-___
 
 ### Fix
 
   * listening sound was failing due to timing, now uses play and record mode on iOS. 
    
   ## 0.6.0
-___
 ### Breaking
 
   * The filenames for the optional sounds for iOS have changed. 
@@ -30,11 +33,9 @@ ___
   * Status listener was being ignored, now properly notifies on status changes.
   
 ## 0.5.1
----
   * Fixes a problem where the recognizer left the AVAudioSession in record mode which meant that subsequent sounds couldn't be played. 
 
 ## 0.5.0
----
 Initial draft with limited functionality, supports:
   * initializing speech recognition
   * asking the user for permission if required
