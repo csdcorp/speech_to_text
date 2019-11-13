@@ -211,5 +211,5 @@ class SpeechToText {
 }
 
 /// Thrown when a method is called that requires successful
-/// initialization first. See [initialize]
+/// initialization first. See [onDbReady]
 class SpeechToTextNotInitializedException implements Exception {}
