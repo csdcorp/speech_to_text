@@ -47,7 +47,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   private val channel: MethodChannel = channel
   private val application: Application = activity.application
   private val minSdkForSpeechSupport = 8
-  private val speechToTextPermissionCode = 34264
+  private val speechToTextPermissionCode = 78521
   private var activeResult: Result? = null
   private var initializedSuccessfully: Boolean = false
   private var permissionToRecordAudio: Boolean = false
@@ -188,9 +188,10 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
                   grantResults.get(0) == PackageManager.PERMISSION_GRANTED
         }
         completeInitialize()
+        return true
       }
     }
-    return true
+    return false
   }
 
 
