@@ -11,6 +11,7 @@ void main() {
   bool initInvoked;
   bool listenInvoked;
   bool cancelInvoked;
+  bool stopInvoked;
   bool localesInvoked;
   String listenLocale;
   TestSpeechListener listener;
@@ -40,7 +41,9 @@ void main() {
     initInvoked = false;
     listenInvoked = false;
     cancelInvoked = false;
+    stopInvoked = false;
     localesInvoked = false;
+    locales = [];
     listener = TestSpeechListener();
     speech = SpeechToText.withMethodChannel(SpeechToText.speechChannel);
     speech.channel.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -51,6 +54,10 @@ void main() {
           break;
         case "cancel":
           cancelInvoked = true;
+          return true;
+          break;
+        case "stop":
+          stopInvoked = true;
           return true;
           break;
         case "listen":
@@ -76,10 +83,18 @@ void main() {
     test('succeeds on platform success', () async {
       expect(await speech.initialize(), true);
       expect(initInvoked, true);
+      expect(speech.isAvailable, true);
+    });
+    test('only invokes once', () async {
+      expect(await speech.initialize(), true);
+      initInvoked = false;
+      expect(await speech.initialize(), true);
+      expect(initInvoked, false);
     });
     test('fails on platform failure', () async {
       initResult = false;
       expect(await speech.initialize(), false);
+      expect(speech.isAvailable, false);
     });
   });
 
@@ -121,6 +136,7 @@ void main() {
           MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson));
       expect(listener.speechResults, 1);
       expect(listener.results, [firstRecognizedResult]);
+      expect(speech.lastRecognizedWords, firstRecognizedWords);
     });
     test('calls speech listener with multiple', () async {
       await speech.initialize();
@@ -131,6 +147,7 @@ void main() {
           MethodCall(SpeechToText.textRecognitionMethod, secondRecognizedJson));
       expect(listener.speechResults, 2);
       expect(listener.results, [firstRecognizedResult, secondRecognizedResult]);
+      expect(speech.lastRecognizedWords, secondRecognizedWords);
     });
   });
 
@@ -152,9 +169,22 @@ void main() {
     });
     test('cancels an active listen', () async {
       await speech.initialize();
-      speech.listen();
-      speech.cancel();
+      await speech.listen();
+      await speech.cancel();
       expect(cancelInvoked, true);
+      expect(speech.isListening, isFalse);
+    });
+  });
+  group('stop', () {
+    test('does nothing if not initialized', () async {
+      speech.stop();
+      expect(cancelInvoked, false);
+    });
+    test('stops an active listen', () async {
+      await speech.initialize();
+      speech.listen();
+      speech.stop();
+      expect(stopInvoked, true);
     });
   });
   group('error', () {
@@ -174,32 +204,68 @@ void main() {
         // This is a good result
       }
     });
+    test('system locale null if not initialized', () async {
+      LocaleName current;
+      try {
+        current = await speech.systemLocale();
+        fail("Expected an exception.");
+      } on SpeechToTextNotInitializedException {
+        expect(current, isNull);
+      }
+    });
     test('handles an empty list', () async {
       await speech.initialize(onError: listener.onSpeechError);
       List<LocaleName> localeNames = await speech.locales();
-      expect( localesInvoked, isTrue );
+      expect(localesInvoked, isTrue);
       expect(localeNames, isEmpty);
     });
     test('returns expected locales', () async {
       await speech.initialize(onError: listener.onSpeechError);
-      locales.add( locale1);
-      locales.add( locale2);
+      locales.add(locale1);
+      locales.add(locale2);
       List<LocaleName> localeNames = await speech.locales();
       expect(localeNames, hasLength(locales.length));
-      expect( localeNames[0].localeId, localeId1 );
-      expect( localeNames[0].name, name1 );
-      expect( localeNames[1].localeId, localeId2 );
-      expect( localeNames[1].name, name2 );
+      expect(localeNames[0].localeId, localeId1);
+      expect(localeNames[0].name, name1);
+      expect(localeNames[1].localeId, localeId2);
+      expect(localeNames[1].name, name2);
     });
     test('skips incorrect locales', () async {
       await speech.initialize(onError: listener.onSpeechError);
-      locales.add( "InvalidJunk");
-      locales.add( locale1);
+      locales.add("InvalidJunk");
+      locales.add(locale1);
       List<LocaleName> localeNames = await speech.locales();
       expect(localeNames, hasLength(1));
-      expect( localeNames[0].localeId, localeId1 );
-      expect( localeNames[0].name, name1 );
+      expect(localeNames[0].localeId, localeId1);
+      expect(localeNames[0].name, name1);
     });
+    test('system locale matches first returned locale', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      locales.add(locale1);
+      locales.add(locale2);
+      LocaleName current = await speech.systemLocale();
+      expect(current.localeId, localeId1);
+    });
+  });
+  group('status', () {
+    test('recognized false at start', () async {
+      expect(speech.hasRecognized, isFalse);
+    });
+    test('listening false at start', () async {
+      expect(speech.isListening, isFalse);
+    });
+  });
+  test('available false at start', () async {
+    expect(speech.isAvailable, isFalse);
+  });
+  test('hasError false at start', () async {
+    expect(speech.hasError, isFalse);
+  });
+  test('lastError null at start', () async {
+    expect(speech.lastError, isNull);
+  });
+  test('status empty at start', () async {
+    expect(speech.lastStatus, isEmpty);
   });
 }
 

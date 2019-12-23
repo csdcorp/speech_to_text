@@ -14,9 +14,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _hasSpeech = false;
+  bool _stressTest = false;
+  int _stressLoops = 0;
   String lastWords = "";
   String lastError = "";
   String lastStatus = "";
+  List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
 
   @override
@@ -28,7 +31,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initSpeechState() async {
     bool hasSpeech = await speech.initialize(
         onError: errorListener, onStatus: statusListener);
-
+    _localeNames = await speech.locales();
     if (!mounted) return;
     setState(() {
       _hasSpeech = hasSpeech;
@@ -65,6 +68,10 @@ class _MyAppState extends State<MyApp> {
                         child: Text('Cancel'),
                         onPressed: cancelListening,
                       ),
+                      FlatButton(
+                        child: Text('Stress Test'),
+                        onPressed: stressTest,
+                      ),
                     ],
                   ),
                 ),
@@ -93,6 +100,20 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
                 Expanded(
+                  child: ListView(
+                    children: _localeNames
+                        .map(
+                          (localeName) => ListTile(
+                            title: Text(
+                              localeName.localeId,
+                            ),
+                            trailing: Text(localeName.name),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+                Expanded(
                   child: Center(
                     child: speech.isListening
                         ? Text("I'm listening...")
@@ -106,6 +127,34 @@ class _MyAppState extends State<MyApp> {
                         fontSize: 20.0, fontWeight: FontWeight.bold))),
       ),
     );
+  }
+
+  void stressTest() {
+    if (_stressTest) {
+      return;
+    }
+    _stressLoops = 0;
+    _stressTest = true;
+    print("Starting stress test...");
+    startListening();
+  }
+
+  void changeStatusForStress(String status) {
+    if (!_stressTest) {
+      return;
+    }
+    if (speech.isListening) {
+      stopListening();
+    } else {
+      if (_stressLoops >= 100) {
+        _stressTest = false;
+        print("Stress test complete.");
+        return;
+      }
+      print("Stress loop: $_stressLoops");
+      ++_stressLoops;
+      startListening();
+    }
   }
 
   void startListening() {
@@ -138,6 +187,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void statusListener(String status) {
+    changeStatusForStress(status);
     setState(() {
       lastStatus = "$status";
     });

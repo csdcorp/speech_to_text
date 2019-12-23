@@ -7,6 +7,10 @@
   * locales method returns the list of available languages for speech
   * new optional localeId parameter on listen method supports choosing the comprehension language separately from the current system locale. 
 
+### Breaking
+
+  * `cancel` and `stop` are now async
+  
 ## 0.6.3
 
 ### Fix

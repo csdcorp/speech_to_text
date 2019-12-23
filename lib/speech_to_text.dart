@@ -107,11 +107,11 @@ class SpeechToText {
   /// Stopping a listen will cause a final result to be sent. *Note:* Cannot
   /// be used until a successful [initialize] call. Should only be
   /// used after a successful [listen] call.
-  void stop() {
+  Future<void> stop() async {
     if (!_initWorked) {
       return;
     }
-    channel.invokeMethod('stop');
+    await channel.invokeMethod('stop');
     _shutdownListener();
   }
 
@@ -120,11 +120,11 @@ class SpeechToText {
   /// Canceling means that there will be no final result returned from the
   /// recognizer. *Note* Cannot be used until a successful [initialize] call.
   /// Should only be used after a successful [listen] call.
-  void cancel() {
+  Future<void> cancel() async {
     if (!_initWorked) {
       return;
     }
-    channel.invokeMethod('cancel');
+    await channel.invokeMethod('cancel');
     _shutdownListener();
   }
 
@@ -178,7 +178,11 @@ class SpeechToText {
         })
         .where((item) => item != null)
         .toList();
-    _systemLocale = filteredLocales.first;
+    if (filteredLocales.isNotEmpty) {
+      _systemLocale = filteredLocales.first;
+    } else {
+      _systemLocale = null;
+    }
     filteredLocales.sort((ln1, ln2) => ln1.name.compareTo(ln2.name));
     return filteredLocales;
   }
