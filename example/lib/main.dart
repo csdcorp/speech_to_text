@@ -19,6 +19,7 @@ class _MyAppState extends State<MyApp> {
   String lastWords = "";
   String lastError = "";
   String lastStatus = "";
+  String _currentLocaleId = "";
   List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
 
@@ -32,6 +33,8 @@ class _MyAppState extends State<MyApp> {
     bool hasSpeech = await speech.initialize(
         onError: errorListener, onStatus: statusListener);
     _localeNames = await speech.locales();
+    var systemLocale = await speech.systemLocale();
+    _currentLocaleId = systemLocale.localeId;
     if (!mounted) return;
     setState(() {
       _hasSpeech = hasSpeech;
@@ -47,51 +50,77 @@ class _MyAppState extends State<MyApp> {
         ),
         body: _hasSpeech
             ? Column(children: [
-                Expanded(
-                  child: Center(
-                    child: Text('Speech recognition available'),
+                Center(
+                  child: Text(
+                    'Speech recognition available',
+                    style: TextStyle(fontSize: 22.0),
                   ),
                 ),
-                Expanded(
+                Container(
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       FlatButton(
                         child: Text('Start'),
-                        onPressed: startListening,
+                        onPressed: speech.isListening ? null : startListening,
                       ),
                       FlatButton(
                         child: Text('Stop'),
-                        onPressed: stopListening,
+                        onPressed: speech.isListening ? stopListening : null,
                       ),
                       FlatButton(
                         child: Text('Cancel'),
-                        onPressed: cancelListening,
+                        onPressed: speech.isListening ? cancelListening : null,
                       ),
-                      FlatButton(
-                        child: Text('Stress Test'),
-                        onPressed: stressTest,
+                      DropdownButton(
+                        onChanged: (selectedVal) => _switchLang(selectedVal),
+                        value: _currentLocaleId,
+                        items: _localeNames
+                            .map(
+                              (localeName) => DropdownMenuItem(
+                                value: localeName.localeId,
+                                child: Text(localeName.name),
+                              ),
+                            )
+                            .toList(),
+                      )
+                      // FlatButton(
+                      //   child: Text('Stress Test'),
+                      //   onPressed: stressTest,
+                      // ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(
+                          'Recognized Words',
+                          style: TextStyle(fontSize: 22.0),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          color: Theme.of(context).selectedRowColor,
+                          child: Center(
+                            child: Text(lastWords),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
+                  flex: 1,
                   child: Column(
                     children: <Widget>[
                       Center(
-                        child: Text('Recognized Words'),
-                      ),
-                      Center(
-                        child: Text(lastWords),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    children: <Widget>[
-                      Center(
-                        child: Text('Error'),
+                        child: Text(
+                          'Error Status',
+                          style: TextStyle(fontSize: 22.0),
+                        ),
                       ),
                       Center(
                         child: Text(lastError),
@@ -99,25 +128,13 @@ class _MyAppState extends State<MyApp> {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ListView(
-                    children: _localeNames
-                        .map(
-                          (localeName) => ListTile(
-                            title: Text(
-                              localeName.localeId,
-                            ),
-                            trailing: Text(localeName.name),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-                Expanded(
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  color: Theme.of(context).backgroundColor,
                   child: Center(
                     child: speech.isListening
-                        ? Text("I'm listening...")
-                        : Text('Not listening'),
+                        ? Text("I'm listening...", style: TextStyle( fontWeight: FontWeight.bold ),)
+                        : Text('Not listening', style: TextStyle( fontWeight: FontWeight.bold ),),
                   ),
                 ),
               ])
@@ -160,7 +177,10 @@ class _MyAppState extends State<MyApp> {
   void startListening() {
     lastWords = "";
     lastError = "";
-    speech.listen(onResult: resultListener, listenFor: Duration(seconds: 10));
+    speech.listen(
+        onResult: resultListener,
+        listenFor: Duration(seconds: 10),
+        localeId: _currentLocaleId);
     setState(() {});
   }
 
@@ -191,5 +211,12 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       lastStatus = "$status";
     });
+  }
+
+  _switchLang(selectedVal) {
+    setState(() {
+      _currentLocaleId = selectedVal;
+    });
+    print(selectedVal);
   }
 }
