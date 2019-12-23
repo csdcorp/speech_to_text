@@ -21,6 +21,10 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONObject
+import android.content.Context
+import android.content.BroadcastReceiver
+import java.util.*
+
 
 enum class SpeechToTextErrors {
   multipleRequests,
@@ -46,13 +50,15 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   private val pluginActivity: Activity = activity
   private val channel: MethodChannel = channel
   private val application: Application = activity.application
-  private val minSdkForSpeechSupport = 8
+  private val minSdkForSpeechSupport = 21
   private val speechToTextPermissionCode = 78521
   private var activeResult: Result? = null
   private var initializedSuccessfully: Boolean = false
   private var permissionToRecordAudio: Boolean = false
   private var speechRecognizer: SpeechRecognizer? = null
   private var recognizerIntent: Intent? = null
+  private var previousRecognizerLang: String? = null
+  private val defaultLanguageTag: String = Locale.getDefault().toLanguageTag()
 
   companion object {
     @JvmStatic
@@ -67,9 +73,17 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "initialize" ->  initialize( result )
-      "listen" ->  startListening( result )
+      "listen" -> {
+        if (null != call.arguments && call.arguments is String) {
+          val localeId = call.arguments as String
+          startListening( result, localeId )
+        } else {
+          startListening( result, defaultLanguageTag )
+        }
+      }
       "stop" -> stopListening( result )
       "cancel" ->  cancelListening( result )
+      "locales" -> locales( result )
       else -> result.notImplemented()
     }
   }
@@ -87,7 +101,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     initializeIfPermitted( application )
    }
 
-  fun sdkVersionTooLow(result: Result): Boolean {
+  private fun sdkVersionTooLow(result: Result): Boolean {
     if ( Build.VERSION.SDK_INT < minSdkForSpeechSupport ) {
       result.success(false)
       return true;
@@ -95,23 +109,24 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     return false;
   }
 
-  fun isNotInitialized(result: Result): Boolean {
+  private fun isNotInitialized(result: Result): Boolean {
     if ( !initializedSuccessfully ) {
       result.success(false)
     }
     return !initializedSuccessfully
   }
 
-  fun startListening(result: Result) {
+  private fun startListening(result: Result, languageTag: String ) {
     if ( sdkVersionTooLow( result ) || isNotInitialized( result )) {
       return
     }
+    setupRecognizerIntent(languageTag)
     speechRecognizer?.startListening(recognizerIntent)
     notifyListening(isRecording = true)
     result.success(true)
   }
 
-  fun stopListening(result: Result) {
+  private fun stopListening(result: Result) {
     if ( sdkVersionTooLow( result ) || isNotInitialized( result )) {
       return
     }
@@ -120,13 +135,24 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     result.success(true)
   }
 
-  fun cancelListening(result: Result) {
+  private fun cancelListening(result: Result) {
     if ( sdkVersionTooLow( result ) || isNotInitialized( result )) {
       return
     }
     speechRecognizer?.cancel()
     notifyListening(isRecording = false)
     result.success(true)
+  }
+
+  private fun locales(result: Result) {
+    if ( sdkVersionTooLow( result ) || isNotInitialized( result )) {
+      return
+    }
+    val detailsIntent = RecognizerIntent.getVoiceDetailsIntent(pluginActivity)
+//    val detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
+    pluginActivity.sendOrderedBroadcast(
+            detailsIntent, null, LanguageDetailsChecker( result, pluginActivity ),
+            null, Activity.RESULT_OK, null, null)
   }
 
   private fun notifyListening(isRecording: Boolean) {
@@ -167,16 +193,27 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
         setRecognitionListener(this@SpeechToTextPlugin)
       }
 
-      recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, application.packageName)
-        putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-      }
+      setupRecognizerIntent( defaultLanguageTag )
     }
 
     initializedSuccessfully = permissionToRecordAudio
     activeResult?.success(permissionToRecordAudio)
     activeResult = null
+  }
+
+  private fun setupRecognizerIntent( languageTag: String ) {
+    if ( previousRecognizerLang == null || previousRecognizerLang != languageTag ) {
+      previousRecognizerLang = languageTag;
+      recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, application.packageName)
+        putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+        if ( languageTag != Locale.getDefault().toLanguageTag()) {
+          putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag );
+        }
+      }
+
+    }
   }
 
   override fun onRequestPermissionsResult( requestCode: Int, permissions: Array<out String>?,
@@ -223,4 +260,43 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   override fun onBufferReceived(p0: ByteArray?) {}
   override fun onEvent(p0: Int, p1: Bundle?) {}
   override fun onBeginningOfSpeech() {}
+}
+
+  // See https://stackoverflow.com/questions/10538791/how-to-set-the-language-in-speech-recognition-on-android/10548680#10548680
+class LanguageDetailsChecker(flutterResult: Result, pluginActivity: Activity) : BroadcastReceiver() {
+  private val pluginActivity: Activity = pluginActivity
+  private val result: Result = flutterResult
+  private var supportedLanguages: List<String>? = null
+
+  private var languagePreference: String? = null
+
+  override fun onReceive(context: Context, intent: Intent) {
+    val results = getResultExtras(true)
+    if (results.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)) {
+      languagePreference = results.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)
+    }
+    if (results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
+      supportedLanguages = results.getStringArrayList(
+              RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)
+      createResponse( supportedLanguages )
+    }
+  }
+    private fun createResponse( supportedLanguages: List<String>? ) {
+      val currentLocale = Locale.getDefault()
+      val localeNames = ArrayList<String>()
+      localeNames.add( buildIdNameForLocale(currentLocale))
+      if ( null != supportedLanguages ) {
+        for ( lang in supportedLanguages) {
+          val locale = Locale.forLanguageTag(lang)
+         localeNames.add( buildIdNameForLocale(locale))
+        }
+      }
+      pluginActivity.runOnUiThread { result.success(localeNames) }
+
+    }
+
+    private fun buildIdNameForLocale( locale: Locale ): String {
+      val name = locale.displayName.replace(':', ' ')
+      return "${locale.language}_${locale.country}:$name"
+    }
 }

@@ -46,6 +46,7 @@ class SpeechToText {
   String _lastRecognized = "";
   String _lastStatus = "";
   Timer _listenTimer;
+  LocaleName _systemLocale;
   SpeechRecognitionError _lastError;
   SpeechResultListener _resultListener;
   SpeechErrorListener errorListener;
@@ -131,18 +132,64 @@ class SpeechToText {
   /// as words are recognized.
   ///
   /// Cannot be used until a successful [initialize] call.
-  Future listen({SpeechResultListener onResult, Duration listenFor}) async {
+  Future listen(
+      {SpeechResultListener onResult,
+      Duration listenFor,
+      String localeId}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
     _recognized = false;
     _resultListener = onResult;
-    channel.invokeMethod('listen');
+    if (null != localeId) {
+      channel.invokeMethod('listen', localeId);
+    } else {
+      channel.invokeMethod('listen');
+    }
     if (null != listenFor) {
       _listenTimer = Timer(listenFor, () {
         cancel();
       });
     }
+  }
+
+  /// returns the list of speech locales available on the device.
+  ///
+  /// This method is useful to find the identifier to use
+  /// for the [listen] method, it is the [localeId] member of the
+  /// [LocaleName].
+  ///
+  /// Each [LocaleName] in the returned list has the
+  /// identifier for the locale as well as a name for
+  /// display. The name is localized for the system locale on
+  /// the device.
+  Future<List<LocaleName>> locales() async {
+    if (!_initWorked) {
+      throw SpeechToTextNotInitializedException();
+    }
+    final List<dynamic> locales = await channel.invokeMethod('locales');
+    List<LocaleName> filteredLocales = locales
+        .map((locale) {
+          var components = locale.split(":");
+          if (components.length != 2) {
+            return null;
+          }
+          return LocaleName(components[0], components[1]);
+        })
+        .where((item) => item != null)
+        .toList();
+    _systemLocale = filteredLocales.first;
+    filteredLocales.sort((ln1, ln2) => ln1.name.compareTo(ln2.name));
+    return filteredLocales;
+  }
+
+  /// returns the locale that will be used if no localeId is passed
+  /// to the [listen] method.
+  Future<LocaleName> systemLocale() async {
+    if (null == _systemLocale) {
+      await locales();
+    }
+    return Future.value(_systemLocale);
   }
 
   Future _handleCallbacks(MethodCall call) async {
@@ -208,6 +255,15 @@ class SpeechToText {
   Future processMethodCall(MethodCall call) async {
     return _handleCallbacks(call);
   }
+}
+
+/// A single locale with a [name], localized to the current system locale,
+/// and a [localeId] which can be used in the [listen] method to choose a
+/// locale for speech recognition.
+class LocaleName {
+  final String localeId;
+  final String name;
+  LocaleName(this.localeId, this.name);
 }
 
 /// Thrown when a method is called that requires successful

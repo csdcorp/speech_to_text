@@ -6,6 +6,10 @@ This plugin contains a set of classes that make it easy to use the speech recogn
 capabilities of the mobile device in Flutter. It supports both Android and iOS. 
 
 ## Recent Updates
+The 0.7.0 version adds the ability to select the recognition language using the `localeId`
+parameter on the `listen` method. It also has a new `locales` method that returns a list 
+of supported locales for speech on the device. 
+
 The 0.6.0 version added a Duration parameter to the listen method to set a maximum time 
 to listen before automatically cancelling. 
 

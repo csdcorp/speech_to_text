@@ -5,12 +5,23 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   bool initResult;
   bool initInvoked;
   bool listenInvoked;
   bool cancelInvoked;
+  bool localesInvoked;
+  String listenLocale;
   TestSpeechListener listener;
   SpeechToText speech;
+  List<String> locales = [];
+  String localeId1 = "en_US";
+  String localeId2 = "fr_CA";
+  String name1 = "English US";
+  String name2 = "French Canada";
+  String locale1 = "$localeId1:$name1";
+  String locale2 = "$localeId2:$name2";
   final String listeningStatus = "listening";
   final String firstRecognizedWords = 'hello';
   final String secondRecognizedWords = 'hello there';
@@ -29,6 +40,7 @@ void main() {
     initInvoked = false;
     listenInvoked = false;
     cancelInvoked = false;
+    localesInvoked = false;
     listener = TestSpeechListener();
     speech = SpeechToText.withMethodChannel(SpeechToText.speechChannel);
     speech.channel.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -43,7 +55,12 @@ void main() {
           break;
         case "listen":
           listenInvoked = true;
+          listenLocale = methodCall.arguments;
           return initResult;
+          break;
+        case "locales":
+          localesInvoked = true;
+          return locales;
           break;
         default:
       }
@@ -88,7 +105,14 @@ void main() {
     test('invokes listen after successful init', () async {
       await speech.initialize();
       speech.listen();
+      expect(listenLocale, isNull);
       expect(listenInvoked, true);
+    });
+    test('uses localeId if provided', () async {
+      await speech.initialize();
+      speech.listen(localeId: localeId1);
+      expect(listenInvoked, true);
+      expect(listenLocale, localeId1);
     });
     test('calls speech listener', () async {
       await speech.initialize();
@@ -139,6 +163,42 @@ void main() {
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
       expect(listener.speechErrors, 1);
+    });
+  });
+  group('locales', () {
+    test('fails with exception if not initialized', () async {
+      try {
+        await speech.locales();
+        fail("Expected an exception.");
+      } on SpeechToTextNotInitializedException {
+        // This is a good result
+      }
+    });
+    test('handles an empty list', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      List<LocaleName> localeNames = await speech.locales();
+      expect( localesInvoked, isTrue );
+      expect(localeNames, isEmpty);
+    });
+    test('returns expected locales', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      locales.add( locale1);
+      locales.add( locale2);
+      List<LocaleName> localeNames = await speech.locales();
+      expect(localeNames, hasLength(locales.length));
+      expect( localeNames[0].localeId, localeId1 );
+      expect( localeNames[0].name, name1 );
+      expect( localeNames[1].localeId, localeId2 );
+      expect( localeNames[1].name, name2 );
+    });
+    test('skips incorrect locales', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      locales.add( "InvalidJunk");
+      locales.add( locale1);
+      List<LocaleName> localeNames = await speech.locales();
+      expect(localeNames, hasLength(1));
+      expect( localeNames[0].localeId, localeId1 );
+      expect( localeNames[0].name, name1 );
     });
   });
 }

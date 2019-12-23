@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0
+
+### New
+
+  * locales method returns the list of available languages for speech
+  * new optional localeId parameter on listen method supports choosing the comprehension language separately from the current system locale. 
+
 ## 0.6.3
 
 ### Fix

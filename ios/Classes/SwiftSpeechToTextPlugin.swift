@@ -7,6 +7,7 @@ public enum SwiftSpeechToTextMethods: String {
     case listen
     case stop
     case cancel
+    case locales
     case unknown // just for testing
 }
 
@@ -39,6 +40,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var successSound: AVAudioPlayer?
     private var cancelSound: AVAudioPlayer?
     private var rememberedAudioCategory: String?
+    private var previousLocale: Locale?
     private let audioSession = AVAudioSession.sharedInstance()
     private let audioEngine = AVAudioEngine()
     private let jsonEncoder = JSONEncoder()
@@ -61,11 +63,18 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         case SwiftSpeechToTextMethods.initialize.rawValue:
             initialize( result )
         case SwiftSpeechToTextMethods.listen.rawValue:
-            listenForSpeech( result )
+            if let localeStr = call.arguments as? String  {
+                listenForSpeech( result, localeStr: localeStr )
+            }
+            else {
+                listenForSpeech( result, localeStr: nil )
+            }
         case SwiftSpeechToTextMethods.stop.rawValue:
             stopSpeech( result )
         case SwiftSpeechToTextMethods.cancel.rawValue:
             cancelSpeech( result )
+        case SwiftSpeechToTextMethods.locales.rawValue:
+            locales( result )
         default:
             print("Unrecognized method: \(call.method)")
             result( FlutterMethodNotImplemented)
@@ -120,7 +129,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     }
     
     private func setupSpeechRecognition( _ result: @escaping FlutterResult) {
-        recognizer = SFSpeechRecognizer()
+        setupRecognizerForLocale( locale: Locale.current )
         guard recognizer != nil else {
             initResult( false, result );
             return
@@ -129,6 +138,22 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         setupListeningSound()
 
         initResult( true, result );
+    }
+
+    private func setupRecognizerForLocale( locale: Locale ) {
+        if ( previousLocale == locale ) {
+            return
+        }
+        previousLocale = locale
+        recognizer = SFSpeechRecognizer( locale: locale )
+    }
+    
+    private func getLocale( _ localeStr: String? ) -> Locale {
+        guard let aLocaleStr = localeStr else {
+            return Locale.current
+        }
+        let locale = Locale(identifier: aLocaleStr)
+        return locale
     }
     
     private func stopSpeech( _ result: @escaping FlutterResult) {
@@ -161,11 +186,12 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         currentTask = nil
     }
     
-    private func listenForSpeech( _ result: @escaping FlutterResult) {
+    private func listenForSpeech( _ result: @escaping FlutterResult, localeStr: String? ) {
         if ( nil != currentTask ) {
             return
         }
         do {
+            setupRecognizerForLocale(locale: getLocale(localeStr))
             listeningSound?.play()
             rememberedAudioCategory = self.audioSession.category
             try self.audioSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
@@ -191,6 +217,34 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         catch {
             result( false )
         }
+    }
+    
+    /// Build a list of localId:name with the current locale first
+    private func locales( _ result: @escaping FlutterResult ) {
+        var localeNames = [String]();
+        let locales = SFSpeechRecognizer.supportedLocales();
+        let currentLocale = Locale.current
+        if let idName = buildIdNameForLocale(forIdentifier: currentLocale.identifier ) {
+            localeNames.append(idName)
+        }
+        for locale in locales {
+            if ( locale.identifier == currentLocale.identifier) {
+                continue
+            }
+            if let idName = buildIdNameForLocale(forIdentifier: locale.identifier ) {
+                localeNames.append(idName)
+            }
+        }
+        result(localeNames)
+    }
+    
+    private func buildIdNameForLocale( forIdentifier: String ) -> String? {
+        var idName: String?
+        if let name = Locale.current.localizedString(forIdentifier: forIdentifier ) {
+            let sanitizedName = name.replacingOccurrences(of: ":", with: " ")
+            idName = "\(forIdentifier):\(sanitizedName)"
+        }
+        return idName
     }
     
     private func handleResult( _ recognizedWords: String, isFinal: Bool ) {
