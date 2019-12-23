@@ -133,8 +133,14 @@ class _MyAppState extends State<MyApp> {
                   color: Theme.of(context).backgroundColor,
                   child: Center(
                     child: speech.isListening
-                        ? Text("I'm listening...", style: TextStyle( fontWeight: FontWeight.bold ),)
-                        : Text('Not listening', style: TextStyle( fontWeight: FontWeight.bold ),),
+                        ? Text(
+                            "I'm listening...",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        : Text(
+                            'Not listening',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                   ),
                 ),
               ])
