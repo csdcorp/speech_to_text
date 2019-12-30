@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.1
+
+### Fix
+
+  * Upgrade Kotlin to 1.3.5 to match the Flutter 1.12 version
+  * Upgrade Gradle build to 3.5.0 to match the Flutter 1.12 version
+  * Android version of the plugin was repeating the system default locale in the `locales` list
+  
 ## 0.7.0
 
 ### New
