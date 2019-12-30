@@ -35,7 +35,7 @@ class SpeechToText {
   static const String notifyStatusMethod = 'notifyStatus';
   static const String notListeningStatus = "notListening";
   static const String listeningStatus = "listening";
-  static const String _onRmsChangedMethod = "onRmsChanged";
+  static const String soundLevelChange = "soundLevelChange";
 
   static const MethodChannel speechChannel =
   const MethodChannel('plugin.csdcorp.com/speech_to_text');
@@ -52,7 +52,7 @@ class SpeechToText {
   SpeechResultListener _resultListener;
   SpeechErrorListener errorListener;
   SpeechStatusListener statusListener;
-  Function(double rms) _rmsChanged;
+  Function(double level) _soundLevelChange;
 
   final MethodChannel channel;
   factory SpeechToText() => _instance;
@@ -119,8 +119,8 @@ class SpeechToText {
   }
 
   /// Notes whether the sound level does not change audio stream.
-  onRmsChanged(Function(double rms) rmsChanged) {
-    this._rmsChanged = rmsChanged;
+  onSoundLevelChange(Function(double level) soundLevelChange) {
+    this._soundLevelChange = soundLevelChange;
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
@@ -222,9 +222,9 @@ class SpeechToText {
           _onNotifyStatus(call.arguments);
         }
         break;
-      case _onRmsChangedMethod:
+      case soundLevelChange:
         if (call.arguments is double) {
-          _rmsChanged(call.arguments);
+          _soundLevelChange(call.arguments);
         }
         break;
       default:

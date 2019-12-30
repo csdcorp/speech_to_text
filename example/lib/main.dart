@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:speech_to_text/speech_to_text.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 void main() => runApp(MyApp());
 
@@ -15,6 +15,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _hasSpeech = false;
   bool _stressTest = false;
+  double level = 0.0;
   int _stressLoops = 0;
   String lastWords = "";
   String lastError = "";
@@ -33,10 +34,17 @@ class _MyAppState extends State<MyApp> {
         onError: errorListener, onStatus: statusListener);
     if (hasSpeech) {
       _localeNames = await speech.locales();
+
       var systemLocale = await speech.systemLocale();
       _currentLocaleId = systemLocale.localeId;
+
+      setState(() {
+        speech.onSoundLevelChange((level) => this.level = level);
+      });
     }
+
     if (!mounted) return;
+
     setState(() {
       _hasSpeech = hasSpeech;
     });
@@ -50,104 +58,150 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Speech to Text Example'),
         ),
         body: Column(children: [
+          Center(
+            child: Text(
+              'Speech recognition available',
+              style: TextStyle(fontSize: 22.0),
+            ),
+          ),
+          Container(
+            child: Column(
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    FlatButton(
+                      child: Text('Initialize'),
+                      onPressed: _hasSpeech ? null : initSpeechState,
+                    ),
+                    FlatButton(
+                      child: Text('Stress Test'),
+                      onPressed: stressTest,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    FlatButton(
+                      child: Text('Start'),
+                      onPressed: !_hasSpeech || speech.isListening
+                          ? null
+                          : startListening,
+                    ),
+                    FlatButton(
+                      child: Text('Stop'),
+                      onPressed: speech.isListening ? stopListening : null,
+                    ),
+                    FlatButton(
+                      child: Text('Cancel'),
+                      onPressed: speech.isListening ? cancelListening : null,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    DropdownButton(
+                      onChanged: (selectedVal) => _switchLang(selectedVal),
+                      value: _currentLocaleId,
+                      items: _localeNames
+                          .map(
+                            (localeName) => DropdownMenuItem(
+                              value: localeName.localeId,
+                              child: Text(localeName.name),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Column(
+              children: <Widget>[
                 Center(
                   child: Text(
-                    'Speech recognition available',
+                    'Recognized Words',
                     style: TextStyle(fontSize: 22.0),
                   ),
                 ),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      FlatButton(
-                        child: Text('Initialize'),
-                        onPressed: _hasSpeech ? null : initSpeechState,
-                      ),
-                      FlatButton(
-                        child: Text('Start'),
-                        onPressed: !_hasSpeech || speech.isListening ? null : startListening,
-                      ),
-                      FlatButton(
-                        child: Text('Stop'),
-                        onPressed: speech.isListening ? stopListening : null,
-                      ),
-                      FlatButton(
-                        child: Text('Cancel'),
-                        onPressed: speech.isListening ? cancelListening : null,
-                      ),
-                      DropdownButton(
-                        onChanged: (selectedVal) => _switchLang(selectedVal),
-                        value: _currentLocaleId,
-                        items: _localeNames
-                            .map(
-                              (localeName) => DropdownMenuItem(
-                                value: localeName.localeId,
-                                child: Text(localeName.name),
-                              ),
-                            )
-                            .toList(),
-                      )
-                      // FlatButton(
-                      //   child: Text('Stress Test'),
-                      //   onPressed: stressTest,
-                      // ),
-                    ],
-                  ),
-                ),
                 Expanded(
-                  flex: 4,
-                  child: Column(
+                  child: Stack(
                     children: <Widget>[
-                      Center(
-                        child: Text(
-                          'Recognized Words',
-                          style: TextStyle(fontSize: 22.0),
+                      Container(
+                        color: Theme.of(context).selectedRowColor,
+                        child: Center(
+                          child: Text(
+                            lastWords,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                      Expanded(
-                        child: Container(
-                          color: Theme.of(context).selectedRowColor,
-                          child: Center(
-                            child: Text(lastWords),
+                      Positioned.fill(
+                        bottom: 10,
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                    blurRadius: .26,
+                                    spreadRadius: level * 1.5,
+                                    color: Colors.black.withOpacity(.05))
+                              ],
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                            ),
+                            child: IconButton(icon: Icon(Icons.mic)),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: <Widget>[
-                      Center(
-                        child: Text(
-                          'Error Status',
-                          style: TextStyle(fontSize: 22.0),
-                        ),
-                      ),
-                      Center(
-                        child: Text(lastError),
-                      ),
-                    ],
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Column(
+              children: <Widget>[
+                Center(
+                  child: Text(
+                    'Error Status',
+                    style: TextStyle(fontSize: 22.0),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  color: Theme.of(context).backgroundColor,
-                  child: Center(
-                    child: speech.isListening
-                        ? Text(
-                            "I'm listening...",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          )
-                        : Text(
-                            'Not listening',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                  ),
+                Center(
+                  child: Text(lastError),
                 ),
-              ]),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            color: Theme.of(context).backgroundColor,
+            child: Center(
+              child: speech.isListening
+                  ? Text(
+                      "I'm listening...",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  : Text(
+                      'Not listening',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+            ),
+          ),
+        ]),
       ),
     );
   }
@@ -192,12 +246,16 @@ class _MyAppState extends State<MyApp> {
 
   void stopListening() {
     speech.stop();
-    setState(() {});
+    setState(() {
+      level = 0.0;
+    });
   }
 
   void cancelListening() {
     speech.cancel();
-    setState(() {});
+    setState(() {
+      level = 0.0;
+    });
   }
 
   void resultListener(SpeechRecognitionResult result) {

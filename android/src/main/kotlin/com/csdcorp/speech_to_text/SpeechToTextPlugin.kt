@@ -35,7 +35,7 @@ enum class SpeechToTextCallbackMethods {
   textRecognition,
   notifyStatus,
   notifyError,
-  onRmsChanged,
+  soundLevelChange,
 }
 
 enum class SpeechToTextStatus {
@@ -257,7 +257,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   }
 
   override fun onRmsChanged(p0: Float) {
-    channel.invokeMethod(SpeechToTextCallbackMethods.onRmsChanged.name, p0)
+    channel.invokeMethod(SpeechToTextCallbackMethods.soundLevelChange.name, p0)
   }
 
   override fun onReadyForSpeech(p0: Bundle?) {}
