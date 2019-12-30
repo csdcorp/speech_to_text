@@ -35,6 +35,7 @@ enum class SpeechToTextCallbackMethods {
   textRecognition,
   notifyStatus,
   notifyError,
+  onRmsChanged,
 }
 
 enum class SpeechToTextStatus {
@@ -99,7 +100,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     }
     activeResult = result
     initializeIfPermitted( application )
-   }
+  }
 
   private fun sdkVersionTooLow(result: Result): Boolean {
     if ( Build.VERSION.SDK_INT < minSdkForSpeechSupport ) {
@@ -255,14 +256,17 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     channel.invokeMethod( SpeechToTextCallbackMethods.notifyError.name, speechError.toString())
   }
 
+  override fun onRmsChanged(p0: Float) {
+    channel.invokeMethod(SpeechToTextCallbackMethods.onRmsChanged.name, p0)
+  }
+
   override fun onReadyForSpeech(p0: Bundle?) {}
-  override fun onRmsChanged(p0: Float) {}
   override fun onBufferReceived(p0: ByteArray?) {}
   override fun onEvent(p0: Int, p1: Bundle?) {}
   override fun onBeginningOfSpeech() {}
 }
 
-  // See https://stackoverflow.com/questions/10538791/how-to-set-the-language-in-speech-recognition-on-android/10548680#10548680
+// See https://stackoverflow.com/questions/10538791/how-to-set-the-language-in-speech-recognition-on-android/10548680#10548680
 class LanguageDetailsChecker(flutterResult: Result, pluginActivity: Activity) : BroadcastReceiver() {
   private val pluginActivity: Activity = pluginActivity
   private val result: Result = flutterResult
@@ -281,25 +285,25 @@ class LanguageDetailsChecker(flutterResult: Result, pluginActivity: Activity) : 
       createResponse( supportedLanguages )
     }
   }
-    private fun createResponse( supportedLanguages: List<String>? ) {
-      val currentLocale = Locale.getDefault()
-      val localeNames = ArrayList<String>()
-      localeNames.add( buildIdNameForLocale(currentLocale))
-      if ( null != supportedLanguages ) {
-        for ( lang in supportedLanguages) {
-          if ( currentLocale.toLanguageTag() == lang ) {
-            continue
-          }
-          val locale = Locale.forLanguageTag(lang)
-         localeNames.add( buildIdNameForLocale(locale))
+  private fun createResponse( supportedLanguages: List<String>? ) {
+    val currentLocale = Locale.getDefault()
+    val localeNames = ArrayList<String>()
+    localeNames.add( buildIdNameForLocale(currentLocale))
+    if ( null != supportedLanguages ) {
+      for ( lang in supportedLanguages) {
+        if ( currentLocale.toLanguageTag() == lang ) {
+          continue
         }
+        val locale = Locale.forLanguageTag(lang)
+        localeNames.add( buildIdNameForLocale(locale))
       }
-      pluginActivity.runOnUiThread { result.success(localeNames) }
-
     }
+    pluginActivity.runOnUiThread { result.success(localeNames) }
 
-    private fun buildIdNameForLocale( locale: Locale ): String {
-      val name = locale.displayName.replace(':', ' ')
-      return "${locale.language}_${locale.country}:$name"
-    }
+  }
+
+  private fun buildIdNameForLocale( locale: Locale ): String {
+    val name = locale.displayName.replace(':', ' ')
+    return "${locale.language}_${locale.country}:$name"
+  }
 }
