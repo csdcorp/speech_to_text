@@ -287,6 +287,9 @@ class LanguageDetailsChecker(flutterResult: Result, pluginActivity: Activity) : 
       localeNames.add( buildIdNameForLocale(currentLocale))
       if ( null != supportedLanguages ) {
         for ( lang in supportedLanguages) {
+          if ( currentLocale.toLanguageTag() == lang ) {
+            continue
+          }
           val locale = Locale.forLanguageTag(lang)
          localeNames.add( buildIdNameForLocale(locale))
         }
