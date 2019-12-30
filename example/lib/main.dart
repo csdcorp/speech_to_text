@@ -26,15 +26,16 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initSpeechState();
   }
 
   Future<void> initSpeechState() async {
     bool hasSpeech = await speech.initialize(
         onError: errorListener, onStatus: statusListener);
-    _localeNames = await speech.locales();
-    var systemLocale = await speech.systemLocale();
-    _currentLocaleId = systemLocale.localeId;
+    if (hasSpeech) {
+      _localeNames = await speech.locales();
+      var systemLocale = await speech.systemLocale();
+      _currentLocaleId = systemLocale.localeId;
+    }
     if (!mounted) return;
     setState(() {
       _hasSpeech = hasSpeech;
@@ -48,8 +49,7 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Speech to Text Example'),
         ),
-        body: _hasSpeech
-            ? Column(children: [
+        body: Column(children: [
                 Center(
                   child: Text(
                     'Speech recognition available',
@@ -61,8 +61,12 @@ class _MyAppState extends State<MyApp> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       FlatButton(
+                        child: Text('Initialize'),
+                        onPressed: _hasSpeech ? null : initSpeechState,
+                      ),
+                      FlatButton(
                         child: Text('Start'),
-                        onPressed: speech.isListening ? null : startListening,
+                        onPressed: !_hasSpeech || speech.isListening ? null : startListening,
                       ),
                       FlatButton(
                         child: Text('Stop'),
@@ -143,11 +147,7 @@ class _MyAppState extends State<MyApp> {
                           ),
                   ),
                 ),
-              ])
-            : Center(
-                child: Text('Speech recognition unavailable',
-                    style: TextStyle(
-                        fontSize: 20.0, fontWeight: FontWeight.bold))),
+              ]),
       ),
     );
   }
