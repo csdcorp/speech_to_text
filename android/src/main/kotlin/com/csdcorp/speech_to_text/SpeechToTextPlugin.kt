@@ -256,8 +256,8 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     channel.invokeMethod( SpeechToTextCallbackMethods.notifyError.name, speechError.toString())
   }
 
-  override fun onRmsChanged(p0: Float) {
-    channel.invokeMethod(SpeechToTextCallbackMethods.soundLevelChange.name, p0)
+  override fun onRmsChanged(rmsdB: Float) {
+    channel.invokeMethod(SpeechToTextCallbackMethods.soundLevelChange.name, rmsdB)
   }
 
   override fun onReadyForSpeech(p0: Bundle?) {}

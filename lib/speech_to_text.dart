@@ -7,14 +7,27 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 /// Notified as words are recognized with the current set of recognized words.
+///
+/// See the [onResult] argument on the [listen] method for use.
 typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
 
 /// Notified if errors occur during recognition or intialization.
+///
+/// See the [onError] argument on the [initialize] method for use.
 typedef SpeechErrorListener = void Function(
     SpeechRecognitionError errorNotification);
 
 /// Notified when recognition status changes.
+///
+/// See the [onStatus] argument on the [initialize] method for use.
 typedef SpeechStatusListener = void Function(String status);
+
+/// Notified when the sound level changes during a listen method.
+///
+/// [level] is a measure of the decibels of the current sound on
+/// the recognition input. See the [onSoundLevelChange] argument on
+/// the [listen] method for use.
+typedef SpeechSoundLevelChange = Function(double level);
 
 /// An interface to device specific speech recognition services.
 ///
@@ -33,26 +46,27 @@ class SpeechToText {
   static const String textRecognitionMethod = 'textRecognition';
   static const String notifyErrorMethod = 'notifyError';
   static const String notifyStatusMethod = 'notifyStatus';
+  static const String soundLevelChangeMethod = "soundLevelChange";
   static const String notListeningStatus = "notListening";
   static const String listeningStatus = "listening";
-  static const String soundLevelChange = "soundLevelChange";
 
   static const MethodChannel speechChannel =
-  const MethodChannel('plugin.csdcorp.com/speech_to_text');
+      const MethodChannel('plugin.csdcorp.com/speech_to_text');
   static final SpeechToText _instance =
-  SpeechToText.withMethodChannel(speechChannel);
+      SpeechToText.withMethodChannel(speechChannel);
   bool _initWorked = false;
   bool _recognized = false;
   bool _listening = false;
   String _lastRecognized = "";
   String _lastStatus = "";
+  double _lastSoundLevel = 0;
   Timer _listenTimer;
   LocaleName _systemLocale;
   SpeechRecognitionError _lastError;
   SpeechResultListener _resultListener;
   SpeechErrorListener errorListener;
   SpeechStatusListener statusListener;
-  Function(double level) _soundLevelChange;
+  SpeechSoundLevelChange _soundLevelChange;
 
   final MethodChannel channel;
   factory SpeechToText() => _instance;
@@ -71,8 +85,17 @@ class SpeechToText {
   /// [listen].
   String get lastRecognizedWords => _lastRecognized;
 
-  /// The last status update received
+  /// The last status update received, see [initialize] to register 
+  /// an optional listener to be notified when this changes. 
   String get lastStatus => _lastStatus;
+
+  /// The last sound level received during a listen event.
+  ///
+  /// The sound level is a measure of how loud the current
+  /// input is during listening. Use the [onSoundLevelChange]
+  /// argument in the [listen] method to get notified of
+  /// changes.
+  double get lastSoundLevel => _lastSoundLevel;
 
   /// True if [initialize] succeeded
   bool get isAvailable => _initWorked;
@@ -80,7 +103,8 @@ class SpeechToText {
   /// True if [listen] succeeded and [cancel] has not been called.
   bool get isListening => _listening;
 
-  /// The last error received or null if none
+  /// The last error received or null if none, see [initialize] to 
+  /// register an optional listener to be notified of errors. 
   SpeechRecognitionError get lastError => _lastError;
 
   /// True if an error has been received, see [lastError] for details
@@ -91,8 +115,15 @@ class SpeechToText {
   ///
   /// This method must be called before any other speech functions.
   /// If this method returns false no further [SpeechToText] methods
-  /// should be used. Should only be called once but does protect
-  /// itself if called repeatedly.
+  /// should be used. Should only be called once if successful but does protect
+  /// itself if called repeatedly. False usually means that the user has denied 
+  /// permission to use speech. The usual option in that case is to give them 
+  /// instructions on how to open system settings and grant permission. 
+  ///
+  /// [onError] is an optional listener for errors like
+  /// timeout, or failure of the device speech recognition.
+  /// [onStatus] is an optional listener for status changes from
+  /// listening to not listening.
   Future<bool> initialize(
       {SpeechErrorListener onError, SpeechStatusListener onStatus}) async {
     if (_initWorked) {
@@ -118,11 +149,6 @@ class SpeechToText {
     _shutdownListener();
   }
 
-  /// Notes whether the sound level does not change audio stream.
-  onSoundLevelChange(Function(double level) soundLevelChange) {
-    this._soundLevelChange = soundLevelChange;
-  }
-
   /// Cancels the current listen for speech if active, does nothing if not.
   ///
   /// Canceling means that there will be no final result returned from the
@@ -140,15 +166,31 @@ class SpeechToText {
   /// as words are recognized.
   ///
   /// Cannot be used until a successful [initialize] call.
+  ///
+  /// [onResult] is an optional listener that is notified when words
+  /// are recognized.
+  ///
+  /// [listenFor] sets the maximum duration that it will listen for, after
+  /// that it automatically cancels the listen for you.
+  ///
+  /// [localeId] is an optional locale that can be used to listen in a language
+  /// other than the current system default. See [locales] to find the list of
+  /// supported languages for listening.
+  ///
+  /// [onSoundLevelChange] is an optional listener that is notified when the
+  /// sound level of the input changes. Use this to update the UI in response to
+  /// more or less input.
   Future listen(
       {SpeechResultListener onResult,
-        Duration listenFor,
-        String localeId}) async {
+      Duration listenFor,
+      String localeId,
+      SpeechSoundLevelChange onSoundLevelChange}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
     _recognized = false;
     _resultListener = onResult;
+    _soundLevelChange = onSoundLevelChange;
     if (null != localeId) {
       channel.invokeMethod('listen', localeId);
     } else {
@@ -178,12 +220,12 @@ class SpeechToText {
     final List<dynamic> locales = await channel.invokeMethod('locales');
     List<LocaleName> filteredLocales = locales
         .map((locale) {
-      var components = locale.split(":");
-      if (components.length != 2) {
-        return null;
-      }
-      return LocaleName(components[0], components[1]);
-    })
+          var components = locale.split(":");
+          if (components.length != 2) {
+            return null;
+          }
+          return LocaleName(components[0], components[1]);
+        })
         .where((item) => item != null)
         .toList();
     if (filteredLocales.isNotEmpty) {
@@ -222,9 +264,9 @@ class SpeechToText {
           _onNotifyStatus(call.arguments);
         }
         break;
-      case soundLevelChange:
+      case soundLevelChangeMethod:
         if (call.arguments is double) {
-          _soundLevelChange(call.arguments);
+          _onSoundLevelChange(call.arguments);
         }
         break;
       default:
@@ -235,7 +277,7 @@ class SpeechToText {
     _recognized = true;
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     SpeechRecognitionResult speechResult =
-    SpeechRecognitionResult.fromJson(resultMap);
+        SpeechRecognitionResult.fromJson(resultMap);
 
     _lastRecognized = speechResult.recognizedWords;
     if (null != _resultListener) {
@@ -246,7 +288,7 @@ class SpeechToText {
   void _onNotifyError(String errorJson) {
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
     SpeechRecognitionError speechError =
-    SpeechRecognitionError.fromJson(errorMap);
+        SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
     if (null != errorListener) {
       errorListener(speechError);
@@ -258,6 +300,13 @@ class SpeechToText {
     _listening = status == listeningStatus;
     if (null != statusListener) {
       statusListener(status);
+    }
+  }
+
+  void _onSoundLevelChange(double level) {
+    _lastSoundLevel = level;
+    if (null != _soundLevelChange) {
+      _soundLevelChange(level);
     }
   }
 

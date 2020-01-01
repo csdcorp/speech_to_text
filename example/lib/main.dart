@@ -37,10 +37,6 @@ class _MyAppState extends State<MyApp> {
 
       var systemLocale = await speech.systemLocale();
       _currentLocaleId = systemLocale.localeId;
-
-      setState(() {
-        speech.onSoundLevelChange((level) => this.level = level);
-      });
     }
 
     if (!mounted) return;
@@ -240,7 +236,8 @@ class _MyAppState extends State<MyApp> {
     speech.listen(
         onResult: resultListener,
         listenFor: Duration(seconds: 10),
-        localeId: _currentLocaleId);
+        localeId: _currentLocaleId,
+        onSoundLevelChange: soundLevelListener );
     setState(() {});
   }
 
@@ -261,6 +258,12 @@ class _MyAppState extends State<MyApp> {
   void resultListener(SpeechRecognitionResult result) {
     setState(() {
       lastWords = "${result.recognizedWords} - ${result.finalResult}";
+    });
+  }
+
+  void soundLevelListener(double level) {
+    setState(() {
+      this.level = level;
     });
   }
 

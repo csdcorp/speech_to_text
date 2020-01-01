@@ -35,6 +35,8 @@ void main() {
   final SpeechRecognitionResult secondRecognizedResult =
       SpeechRecognitionResult(secondRecognizedWords, false);
   final String transientErrorJson = '{"errorMsg":"network","permanent":false}';
+  final double level1 = 0.5;
+  final double level2 = 10;
 
   setUp(() {
     initResult = true;
@@ -162,6 +164,24 @@ void main() {
     });
   });
 
+  group('soundLevel callback', () {
+    test('invoked on listen', () async {
+      await speech.initialize();
+      await speech.listen(onSoundLevelChange: listener.onSoundLevel );
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.soundLevelChangeMethod, level1 ));
+      expect(listener.soundLevel, 1 );
+      expect(listener.soundLevels, contains(level1 ));
+    });
+    test('sets lastLevel', () async {
+      await speech.initialize();
+      await speech.listen(onSoundLevelChange: listener.onSoundLevel );
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.soundLevelChangeMethod, level1 ));
+      expect( speech.lastSoundLevel, level1 );
+    });
+  });
+
   group('cancel', () {
     test('does nothing if not initialized', () async {
       speech.cancel();
@@ -276,6 +296,8 @@ class TestSpeechListener {
   List<SpeechRecognitionError> errors = [];
   int speechStatus = 0;
   List<String> statuses = [];
+  int soundLevel = 0;
+  List<double> soundLevels = [];
 
   void onSpeechResult(SpeechRecognitionResult result) {
     ++speechResults;
@@ -290,5 +312,10 @@ class TestSpeechListener {
   void onSpeechStatus(String status) {
     ++speechStatus;
     statuses.add(status);
+  }
+
+  void onSoundLevel( double level ) {
+    ++soundLevel;
+    soundLevels.add( level );
   }
 }
