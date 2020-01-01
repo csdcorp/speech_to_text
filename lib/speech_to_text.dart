@@ -35,11 +35,12 @@ class SpeechToText {
   static const String notifyStatusMethod = 'notifyStatus';
   static const String notListeningStatus = "notListening";
   static const String listeningStatus = "listening";
+  static const String soundLevelChange = "soundLevelChange";
 
   static const MethodChannel speechChannel =
-      const MethodChannel('plugin.csdcorp.com/speech_to_text');
+  const MethodChannel('plugin.csdcorp.com/speech_to_text');
   static final SpeechToText _instance =
-      SpeechToText.withMethodChannel(speechChannel);
+  SpeechToText.withMethodChannel(speechChannel);
   bool _initWorked = false;
   bool _recognized = false;
   bool _listening = false;
@@ -51,9 +52,11 @@ class SpeechToText {
   SpeechResultListener _resultListener;
   SpeechErrorListener errorListener;
   SpeechStatusListener statusListener;
+  Function(double level) _soundLevelChange;
 
   final MethodChannel channel;
   factory SpeechToText() => _instance;
+
   @visibleForTesting
   SpeechToText.withMethodChannel(this.channel);
 
@@ -115,6 +118,11 @@ class SpeechToText {
     _shutdownListener();
   }
 
+  /// Notes whether the sound level does not change audio stream.
+  onSoundLevelChange(Function(double level) soundLevelChange) {
+    this._soundLevelChange = soundLevelChange;
+  }
+
   /// Cancels the current listen for speech if active, does nothing if not.
   ///
   /// Canceling means that there will be no final result returned from the
@@ -134,8 +142,8 @@ class SpeechToText {
   /// Cannot be used until a successful [initialize] call.
   Future listen(
       {SpeechResultListener onResult,
-      Duration listenFor,
-      String localeId}) async {
+        Duration listenFor,
+        String localeId}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
@@ -170,12 +178,12 @@ class SpeechToText {
     final List<dynamic> locales = await channel.invokeMethod('locales');
     List<LocaleName> filteredLocales = locales
         .map((locale) {
-          var components = locale.split(":");
-          if (components.length != 2) {
-            return null;
-          }
-          return LocaleName(components[0], components[1]);
-        })
+      var components = locale.split(":");
+      if (components.length != 2) {
+        return null;
+      }
+      return LocaleName(components[0], components[1]);
+    })
         .where((item) => item != null)
         .toList();
     if (filteredLocales.isNotEmpty) {
@@ -214,6 +222,11 @@ class SpeechToText {
           _onNotifyStatus(call.arguments);
         }
         break;
+      case soundLevelChange:
+        if (call.arguments is double) {
+          _soundLevelChange(call.arguments);
+        }
+        break;
       default:
     }
   }
@@ -222,7 +235,7 @@ class SpeechToText {
     _recognized = true;
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     SpeechRecognitionResult speechResult =
-        SpeechRecognitionResult.fromJson(resultMap);
+    SpeechRecognitionResult.fromJson(resultMap);
 
     _lastRecognized = speechResult.recognizedWords;
     if (null != _resultListener) {
@@ -233,7 +246,7 @@ class SpeechToText {
   void _onNotifyError(String errorJson) {
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
     SpeechRecognitionError speechError =
-        SpeechRecognitionError.fromJson(errorMap);
+    SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
     if (null != errorListener) {
       errorListener(speechError);
