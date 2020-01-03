@@ -1,5 +1,7 @@
 # speech_to_text
 
+[![pub package](https://img.shields.io/badge/pub-v0.7.2-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+
 A library that exposes device specific text to speech recognition capability.
 
 This plugin contains a set of classes that make it easy to use the speech recognition 
