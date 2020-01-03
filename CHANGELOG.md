@@ -2,6 +2,12 @@
 
 ## 0.7.1
 
+### Breaking
+
+  * Upgrade Swift to version 5 to match Flutter. Projects using this plugin must now switch to 5. 
+  
+## 0.7.1
+
 ### Fix
 
   * Upgrade Kotlin to 1.3.5 to match the Flutter 1.12 version
