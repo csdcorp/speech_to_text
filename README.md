@@ -6,6 +6,10 @@ This plugin contains a set of classes that make it easy to use the speech recogn
 capabilities of the mobile device in Flutter. It supports both Android and iOS. 
 
 ## Recent Updates
+The 0.7.2 version uses Swift 5, which is the default for new Flutter projects. If you are 
+using the plugin with an older project you will need to upgrade it before you can use the 
+0.7.2 version of the plugin. 
+
 The 0.7.0 version adds the ability to select the recognition language using the `localeId`
 parameter on the `listen` method. It also has a new `locales` method that returns a list 
 of supported locales for speech on the device. 
