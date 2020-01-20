@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.0
+
+### New
+
+  * speech recognizer now exposes multiple possible transcriptions for each recognized speech
+  * alternates list on SpeechRecognitionResult exposes alternate transcriptions of voice 
+  * confidence on SpeechRecognitionResult gives an estimate of confidence in the transcription
+  * isConfident on SpeechRecognitionResult supports testing confidence
+  * hasConfidenceRating on SpeechRecognitionResult indicates if confidence was provided from the device
+  * new SpeechRecognitionWords class gives details on per transcription words and confidence
+
 ## 0.7.2
 
 ### Breaking

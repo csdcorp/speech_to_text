@@ -85,8 +85,8 @@ class SpeechToText {
   /// [listen].
   String get lastRecognizedWords => _lastRecognized;
 
-  /// The last status update received, see [initialize] to register 
-  /// an optional listener to be notified when this changes. 
+  /// The last status update received, see [initialize] to register
+  /// an optional listener to be notified when this changes.
   String get lastStatus => _lastStatus;
 
   /// The last sound level received during a listen event.
@@ -103,8 +103,8 @@ class SpeechToText {
   /// True if [listen] succeeded and [cancel] has not been called.
   bool get isListening => _listening;
 
-  /// The last error received or null if none, see [initialize] to 
-  /// register an optional listener to be notified of errors. 
+  /// The last error received or null if none, see [initialize] to
+  /// register an optional listener to be notified of errors.
   SpeechRecognitionError get lastError => _lastError;
 
   /// True if an error has been received, see [lastError] for details
@@ -116,9 +116,9 @@ class SpeechToText {
   /// This method must be called before any other speech functions.
   /// If this method returns false no further [SpeechToText] methods
   /// should be used. Should only be called once if successful but does protect
-  /// itself if called repeatedly. False usually means that the user has denied 
-  /// permission to use speech. The usual option in that case is to give them 
-  /// instructions on how to open system settings and grant permission. 
+  /// itself if called repeatedly. False usually means that the user has denied
+  /// permission to use speech. The usual option in that case is to give them
+  /// instructions on how to open system settings and grant permission.
   ///
   /// [onError] is an optional listener for errors like
   /// timeout, or failure of the device speech recognition.

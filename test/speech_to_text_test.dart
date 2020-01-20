@@ -32,8 +32,10 @@ void main() {
       '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"finalResult":false}';
   final String secondRecognizedJson =
       '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":false}';
-  final SpeechRecognitionWords firstWords = SpeechRecognitionWords(firstRecognizedWords, firstConfidence );
-  final SpeechRecognitionWords secondWords = SpeechRecognitionWords(secondRecognizedWords, secondConfidence );
+  final SpeechRecognitionWords firstWords =
+      SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
+  final SpeechRecognitionWords secondWords =
+      SpeechRecognitionWords(secondRecognizedWords, secondConfidence);
   final SpeechRecognitionResult firstRecognizedResult =
       SpeechRecognitionResult([firstWords], false);
   final SpeechRecognitionResult secondRecognizedResult =
@@ -171,18 +173,18 @@ void main() {
   group('soundLevel callback', () {
     test('invoked on listen', () async {
       await speech.initialize();
-      await speech.listen(onSoundLevelChange: listener.onSoundLevel );
+      await speech.listen(onSoundLevelChange: listener.onSoundLevel);
       await speech.processMethodCall(
-          MethodCall(SpeechToText.soundLevelChangeMethod, level1 ));
-      expect(listener.soundLevel, 1 );
-      expect(listener.soundLevels, contains(level1 ));
+          MethodCall(SpeechToText.soundLevelChangeMethod, level1));
+      expect(listener.soundLevel, 1);
+      expect(listener.soundLevels, contains(level1));
     });
     test('sets lastLevel', () async {
       await speech.initialize();
-      await speech.listen(onSoundLevelChange: listener.onSoundLevel );
+      await speech.listen(onSoundLevelChange: listener.onSoundLevel);
       await speech.processMethodCall(
-          MethodCall(SpeechToText.soundLevelChangeMethod, level1 ));
-      expect( speech.lastSoundLevel, level1 );
+          MethodCall(SpeechToText.soundLevelChangeMethod, level1));
+      expect(speech.lastSoundLevel, level1);
     });
   });
 
@@ -318,8 +320,8 @@ class TestSpeechListener {
     statuses.add(status);
   }
 
-  void onSoundLevel( double level ) {
+  void onSoundLevel(double level) {
     ++soundLevel;
-    soundLevels.add( level );
+    soundLevels.add(level);
   }
 }
