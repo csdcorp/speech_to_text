@@ -9,7 +9,11 @@ part of 'speech_recognition_result.dart';
 SpeechRecognitionResult _$SpeechRecognitionResultFromJson(
     Map<String, dynamic> json) {
   return SpeechRecognitionResult(
-    json['recognizedWords'] as String,
+    (json['alternates'] as List)
+        ?.map((e) => e == null
+            ? null
+            : SpeechRecognitionWords.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
     json['finalResult'] as bool,
   );
 }
@@ -17,6 +21,21 @@ SpeechRecognitionResult _$SpeechRecognitionResultFromJson(
 Map<String, dynamic> _$SpeechRecognitionResultToJson(
         SpeechRecognitionResult instance) =>
     <String, dynamic>{
-      'recognizedWords': instance.recognizedWords,
+      'alternates': instance.alternates?.map((e) => e?.toJson())?.toList(),
       'finalResult': instance.finalResult,
+    };
+
+SpeechRecognitionWords _$SpeechRecognitionWordsFromJson(
+    Map<String, dynamic> json) {
+  return SpeechRecognitionWords(
+    json['recognizedWords'] as String,
+    (json['confidence'] as num)?.toDouble(),
+  );
+}
+
+Map<String, dynamic> _$SpeechRecognitionWordsToJson(
+        SpeechRecognitionWords instance) =>
+    <String, dynamic>{
+      'recognizedWords': instance.recognizedWords,
+      'confidence': instance.confidence,
     };

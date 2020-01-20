@@ -24,8 +24,13 @@ public enum SpeechToTextStatus: String {
     case available
 }
 
-struct SpeechRecognitionResult : Codable {
+struct SpeechRecognitionWords : Codable {
     let recognizedWords: String
+    let confidence: Decimal
+}
+
+struct SpeechRecognitionResult : Codable {
+    let alternates: [SpeechRecognitionWords]
     let finalResult: Bool
 }
 
@@ -247,14 +252,32 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         return idName
     }
     
-    private func handleResult( _ recognizedWords: String, isFinal: Bool ) {
-        let speechInfo = SpeechRecognitionResult(recognizedWords: recognizedWords, finalResult: isFinal )
+    private func handleResult( _ transcriptions: [SFTranscription], isFinal: Bool ) {
+        var speechWords: [SpeechRecognitionWords] = []
+        for transcription in transcriptions {
+            let words: SpeechRecognitionWords = SpeechRecognitionWords(recognizedWords: transcription.formattedString, confidence: confidenceIn( transcription))
+            speechWords.append( words )
+        }
+        let speechInfo = SpeechRecognitionResult(alternates: speechWords, finalResult: isFinal )
         do {
             let speechMsg = try jsonEncoder.encode(speechInfo)
             invokeFlutter( SwiftSpeechToTextCallbackMethods.textRecognition, arguments: String( data:speechMsg, encoding: .utf8) )
         } catch {
             print("Could not encode JSON")
         }
+    }
+    
+    private func confidenceIn( _ transcription: SFTranscription ) -> Decimal {
+        guard ( transcription.segments.count > 0 ) else {
+            return 0;
+        }
+        var totalConfidence: Float = 0.0;
+        for segment in transcription.segments {
+            totalConfidence += segment.confidence
+        }
+        let avgConfidence: Float = totalConfidence / Float(transcription.segments.count )
+        let confidence: Float = (avgConfidence * 1000).rounded() / 1000
+        return Decimal( string: String( describing: confidence ) )!
     }
     
     private func invokeFlutter( _ method: SwiftSpeechToTextCallbackMethods, arguments: Any? ) {
@@ -292,12 +315,12 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didHypothesizeTranscription transcription: SFTranscription) {
-        handleResult( transcription.formattedString, isFinal: false )
+        handleResult( [transcription], isFinal: false )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishRecognition recognitionResult: SFSpeechRecognitionResult) {
         let isFinal = recognitionResult.isFinal
-        handleResult( recognitionResult.bestTranscription.formattedString, isFinal: isFinal )
+        handleResult( recognitionResult.transcriptions, isFinal: isFinal )
     }
     
 }

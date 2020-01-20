@@ -23,6 +23,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONObject
 import android.content.Context
 import android.content.BroadcastReceiver
+import org.json.JSONArray
 import java.util.*
 
 
@@ -53,6 +54,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   private val application: Application = activity.application
   private val minSdkForSpeechSupport = 21
   private val speechToTextPermissionCode = 78521
+  private val missingConfidence: Double = -1.0;
   private var activeResult: Result? = null
   private var initializedSuccessfully: Boolean = false
   private var permissionToRecordAudio: Boolean = false
@@ -166,14 +168,28 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
 
   private fun updateResults(speechBundle: Bundle?, isFinal: Boolean ) {
     val userSaid = speechBundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-    if ( null != userSaid ) {
+    if ( null != userSaid && userSaid.isNotEmpty() ) {
       val speechResult  = JSONObject()
-      speechResult.put("recognizedWords", userSaid.get(0))
       speechResult.put( "finalResult", isFinal )
+      val confidence = speechBundle?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
+      val alternates = JSONArray()
+      for ( resultIndex in 0.. userSaid.size - 1 ) {
+        val speechWords = JSONObject()
+        speechWords.put( "recognizedWords", userSaid[resultIndex])
+        if ( null != confidence && confidence.size >= userSaid.size ) {
+          speechWords.put( "confidence", confidence[resultIndex])
+        }
+        else {
+          speechWords.put( "confidence", missingConfidence )
+        }
+        alternates.put( speechWords)
+      }
+      speechResult.put("alternates", alternates)
+      val jsonResult = speechResult.toString()
       channel.invokeMethod( SpeechToTextCallbackMethods.textRecognition.name,
-              speechResult.toString())
+              jsonResult)
+      }
     }
-  }
 
   private fun initializeIfPermitted(context: Application) {
     permissionToRecordAudio = ContextCompat.checkSelfPermission(context,

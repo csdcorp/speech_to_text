@@ -26,14 +26,18 @@ void main() {
   final String listeningStatus = "listening";
   final String firstRecognizedWords = 'hello';
   final String secondRecognizedWords = 'hello there';
+  final double firstConfidence = 0.85;
+  final double secondConfidence = 0.62;
   final String firstRecognizedJson =
-      '{"recognizedWords":"$firstRecognizedWords","finalResult":false}';
+      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"finalResult":false}';
   final String secondRecognizedJson =
-      '{"recognizedWords":"$secondRecognizedWords","finalResult":false}';
+      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":false}';
+  final SpeechRecognitionWords firstWords = SpeechRecognitionWords(firstRecognizedWords, firstConfidence );
+  final SpeechRecognitionWords secondWords = SpeechRecognitionWords(secondRecognizedWords, secondConfidence );
   final SpeechRecognitionResult firstRecognizedResult =
-      SpeechRecognitionResult(firstRecognizedWords, false);
+      SpeechRecognitionResult([firstWords], false);
   final SpeechRecognitionResult secondRecognizedResult =
-      SpeechRecognitionResult(secondRecognizedWords, false);
+      SpeechRecognitionResult([secondWords], false);
   final String transientErrorJson = '{"errorMsg":"network","permanent":false}';
   final double level1 = 0.5;
   final double level2 = 10;
