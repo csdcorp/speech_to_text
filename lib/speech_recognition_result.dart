@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'speech_recognition_result.g.dart';
@@ -11,10 +13,23 @@ part 'speech_recognition_result.g.dart';
 /// result is considered final by the platform.
 @JsonSerializable(explicitToJson: true )
 class SpeechRecognitionResult {
-  List<SpeechRecognitionWords> alternates;
+  List<SpeechRecognitionWords> _alternates;
 
-  /// The sequence of words recognized.
-  String get recognizedWords => alternates.isNotEmpty ? alternates[0].recognizedWords : "";
+  /// Returns a list of possible transcriptions of the speech.
+  /// 
+  /// The first value is always the same as the [recognizedWords] 
+  /// value. Use the confidence for each alternate transcription 
+  /// to determine how likely it is. Note that not all platforms 
+  /// do a good job with confidence, there are convenience methods 
+  /// on [SpeechRecogntionWords] to work with possibly missing 
+  /// confidence values. 
+  List<SpeechRecognitionWords> get alternates => UnmodifiableListView(_alternates);
+
+  /// The sequence of words that is the best transcription of
+  /// what was said.
+  /// 
+  /// This is the same as the first value of [alternates].
+  String get recognizedWords => _alternates.isNotEmpty ? _alternates.first.recognizedWords : "";
 
   /// False means the words are an interim result, true means
   /// they are the final recognition.
@@ -22,15 +37,27 @@ class SpeechRecognitionResult {
 
   /// The confidence that the [recognizedWords] are correct. 
   /// 
-  /// Confidence is expressed as a value between 0 and 1. 0 
+  /// Confidence is expressed as a value between 0 and 1. -1 
   /// means that the confidence value was not available. 
-  double get confidence => alternates.isNotEmpty ? alternates[0].confidence : 0;
+  double get confidence => _alternates.isNotEmpty ? _alternates.first.confidence : 0;
 
-  SpeechRecognitionResult(this.alternates, this.finalResult);
+  /// true if there is confidence in this recognition, false otherwise. 
+  /// 
+  /// There are two separate ways for there to be confidence, the first 
+  /// is if the confidence is missing, which is indicated by a value of 
+  /// -1. The second is if the confidence is greater than or equal 
+  /// [threshold]. If [threshold] is not provided it defaults to 0.8. 
+  bool isConfident({double threshold = SpeechRecognitionWords.confidenceThreshold}) => _alternates.isNotEmpty ? _alternates.first.isConfident( threshold: threshold) : false;
+
+  /// true if [confidence] is not the [missingConfidence] value, false
+  /// otherwise. 
+  bool get hasConfidenceRating => _alternates.isNotEmpty ? _alternates.first.hasConfidenceRating : false;
+  
+  SpeechRecognitionResult(this._alternates, this.finalResult);
 
   @override
   String toString() {
-    return "SpeechRecognitionResult words: $alternates, final: $finalResult";
+    return "SpeechRecognitionResult words: $_alternates, final: $finalResult";
   }
 
   @override

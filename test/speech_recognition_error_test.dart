@@ -37,6 +37,10 @@ void main() {
       SpeechRecognitionError error2 = SpeechRecognitionError("msg2", false);
       expect(error1.hashCode, isNot(error2.hashCode));
     });
+    test('toString as expected', () {
+      SpeechRecognitionError error1 = SpeechRecognitionError(msg1, false);
+      expect(error1.toString(), "SpeechRecognitionError msg: $msg1, permanent: false" );
+    });
   });
   group('json', () {
     test('loads properly', () {

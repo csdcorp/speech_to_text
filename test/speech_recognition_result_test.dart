@@ -27,14 +27,41 @@ void main() {
       expect( result.recognizedWords, firstRecognizedWords );
     });
   });
+  group('alternates', () {
+    test('empty if no alternates', () {
+      SpeechRecognitionResult result = SpeechRecognitionResult([], true );
+      expect( result.alternates, isEmpty );
+    });
+    test('expected contents', () {
+      SpeechRecognitionResult result = SpeechRecognitionResult([ firstWords, secondWords], true );
+      expect( result.alternates, contains(firstWords) );
+      expect( result.alternates, contains(secondWords) );
+    });
+    test('in order', () {
+      SpeechRecognitionResult result = SpeechRecognitionResult([ firstWords, secondWords], true );
+      expect( result.alternates.first, firstWords );
+    });
+  });
   group('confidence', () {
     test('0 if no alternates', () {
       SpeechRecognitionResult result = SpeechRecognitionResult([], true );
       expect( result.confidence, 0 );
     });
-    test('matches first alternate', () {
+    test('isConfident false if no alternates', () {
+      SpeechRecognitionResult result = SpeechRecognitionResult([], true );
+      expect( result.isConfident(), isFalse );
+    });
+    test('isConfident matches first alternate', () {
       SpeechRecognitionResult result = SpeechRecognitionResult([ firstWords, secondWords], true );
-      expect( result.confidence, firstConfidence );
+      expect( result.isConfident(), firstWords.isConfident() );
+    });
+    test('hasConfidenceRating false if no alternates', () {
+      SpeechRecognitionResult result = SpeechRecognitionResult([], true );
+      expect( result.hasConfidenceRating, isFalse );
+    });
+    test('hasConfidenceRating matches first alternate', () {
+      SpeechRecognitionResult result = SpeechRecognitionResult([ firstWords, secondWords], true );
+      expect( result.hasConfidenceRating, firstWords.hasConfidenceRating );
     });
   });
   group('json', () {
