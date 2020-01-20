@@ -29,13 +29,12 @@ struct SpeechRecognitionResult : Codable {
     let finalResult: Bool
 }
 
-@available(iOS 10.0, *)
 public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var channel: FlutterMethodChannel
     private var registrar: FlutterPluginRegistrar
-    private var recognizer: SFSpeechRecognizer?
-    private var currentRequest: SFSpeechAudioBufferRecognitionRequest?
-    private var currentTask: SFSpeechRecognitionTask?
+    private var recognizer: AnyObject?
+    private var currentRequest: AnyObject?
+    private var currentTask: AnyObject?
     private var listeningSound: AVAudioPlayer?
     private var successSound: AVAudioPlayer?
     private var cancelSound: AVAudioPlayer?
@@ -83,19 +82,24 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     private func initialize( _ result: @escaping FlutterResult) {
         var success = false
-        if ( SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.notDetermined ) {
-            SFSpeechRecognizer.requestAuthorization({(status)->Void in
-                success = status == SFSpeechRecognizerAuthorizationStatus.authorized
-                if ( success ) {
-                    self.setupSpeechRecognition(result)
-                }
-                else {
-                    self.initResult( false, result );
-                }
-            });
+        if #available(iOS 10.0, *) {
+            if ( SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.notDetermined ) {
+                SFSpeechRecognizer.requestAuthorization({(status)->Void in
+                    success = status == SFSpeechRecognizerAuthorizationStatus.authorized
+                    if ( success ) {
+                        self.setupSpeechRecognition(result)
+                    }
+                    else {
+                        self.initResult( false, result );
+                    }
+                });
+            }
+            else {
+                setupSpeechRecognition(result)
+            }
         }
         else {
-            setupSpeechRecognition(result)
+            self.initResult( false, result );
         }
     }
     
@@ -134,9 +138,12 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             initResult( false, result );
             return
         }
-        recognizer?.delegate = self
-        setupListeningSound()
-
+        if #available(iOS 10.0, *) {
+            if let spRecognizer = recognizer as! SFSpeechRecognizer? {
+                spRecognizer.delegate = self
+            }
+            setupListeningSound()
+        }
         initResult( true, result );
     }
 
@@ -145,7 +152,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             return
         }
         previousLocale = locale
-        recognizer = SFSpeechRecognizer( locale: locale )
+        if #available(iOS 10.0, *) {
+            recognizer = SFSpeechRecognizer( locale: locale )
+        }
     }
     
     private func getLocale( _ localeStr: String? ) -> Locale {
@@ -157,14 +166,22 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     }
     
     private func stopSpeech( _ result: @escaping FlutterResult) {
-        currentTask?.finish()
+        if #available(iOS 10.0, *) {
+            if let spTask = currentTask as! SFSpeechRecognitionTask? {
+                spTask.finish()
+            }
+        }
         stopCurrentListen( )
         successSound?.play()
         result( true )
     }
     
     private func cancelSpeech( _ result: @escaping FlutterResult) {
-        currentTask?.cancel()
+        if #available(iOS 10.0, *) {
+            if let spTask = currentTask as! SFSpeechRecognitionTask? {
+                spTask.cancel()
+            }
+        }
         stopCurrentListen( )
         cancelSound?.play()
         result( true )
@@ -190,49 +207,55 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         if ( nil != currentTask ) {
             return
         }
-        do {
-            setupRecognizerForLocale(locale: getLocale(localeStr))
-            listeningSound?.play()
-            rememberedAudioCategory = self.audioSession.category
-            try self.audioSession.setCategory(AVAudioSession.Category.playAndRecord)
-            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
-            try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-            let inputNode = self.audioEngine.inputNode
-            self.currentRequest = SFSpeechAudioBufferRecognitionRequest()
-            guard let currentRequest = self.currentRequest else {
+        if #available(iOS 10.0, *) {
+            do {
+                setupRecognizerForLocale(locale: getLocale(localeStr))
+                listeningSound?.play()
+                rememberedAudioCategory = self.audioSession.category
+                try self.audioSession.setCategory(AVAudioSession.Category.playAndRecord)
+                try self.audioSession.setMode(AVAudioSession.Mode.measurement)
+                try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+                let inputNode = self.audioEngine.inputNode
+                self.currentRequest = SFSpeechAudioBufferRecognitionRequest()
+                guard let currentRequest = self.currentRequest else {
+                    result( false )
+                    return
+                }
+                if let spRequest = self.currentRequest as! SFSpeechRecognitionRequest? {
+                    spRequest.shouldReportPartialResults = true
+                    self.currentTask = self.recognizer?.recognitionTask(with: spRequest, delegate: self )
+                }
+                let recordingFormat = inputNode.outputFormat(forBus: self.busForNodeTap)
+                inputNode.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
+                    currentRequest.append(buffer)
+                }
+                
+                self.audioEngine.prepare()
+                try self.audioEngine.start()
+                self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
+            }
+            catch {
                 result( false )
-                return
             }
-            currentRequest.shouldReportPartialResults = true
-            self.currentTask = self.recognizer?.recognitionTask(with: currentRequest, delegate: self )
-            let recordingFormat = inputNode.outputFormat(forBus: self.busForNodeTap)
-            inputNode.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
-                currentRequest.append(buffer)
-            }
-            
-            self.audioEngine.prepare()
-            try self.audioEngine.start()
-            self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
-        }
-        catch {
-            result( false )
         }
     }
     
     /// Build a list of localId:name with the current locale first
     private func locales( _ result: @escaping FlutterResult ) {
         var localeNames = [String]();
-        let locales = SFSpeechRecognizer.supportedLocales();
-        let currentLocale = Locale.current
-        if let idName = buildIdNameForLocale(forIdentifier: currentLocale.identifier ) {
-            localeNames.append(idName)
-        }
-        for locale in locales {
-            if ( locale.identifier == currentLocale.identifier) {
-                continue
-            }
-            if let idName = buildIdNameForLocale(forIdentifier: locale.identifier ) {
+        if #available(iOS 10.0, *) {
+            let locales = SFSpeechRecognizer.supportedLocales();
+            let currentLocale = Locale.current
+            if let idName = buildIdNameForLocale(forIdentifier: currentLocale.identifier ) {
                 localeNames.append(idName)
+            }
+            for locale in locales {
+                if ( locale.identifier == currentLocale.identifier) {
+                    continue
+                }
+                if let idName = buildIdNameForLocale(forIdentifier: locale.identifier ) {
+                    localeNames.append(idName)
+                }
             }
         }
         result(localeNames)
@@ -302,7 +325,7 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
     
 }
 
-@available(iOS 10.0, *)
+@available(iOS 8.0, *)
 extension SwiftSpeechToTextPlugin : AVAudioPlayerDelegate {
     
     public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer,
