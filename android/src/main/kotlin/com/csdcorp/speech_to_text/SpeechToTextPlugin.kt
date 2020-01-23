@@ -23,6 +23,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONObject
 import android.content.Context
 import android.content.BroadcastReceiver
+import android.util.Log
 import org.json.JSONArray
 import java.util.*
 
@@ -54,7 +55,8 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   private val application: Application = activity.application
   private val minSdkForSpeechSupport = 21
   private val speechToTextPermissionCode = 78521
-  private val missingConfidence: Double = -1.0;
+  private val missingConfidence: Double = -1.0
+  private val logTag = "SpeechToTextPlugin"
   private var activeResult: Result? = null
   private var initializedSuccessfully: Boolean = false
   private var permissionToRecordAudio: Boolean = false
@@ -95,6 +97,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     if ( sdkVersionTooLow( result )) {
       return
     }
+    Log.d(logTag, "Start initialize")
     if ( null != activeResult ) {
       result.error(SpeechToTextErrors.multipleRequests.name,
               "Only one initialize at a time", null )
@@ -194,39 +197,56 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   private fun initializeIfPermitted(context: Application) {
     permissionToRecordAudio = ContextCompat.checkSelfPermission(context,
             Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    Log.d(logTag, "Checked permission")
     if ( !permissionToRecordAudio ) {
+      Log.d(logTag, "Requesting permission")
       ActivityCompat.requestPermissions(pluginActivity,
               arrayOf(Manifest.permission.RECORD_AUDIO), speechToTextPermissionCode )
     }
     else {
+      Log.d(logTag, "has permission, completing")
       completeInitialize()
     }
+    Log.d(logTag, "leaving initializeIfPermitted")
   }
 
   private fun completeInitialize() {
 
+    Log.d(logTag, "completeInitialize")
     if ( permissionToRecordAudio ) {
+      Log.d(logTag, "Creating recognizer")
       speechRecognizer = createSpeechRecognizer(application.applicationContext).apply {
+        Log.d(logTag, "Setting listener")
         setRecognitionListener(this@SpeechToTextPlugin)
       }
 
+      Log.d(logTag, "before setup intent")
       setupRecognizerIntent( defaultLanguageTag )
+      Log.d(logTag, "after setup intent")
     }
 
     initializedSuccessfully = permissionToRecordAudio
+    Log.d(logTag, "sending result")
     activeResult?.success(permissionToRecordAudio)
+    Log.d(logTag, "leaving complete")
     activeResult = null
   }
 
   private fun setupRecognizerIntent( languageTag: String ) {
+    Log.d(logTag, "setupRecognizerIntent")
     if ( previousRecognizerLang == null || previousRecognizerLang != languageTag ) {
       previousRecognizerLang = languageTag;
       recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        Log.d(logTag, "In RecognizerIntent apply")
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        Log.d(logTag, "put model")
         putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, application.packageName)
+        Log.d(logTag, "put package")
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+        Log.d(logTag, "put partial")
         if ( languageTag != Locale.getDefault().toLanguageTag()) {
           putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag );
+          Log.d(logTag, "put languageTag")
         }
       }
 
@@ -266,10 +286,14 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
       SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "error_timeout"
       else -> "error_unknown"
     }
-    val speechError  = JSONObject()
-    speechError.put("errorMsg", errorMsg )
-    speechError.put( "permanent", true )
-    channel.invokeMethod( SpeechToTextCallbackMethods.notifyError.name, speechError.toString())
+    sendError(errorMsg)
+  }
+
+  private fun sendError(errorMsg: String) {
+    val speechError = JSONObject()
+    speechError.put("errorMsg", errorMsg)
+    speechError.put("permanent", true)
+    channel.invokeMethod(SpeechToTextCallbackMethods.notifyError.name, speechError.toString())
   }
 
   override fun onRmsChanged(rmsdB: Float) {
