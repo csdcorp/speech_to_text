@@ -31,6 +31,7 @@ import java.util.*
 enum class SpeechToTextErrors {
   multipleRequests,
   unimplemented,
+  unknown
 }
 
 enum class SpeechToTextCallbackMethods {
@@ -76,20 +77,27 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    when (call.method) {
-      "initialize" ->  initialize( result )
-      "listen" -> {
-        if (null != call.arguments && call.arguments is String) {
-          val localeId = call.arguments as String
-          startListening( result, localeId )
-        } else {
-          startListening( result, defaultLanguageTag )
+    try {
+      when (call.method) {
+        "initialize" ->  initialize( result )
+        "listen" -> {
+          if (null != call.arguments && call.arguments is String) {
+            val localeId = call.arguments as String
+            startListening( result, localeId )
+          } else {
+            startListening( result, defaultLanguageTag )
+          }
         }
+        "stop" -> stopListening( result )
+        "cancel" ->  cancelListening( result )
+        "locales" -> locales( result )
+        else -> result.notImplemented()
       }
-      "stop" -> stopListening( result )
-      "cancel" ->  cancelListening( result )
-      "locales" -> locales( result )
-      else -> result.notImplemented()
+    }
+    catch ( exc: Exception ) {
+      Log.e( logTag, "Unexpected exception", exc )
+      result.error(SpeechToTextErrors.unknown.name,
+              "Unexpected exception", exc.localizedMessage )
     }
   }
 
