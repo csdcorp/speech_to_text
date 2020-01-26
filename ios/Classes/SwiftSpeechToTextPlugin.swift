@@ -291,7 +291,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
 @available(iOS 10.0, *)
 extension SwiftSpeechToTextPlugin : SFSpeechRecognizerDelegate {
     public func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
-        let availability = available ? SpeechToTextStatus.available : SpeechToTextStatus.unavailable
+        let availability = available ? SpeechToTextStatus.available.rawValue : SpeechToTextStatus.unavailable.rawValue
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: availability )
     }
 }
