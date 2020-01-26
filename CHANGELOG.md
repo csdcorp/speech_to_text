@@ -11,6 +11,11 @@
   * hasConfidenceRating on SpeechRecognitionResult indicates if confidence was provided from the device
   * new SpeechRecognitionWords class gives details on per transcription words and confidence
 
+### Fix
+
+  * speechRecognizer availabilityDidChange was crashing if invoked due to an invalid parameter type
+  * Added iOS platform 10 to example Podfile to resolve compilation warnings
+
 ## 0.7.2
 
 ### Breaking
