@@ -31,6 +31,7 @@ import java.util.*
 enum class SpeechToTextErrors {
   multipleRequests,
   unimplemented,
+  noLanguageIntent,
   unknown
 }
 
@@ -162,8 +163,15 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel ):
     if ( sdkVersionTooLow( result ) || isNotInitialized( result )) {
       return
     }
-    val detailsIntent = RecognizerIntent.getVoiceDetailsIntent(pluginActivity)
-//    val detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
+    var detailsIntent = RecognizerIntent.getVoiceDetailsIntent(pluginActivity)
+    if ( null == detailsIntent ) {
+      detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
+    }
+    if ( null == detailsIntent ) {
+      result.error(SpeechToTextErrors.noLanguageIntent.name,
+              "Could not get voice details", null )
+      return
+    }
     pluginActivity.sendOrderedBroadcast(
             detailsIntent, null, LanguageDetailsChecker( result, pluginActivity ),
             null, Activity.RESULT_OK, null, null)
