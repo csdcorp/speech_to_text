@@ -110,7 +110,19 @@ class SpeechToText {
   /// True if an error has been received, see [lastError] for details
   bool get hasError => null != lastError;
 
-  /// Initialize speech recognition services, returns true if
+    /// Returns true if the user has already granted permission to access the microphone.
+  ///
+  /// This method can be called before [initialize] to check if permission
+  /// has already been granted. If this returns false then the [initialize]
+  /// call will prompt the user for permission if it is allowed to do so.
+  /// Note that applications cannot ask for permission again if the user has
+  /// denied them permission in the past.
+  Future<bool> get hasPermission async {
+    bool hasPermission = await channel.invokeMethod('has_permission');
+    return hasPermission;
+  }
+
+/// Initialize speech recognition services, returns true if
   /// successful, false if failed.
   ///
   /// This method must be called before any other speech functions.

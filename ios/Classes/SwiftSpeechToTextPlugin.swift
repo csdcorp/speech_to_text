@@ -3,6 +3,7 @@ import UIKit
 import Speech
 
 public enum SwiftSpeechToTextMethods: String {
+    case has_permission
     case initialize
     case listen
     case stop
@@ -65,6 +66,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
+        case SwiftSpeechToTextMethods.has_permission.rawValue:
+            hasPermission( result )
         case SwiftSpeechToTextMethods.initialize.rawValue:
             initialize( result )
         case SwiftSpeechToTextMethods.listen.rawValue:
@@ -83,6 +86,13 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         default:
             print("Unrecognized method: \(call.method)")
             result( FlutterMethodNotImplemented)
+        }
+    }
+    
+    private func hasPermission( _ result: @escaping FlutterResult) {
+        let has = SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.authorized
+        DispatchQueue.main.async {
+            result( has )
         }
     }
     

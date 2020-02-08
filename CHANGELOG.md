@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.0
+
+### New
+  * hasPermission to check for the current permission without bringing up the system dialog 
+
 ## 0.8.0
 
 ### New
