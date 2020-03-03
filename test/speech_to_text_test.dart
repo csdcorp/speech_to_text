@@ -73,8 +73,8 @@ void main() {
         case SpeechToText.listenMethod:
           listenInvoked = true;
           listenLocale = methodCall.arguments;
-          await speech.processMethodCall(
-              MethodCall(SpeechToText.notifyStatusMethod, listeningStatusResponse));
+          await speech.processMethodCall(MethodCall(
+              SpeechToText.notifyStatusMethod, listeningStatusResponse));
           return initResult;
           break;
         case "locales":
@@ -167,8 +167,8 @@ void main() {
     test('invoked on listen', () async {
       await speech.initialize(
           onError: listener.onSpeechError, onStatus: listener.onSpeechStatus);
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyStatusMethod, SpeechToText.listeningStatus));
+      await speech.processMethodCall(MethodCall(
+          SpeechToText.notifyStatusMethod, SpeechToText.listeningStatus));
       expect(listener.speechStatus, 1);
       expect(listener.statuses.contains(SpeechToText.listeningStatus), true);
     });
@@ -223,35 +223,37 @@ void main() {
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
       expect(listener.speechErrors, 1);
-      expect(listener.errors.first.permanent, isFalse );
+      expect(listener.errors.first.permanent, isFalse);
     });
     test('notifies handler with permanent', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
       expect(listener.speechErrors, 1);
-      expect(listener.errors.first.permanent, isTrue );
+      expect(listener.errors.first.permanent, isTrue);
     });
     test('continues listening on transient', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
-      expect( speech.isListening, isTrue );
+      expect(speech.isListening, isTrue);
     });
-    test('continues listening on permanent if cancel not explicitly requested', () async {
+    test('continues listening on permanent if cancel not explicitly requested',
+        () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
-      expect( speech.isListening, isTrue );
+      expect(speech.isListening, isTrue);
     });
-    test('stops listening on permanent if cancel explicitly requested', () async {
+    test('stops listening on permanent if cancel explicitly requested',
+        () async {
       await speech.initialize(onError: listener.onSpeechError);
-      await speech.listen( cancelOnError: true );
+      await speech.listen(cancelOnError: true);
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
-      expect( speech.isListening, isFalse );
+      expect(speech.isListening, isFalse);
     });
   });
   group('locales', () {

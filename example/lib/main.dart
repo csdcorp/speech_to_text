@@ -237,7 +237,8 @@ class _MyAppState extends State<MyApp> {
         onResult: resultListener,
         listenFor: Duration(seconds: 10),
         localeId: _currentLocaleId,
-        onSoundLevelChange: soundLevelListener);
+        onSoundLevelChange: soundLevelListener,
+        cancelOnError: true);
     setState(() {});
   }
 

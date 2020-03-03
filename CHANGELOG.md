@@ -1,9 +1,11 @@
 # Changelog
 
-## 0.9.0
+## 1.0.0
 
 ### New
-  * hasPermission to check for the current permission without bringing up the system dialog 
+  * hasPermission to check for the current permission without bringing up the system dialog
+  * `listen` has a new optional `cancelOnError` parameter to support automatically canceling 
+  a listening session on a permanent error. 
 
 ## 0.8.0
 

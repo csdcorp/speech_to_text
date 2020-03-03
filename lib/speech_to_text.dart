@@ -112,7 +112,7 @@ class SpeechToText {
   /// True if an error has been received, see [lastError] for details
   bool get hasError => null != lastError;
 
-    /// Returns true if the user has already granted permission to access the microphone.
+  /// Returns true if the user has already granted permission to access the microphone.
   ///
   /// This method can be called before [initialize] to check if permission
   /// has already been granted. If this returns false then the [initialize]
@@ -124,7 +124,7 @@ class SpeechToText {
     return hasPermission;
   }
 
-/// Initialize speech recognition services, returns true if
+  /// Initialize speech recognition services, returns true if
   /// successful, false if failed.
   ///
   /// This method must be called before any other speech functions.
@@ -152,13 +152,13 @@ class SpeechToText {
 
   /// Stops the current listen for speech if active, does nothing if not.
   ///
-  /// Stopping a listen session will cause a final result to be sent. Each 
-  /// listen session should be ended with either [stop] or [cancel], for 
-  /// example in the dispose method of a Widget. [cancel] is automatically 
-  /// invoked by a permanent error if [cancelOnError] is set to true in the 
-  /// [listen] call. 
-  /// 
-  /// *Note:* Cannot be used until a successful [initialize] call. Should 
+  /// Stopping a listen session will cause a final result to be sent. Each
+  /// listen session should be ended with either [stop] or [cancel], for
+  /// example in the dispose method of a Widget. [cancel] is automatically
+  /// invoked by a permanent error if [cancelOnError] is set to true in the
+  /// [listen] call.
+  ///
+  /// *Note:* Cannot be used until a successful [initialize] call. Should
   /// only be used after a successful [listen] call.
   Future<void> stop() async {
     if (!_initWorked) {
@@ -171,12 +171,12 @@ class SpeechToText {
   /// Cancels the current listen for speech if active, does nothing if not.
   ///
   /// Canceling means that there will be no final result returned from the
-  /// recognizer. Each listen session should be ended with either [stop] or 
-  /// [cancel], for example in the dispose method of a Widget. [cancel] is 
-  /// automatically invoked by a permanent error if [cancelOnError] is set 
+  /// recognizer. Each listen session should be ended with either [stop] or
+  /// [cancel], for example in the dispose method of a Widget. [cancel] is
+  /// automatically invoked by a permanent error if [cancelOnError] is set
   /// to true in the [listen] call.
-  /// 
-  /// *Note* Cannot be used until a successful [initialize] call. Should only 
+  ///
+  /// *Note* Cannot be used until a successful [initialize] call. Should only
   /// be used after a successful [listen] call.
   Future<void> cancel() async {
     if (!_initWorked) {
@@ -189,16 +189,16 @@ class SpeechToText {
   /// Starts a listening session for speech and converts it to text,
   /// invoking the provided [onResult] method as words are recognized.
   ///
-  /// Cannot be used until a successful [initialize] call. There is a 
-  /// time limit on listening imposed by both Android and iOS. The time 
-  /// depends on the device, network, etc. Android is usually quite short, 
+  /// Cannot be used until a successful [initialize] call. There is a
+  /// time limit on listening imposed by both Android and iOS. The time
+  /// depends on the device, network, etc. Android is usually quite short,
   /// especially if there is no active speech event detected, on the order
-  /// of ten seconds or so. 
-  /// 
-  /// When listening is done always invoke either [cancel] or [stop] to 
+  /// of ten seconds or so.
+  ///
+  /// When listening is done always invoke either [cancel] or [stop] to
   /// end the session, even if it times out. [cancelOnError] provides an
-  /// automatic way to ensure this happens. 
-  /// 
+  /// automatic way to ensure this happens.
+  ///
   /// [onResult] is an optional listener that is notified when words
   /// are recognized.
   ///
@@ -212,16 +212,16 @@ class SpeechToText {
   /// [onSoundLevelChange] is an optional listener that is notified when the
   /// sound level of the input changes. Use this to update the UI in response to
   /// more or less input. Currently this is only supported on Android.
-  /// 
-  /// [cancelOnError] if true then listening is automatically canceled on a 
-  /// permanent error. This defaults to false. When false cancel should be 
-  /// called from the error handler. 
+  ///
+  /// [cancelOnError] if true then listening is automatically canceled on a
+  /// permanent error. This defaults to false. When false cancel should be
+  /// called from the error handler.
   Future listen(
       {SpeechResultListener onResult,
       Duration listenFor,
       String localeId,
       SpeechSoundLevelChange onSoundLevelChange,
-      cancelOnError = false }) async {
+      cancelOnError = false}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
@@ -328,7 +328,7 @@ class SpeechToText {
     SpeechRecognitionError speechError =
         SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
-    if ( _cancelOnError && speechError.permanent ) {
+    if (_cancelOnError && speechError.permanent) {
       await cancel();
     }
     if (null != errorListener) {

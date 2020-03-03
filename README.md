@@ -1,28 +1,27 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v0.8.1-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+[![pub package](https://img.shields.io/badge/pub-v1.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
 
-A library that exposes device specific text to speech recognition capability.
+A library that exposes device specific speech to text recognition capability.
 
 This plugin contains a set of classes that make it easy to use the speech recognition 
-capabilities of the mobile device in Flutter. It supports both Android and iOS. 
+capabilities of the mobile device in Flutter. It supports both Android and iOS. The 
+target use cases for this library are commands and short phrases, not continuous spoken
+conversion or always on listening. 
 
 ## Recent Updates
+
+The 1.0.0 version adds the ability to automatically cancel listening on a permanent error. 
+This is a new parameter on the `listen` method, defaulted to false for backward 
+compatibility. Also new is the ability to check the status of device permission to use the 
+microphone without triggering the permission dialogs. 
 
 The 0.8.0 version exposes a list of possible speech transcriptions instead of just the 
 transcription with the highest confidence. The functionality should be backwards compatible,
 to find out more have a look at the details of `SpeechRecognitionResult` and 
 `SpeechRecognitionWords`. 
 
-The 0.7.2 version uses Swift 5, which is the default for new Flutter projects. If you are 
-using the plugin with an older project you will need to upgrade it before you can use the 
-0.7.2 version of the plugin. 
-
-The 0.7.0 version adds the ability to select the recognition language using the `localeId`
-parameter on the `listen` method. It also has a new `locales` method that returns a list 
-of supported locales for speech on the device. 
-
-*Note*: This plugin is solidifying, feedback from any test devices is welcome. 
+*Note*: Feedback from any test devices is welcome. 
 
 ## Using
 
@@ -62,7 +61,8 @@ Add the record audio permission to your _AndroidManifest.xml_ file, located in `
 
 ## Adding Sounds for iOS (optional)
 
-Android automatically plays system sounds when speech listening starts or stops but iOS does not. This plugin supports playing sounds to indicate listening status on iOS if sound files are available as assets in the application. To enable sounds in an application using this plugin add the sound files to the project and reference them in the assets section of the application `pubspec.yaml`. The location and filenames of the sound files must exactly match or they will not be found. The example application for the plugin shows the usage. 
+Android automatically plays system sounds when speech listening starts or stops but iOS does not. This plugin supports playing sounds to indicate listening status on iOS if sound files are available as assets in the application. To enable sounds in an application using this plugin add the sound files to the project and reference them in the assets section of the application `pubspec.yaml`. The location and filenames of the sound files must exactly match what 
+is shown below or they will not be found. The example application for the plugin shows the usage. 
 ```yaml
   assets:
   - assets/sounds/speech_to_text_listening.m4r

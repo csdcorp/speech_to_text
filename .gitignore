@@ -8,3 +8,4 @@ build/
 coverage/
 example/.flutter-plugins-dependencies
 **/ios/Flutter/flutter_export_environment.sh
+android/.idea/
