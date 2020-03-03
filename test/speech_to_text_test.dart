@@ -13,6 +13,7 @@ void main() {
   bool cancelInvoked;
   bool stopInvoked;
   bool localesInvoked;
+  String listeningStatusResponse;
   String listenLocale;
   TestSpeechListener listener;
   SpeechToText speech;
@@ -23,7 +24,6 @@ void main() {
   String name2 = "French Canada";
   String locale1 = "$localeId1:$name1";
   String locale2 = "$localeId2:$name2";
-  final String listeningStatus = "listening";
   final String firstRecognizedWords = 'hello';
   final String secondRecognizedWords = 'hello there';
   final double firstConfidence = 0.85;
@@ -41,6 +41,7 @@ void main() {
   final SpeechRecognitionResult secondRecognizedResult =
       SpeechRecognitionResult([secondWords], false);
   final String transientErrorJson = '{"errorMsg":"network","permanent":false}';
+  final String permanentErrorJson = '{"errorMsg":"network","permanent":true}';
   final double level1 = 0.5;
   final double level2 = 10;
 
@@ -51,6 +52,7 @@ void main() {
     cancelInvoked = false;
     stopInvoked = false;
     localesInvoked = false;
+    listeningStatusResponse = SpeechToText.listeningStatus;
     locales = [];
     listener = TestSpeechListener();
     speech = SpeechToText.withMethodChannel(SpeechToText.speechChannel);
@@ -68,9 +70,11 @@ void main() {
           stopInvoked = true;
           return true;
           break;
-        case "listen":
+        case SpeechToText.listenMethod:
           listenInvoked = true;
           listenLocale = methodCall.arguments;
+          await speech.processMethodCall(
+              MethodCall(SpeechToText.notifyStatusMethod, listeningStatusResponse));
           return initResult;
           break;
         case "locales":
@@ -127,13 +131,13 @@ void main() {
     });
     test('invokes listen after successful init', () async {
       await speech.initialize();
-      speech.listen();
+      await speech.listen();
       expect(listenLocale, isNull);
       expect(listenInvoked, true);
     });
     test('uses localeId if provided', () async {
       await speech.initialize();
-      speech.listen(localeId: localeId1);
+      await speech.listen(localeId: localeId1);
       expect(listenInvoked, true);
       expect(listenLocale, localeId1);
     });
@@ -164,9 +168,9 @@ void main() {
       await speech.initialize(
           onError: listener.onSpeechError, onStatus: listener.onSpeechStatus);
       await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyStatusMethod, listeningStatus));
+          MethodCall(SpeechToText.notifyStatusMethod, SpeechToText.listeningStatus));
       expect(listener.speechStatus, 1);
-      expect(listener.statuses.contains(listeningStatus), true);
+      expect(listener.statuses.contains(SpeechToText.listeningStatus), true);
     });
   });
 
@@ -219,6 +223,35 @@ void main() {
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
       expect(listener.speechErrors, 1);
+      expect(listener.errors.first.permanent, isFalse );
+    });
+    test('notifies handler with permanent', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      expect(listener.speechErrors, 1);
+      expect(listener.errors.first.permanent, isTrue );
+    });
+    test('continues listening on transient', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen();
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
+      expect( speech.isListening, isTrue );
+    });
+    test('continues listening on permanent if cancel not explicitly requested', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen();
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      expect( speech.isListening, isTrue );
+    });
+    test('stops listening on permanent if cancel explicitly requested', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen( cancelOnError: true );
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      expect( speech.isListening, isFalse );
     });
   });
   group('locales', () {

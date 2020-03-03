@@ -43,6 +43,7 @@ typedef SpeechSoundLevelChange = Function(double level);
 /// speech.stop();
 /// ```
 class SpeechToText {
+  static const String listenMethod = 'listen';
   static const String textRecognitionMethod = 'textRecognition';
   static const String notifyErrorMethod = 'notifyError';
   static const String notifyStatusMethod = 'notifyStatus';
@@ -57,6 +58,7 @@ class SpeechToText {
   bool _initWorked = false;
   bool _recognized = false;
   bool _listening = false;
+  bool _cancelOnError = false;
   String _lastRecognized = "";
   String _lastStatus = "";
   double _lastSoundLevel = 0;
@@ -150,9 +152,14 @@ class SpeechToText {
 
   /// Stops the current listen for speech if active, does nothing if not.
   ///
-  /// Stopping a listen will cause a final result to be sent. *Note:* Cannot
-  /// be used until a successful [initialize] call. Should only be
-  /// used after a successful [listen] call.
+  /// Stopping a listen session will cause a final result to be sent. Each 
+  /// listen session should be ended with either [stop] or [cancel], for 
+  /// example in the dispose method of a Widget. [cancel] is automatically 
+  /// invoked by a permanent error if [cancelOnError] is set to true in the 
+  /// [listen] call. 
+  /// 
+  /// *Note:* Cannot be used until a successful [initialize] call. Should 
+  /// only be used after a successful [listen] call.
   Future<void> stop() async {
     if (!_initWorked) {
       return;
@@ -164,8 +171,13 @@ class SpeechToText {
   /// Cancels the current listen for speech if active, does nothing if not.
   ///
   /// Canceling means that there will be no final result returned from the
-  /// recognizer. *Note* Cannot be used until a successful [initialize] call.
-  /// Should only be used after a successful [listen] call.
+  /// recognizer. Each listen session should be ended with either [stop] or 
+  /// [cancel], for example in the dispose method of a Widget. [cancel] is 
+  /// automatically invoked by a permanent error if [cancelOnError] is set 
+  /// to true in the [listen] call.
+  /// 
+  /// *Note* Cannot be used until a successful [initialize] call. Should only 
+  /// be used after a successful [listen] call.
   Future<void> cancel() async {
     if (!_initWorked) {
       return;
@@ -174,11 +186,19 @@ class SpeechToText {
     _shutdownListener();
   }
 
-  /// Listen for speech and convert to text invoking the provided [interimListener]
-  /// as words are recognized.
+  /// Starts a listening session for speech and converts it to text,
+  /// invoking the provided [onResult] method as words are recognized.
   ///
-  /// Cannot be used until a successful [initialize] call.
-  ///
+  /// Cannot be used until a successful [initialize] call. There is a 
+  /// time limit on listening imposed by both Android and iOS. The time 
+  /// depends on the device, network, etc. Android is usually quite short, 
+  /// especially if there is no active speech event detected, on the order
+  /// of ten seconds or so. 
+  /// 
+  /// When listening is done always invoke either [cancel] or [stop] to 
+  /// end the session, even if it times out. [cancelOnError] provides an
+  /// automatic way to ensure this happens. 
+  /// 
   /// [onResult] is an optional listener that is notified when words
   /// are recognized.
   ///
@@ -191,22 +211,28 @@ class SpeechToText {
   ///
   /// [onSoundLevelChange] is an optional listener that is notified when the
   /// sound level of the input changes. Use this to update the UI in response to
-  /// more or less input.
+  /// more or less input. Currently this is only supported on Android.
+  /// 
+  /// [cancelOnError] if true then listening is automatically canceled on a 
+  /// permanent error. This defaults to false. When false cancel should be 
+  /// called from the error handler. 
   Future listen(
       {SpeechResultListener onResult,
       Duration listenFor,
       String localeId,
-      SpeechSoundLevelChange onSoundLevelChange}) async {
+      SpeechSoundLevelChange onSoundLevelChange,
+      cancelOnError = false }) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
+    _cancelOnError = cancelOnError;
     _recognized = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
     if (null != localeId) {
-      channel.invokeMethod('listen', localeId);
+      channel.invokeMethod(listenMethod, localeId);
     } else {
-      channel.invokeMethod('listen');
+      channel.invokeMethod(listenMethod);
     }
     if (null != listenFor) {
       _listenTimer = Timer(listenFor, () {
@@ -268,7 +294,7 @@ class SpeechToText {
         break;
       case notifyErrorMethod:
         if (call.arguments is String) {
-          _onNotifyError(call.arguments);
+          await _onNotifyError(call.arguments);
         }
         break;
       case notifyStatusMethod:
@@ -297,11 +323,14 @@ class SpeechToText {
     }
   }
 
-  void _onNotifyError(String errorJson) {
+  Future<void> _onNotifyError(String errorJson) async {
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
     SpeechRecognitionError speechError =
         SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
+    if ( _cancelOnError && speechError.permanent ) {
+      await cancel();
+    }
     if (null != errorListener) {
       errorListener(speechError);
     }
@@ -331,7 +360,7 @@ class SpeechToText {
 
   @visibleForTesting
   Future processMethodCall(MethodCall call) async {
-    return _handleCallbacks(call);
+    return await _handleCallbacks(call);
   }
 }
 
