@@ -6,6 +6,8 @@
   * hasPermission to check for the current permission without bringing up the system dialog
   * `listen` has a new optional `cancelOnError` parameter to support automatically canceling 
   a listening session on a permanent error. 
+  * `listen` has a new optional `partialResults` parameter that controls whether the callback
+  receives partial or only final results. 
 
 ## 0.8.0
 

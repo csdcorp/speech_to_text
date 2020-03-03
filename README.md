@@ -13,8 +13,8 @@ conversion or always on listening.
 
 The 1.0.0 version adds the ability to automatically cancel listening on a permanent error. 
 This is a new parameter on the `listen` method, defaulted to false for backward 
-compatibility. Also new is the ability to check the status of device permission to use the 
-microphone without triggering the permission dialogs. 
+compatibility. It also adds the ability to control whether partial and complete or only 
+complete results are sent during listening.  
 
 The 0.8.0 version exposes a list of possible speech transcriptions instead of just the 
 transcription with the highest confidence. The functionality should be backwards compatible,
