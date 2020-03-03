@@ -112,7 +112,8 @@ class SpeechToText {
   /// True if an error has been received, see [lastError] for details
   bool get hasError => null != lastError;
 
-  /// Returns true if the user has already granted permission to access the microphone.
+  /// Returns true if the user has already granted permission to access the
+  /// microphone, does not prompt the user.
   ///
   /// This method can be called before [initialize] to check if permission
   /// has already been granted. If this returns false then the [initialize]
@@ -216,12 +217,16 @@ class SpeechToText {
   /// [cancelOnError] if true then listening is automatically canceled on a
   /// permanent error. This defaults to false. When false cancel should be
   /// called from the error handler.
+  ///
+  /// [partialResults] if true the listen reports results as they are recognized,
+  /// when false only final results are reported. Defaults to true.
   Future listen(
       {SpeechResultListener onResult,
       Duration listenFor,
       String localeId,
       SpeechSoundLevelChange onSoundLevelChange,
-      cancelOnError = false}) async {
+      cancelOnError = false,
+      partialResults = true}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
@@ -229,11 +234,11 @@ class SpeechToText {
     _recognized = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
+    Map<String, dynamic> listenParams = {"partialResults": partialResults};
     if (null != localeId) {
-      channel.invokeMethod(listenMethod, localeId);
-    } else {
-      channel.invokeMethod(listenMethod);
+      listenParams["localeId"] = localeId;
     }
+    channel.invokeMethod(listenMethod, listenParams);
     if (null != listenFor) {
       _listenTimer = Timer(listenFor, () {
         cancel();

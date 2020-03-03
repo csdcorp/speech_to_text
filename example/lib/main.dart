@@ -238,7 +238,8 @@ class _MyAppState extends State<MyApp> {
         listenFor: Duration(seconds: 10),
         localeId: _currentLocaleId,
         onSoundLevelChange: soundLevelListener,
-        cancelOnError: true);
+        cancelOnError: true,
+        partialResults: true );
     setState(() {});
   }
 

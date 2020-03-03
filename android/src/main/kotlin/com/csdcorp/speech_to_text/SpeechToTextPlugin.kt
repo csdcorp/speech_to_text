@@ -66,6 +66,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
     private var previousRecognizerLang: String? = null
+    private var previousPartialResults: Boolean = true
     private val defaultLanguageTag: String = Locale.getDefault().toLanguageTag()
 
     companion object {
@@ -84,12 +85,15 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
                 "has_permission" -> hasPermission(result)
                 "initialize" -> initialize(result)
                 "listen" -> {
-                    if (null != call.arguments && call.arguments is String) {
-                        val localeId = call.arguments as String
-                        startListening(result, localeId)
-                    } else {
-                        startListening(result, defaultLanguageTag)
+                    var localeId = call.argument<String>("localeId")
+                    if ( null == localeId ) {
+                      localeId = defaultLanguageTag
                     }
+                    var partialResults = call.argument<Boolean>("partialResults")
+                    if ( null == partialResults ) {
+                      partialResults = true
+                    }
+                    startListening(result, localeId, partialResults)
                 }
                 "stop" -> stopListening(result)
                 "cancel" -> cancelListening(result)
@@ -144,11 +148,11 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
         return !initializedSuccessfully
     }
 
-    private fun startListening(result: Result, languageTag: String) {
+    private fun startListening(result: Result, languageTag: String, partialResults: Boolean) {
         if (sdkVersionTooLow(result) || isNotInitialized(result)) {
             return
         }
-        setupRecognizerIntent(languageTag)
+        setupRecognizerIntent(languageTag, partialResults)
         pluginActivity.runOnUiThread { speechRecognizer?.startListening(recognizerIntent) }
         notifyListening(isRecording = true)
         pluginActivity.runOnUiThread { result.success(true) }
@@ -268,7 +272,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
             }
 
             Log.d(logTag, "before setup intent")
-            setupRecognizerIntent(defaultLanguageTag)
+            setupRecognizerIntent(defaultLanguageTag, true )
             Log.d(logTag, "after setup intent")
         }
 
@@ -279,10 +283,11 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
         activeResult = null
     }
 
-    private fun setupRecognizerIntent(languageTag: String) {
+    private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean) {
         Log.d(logTag, "setupRecognizerIntent")
-        if (previousRecognizerLang == null || previousRecognizerLang != languageTag) {
+        if (previousRecognizerLang == null || previousRecognizerLang != languageTag || partialResults != previousPartialResults ) {
             previousRecognizerLang = languageTag;
+            previousPartialResults = partialResults
             pluginActivity.runOnUiThread {
                 recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     Log.d(logTag, "In RecognizerIntent apply")
@@ -290,7 +295,7 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
                     Log.d(logTag, "put model")
                     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, application.packageName)
                     Log.d(logTag, "put package")
-                    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, partialResults)
                     Log.d(logTag, "put partial")
                     if (languageTag != Locale.getDefault().toLanguageTag()) {
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag);

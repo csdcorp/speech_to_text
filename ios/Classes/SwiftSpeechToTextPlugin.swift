@@ -25,6 +25,10 @@ public enum SpeechToTextStatus: String {
     case available
 }
 
+public enum SpeechToTextErrors: String {
+    case missingOrInvalidArg
+}
+
 struct SpeechRecognitionWords : Codable {
     let recognizedWords: String
     let confidence: Decimal
@@ -47,6 +51,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var cancelSound: AVAudioPlayer?
     private var rememberedAudioCategory: AVAudioSession.Category?
     private var previousLocale: Locale?
+    private var returnPartialResults: Bool = true
     private let audioSession = AVAudioSession.sharedInstance()
     private let audioEngine = AVAudioEngine()
     private let jsonEncoder = JSONEncoder()
@@ -71,12 +76,19 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         case SwiftSpeechToTextMethods.initialize.rawValue:
             initialize( result )
         case SwiftSpeechToTextMethods.listen.rawValue:
-            if let localeStr = call.arguments as? String  {
-                listenForSpeech( result, localeStr: localeStr )
+            guard let argsArr = call.arguments as? Dictionary<String,AnyObject>,
+                let partialResults = argsArr["partialResults"] as? Bool
+                else {
+                    result(FlutterError( code: SpeechToTextErrors.missingOrInvalidArg.rawValue,
+                                         message:"Missing arg partialResults",
+                                         details: nil ))
+                    return
             }
-            else {
-                listenForSpeech( result, localeStr: nil )
+            var localeStr: String? = nil
+            if let localeParam = argsArr["localeId"] as? String {
+                localeStr = localeParam
             }
+            listenForSpeech( result, localeStr: localeStr, partialResults: partialResults )
         case SwiftSpeechToTextMethods.stop.rawValue:
             stopSpeech( result )
         case SwiftSpeechToTextMethods.cancel.rawValue:
@@ -201,11 +213,12 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         currentTask = nil
     }
     
-    private func listenForSpeech( _ result: @escaping FlutterResult, localeStr: String? ) {
+    private func listenForSpeech( _ result: @escaping FlutterResult, localeStr: String?, partialResults: Bool ) {
         if ( nil != currentTask ) {
             return
         }
         do {
+            returnPartialResults = partialResults
             setupRecognizerForLocale(locale: getLocale(localeStr))
             listeningSound?.play()
             rememberedAudioCategory = self.audioSession.category
@@ -263,6 +276,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     }
     
     private func handleResult( _ transcriptions: [SFTranscription], isFinal: Bool ) {
+        if ( !isFinal && !returnPartialResults ) {
+            return
+        }
         var speechWords: [SpeechRecognitionWords] = []
         for transcription in transcriptions {
             let words: SpeechRecognitionWords = SpeechRecognitionWords(recognizedWords: transcription.formattedString, confidence: confidenceIn( transcription))
