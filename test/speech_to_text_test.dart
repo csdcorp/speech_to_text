@@ -72,7 +72,7 @@ void main() {
           break;
         case SpeechToText.listenMethod:
           listenInvoked = true;
-          listenLocale = methodCall.arguments;
+          listenLocale = methodCall.arguments["localeId"];
           await speech.processMethodCall(MethodCall(
               SpeechToText.notifyStatusMethod, listeningStatusResponse));
           return initResult;
