@@ -220,6 +220,7 @@ void main() {
   group('error', () {
     test('notifies handler with transient', () async {
       await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen();
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
       expect(listener.speechErrors, 1);
@@ -227,6 +228,7 @@ void main() {
     });
     test('notifies handler with permanent', () async {
       await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen();
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
       expect(listener.speechErrors, 1);
@@ -254,6 +256,16 @@ void main() {
       await speech.processMethodCall(
           MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
       expect(speech.isListening, isFalse);
+    });
+    test('Error not sent after cancel',
+        () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen();
+      await speech.cancel();
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      expect(speech.isListening, isFalse);
+      expect(listener.speechErrors, 0);
     });
   });
   group('locales', () {

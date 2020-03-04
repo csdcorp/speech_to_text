@@ -102,8 +102,11 @@ class SpeechToText {
   /// True if [initialize] succeeded
   bool get isAvailable => _initWorked;
 
-  /// True if [listen] succeeded and [cancel] has not been called.
+  /// True if [listen] succeeded and [stop] or [cancel] has not been called.
+  /// 
+  /// Also goes false when listening times out if listenFor was set. 
   bool get isListening => _listening;
+  bool get isNotListening => !isListening;
 
   /// The last error received or null if none, see [initialize] to
   /// register an optional listener to be notified of errors.
@@ -165,8 +168,8 @@ class SpeechToText {
     if (!_initWorked) {
       return;
     }
-    await channel.invokeMethod('stop');
     _shutdownListener();
+    await channel.invokeMethod('stop');
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
@@ -183,8 +186,8 @@ class SpeechToText {
     if (!_initWorked) {
       return;
     }
-    await channel.invokeMethod('cancel');
     _shutdownListener();
+    await channel.invokeMethod('cancel');
   }
 
   /// Starts a listening session for speech and converts it to text,
@@ -317,6 +320,9 @@ class SpeechToText {
   }
 
   void _onTextRecognition(String resultJson) {
+    if ( isNotListening ) {
+      return;
+    }
     _recognized = true;
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     SpeechRecognitionResult speechResult =
@@ -329,6 +335,9 @@ class SpeechToText {
   }
 
   Future<void> _onNotifyError(String errorJson) async {
+    if ( isNotListening ) {
+      return;
+    }
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
     SpeechRecognitionError speechError =
         SpeechRecognitionError.fromJson(errorMap);
@@ -350,6 +359,9 @@ class SpeechToText {
   }
 
   void _onSoundLevelChange(double level) {
+    if ( isNotListening ) {
+      return;
+    }
     _lastSoundLevel = level;
     if (null != _soundLevelChange) {
       _soundLevelChange(level);
