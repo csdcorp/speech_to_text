@@ -320,9 +320,6 @@ class SpeechToText {
   }
 
   void _onTextRecognition(String resultJson) {
-    if ( isNotListening ) {
-      return;
-    }
     _recognized = true;
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     SpeechRecognitionResult speechResult =
@@ -353,6 +350,7 @@ class SpeechToText {
   void _onNotifyStatus(String status) {
     _lastStatus = status;
     _listening = status == listeningStatus;
+    print(status);
     if (null != statusListener) {
       statusListener(status);
     }
