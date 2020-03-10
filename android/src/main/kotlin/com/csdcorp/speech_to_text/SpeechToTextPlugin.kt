@@ -332,11 +332,11 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
             SpeechRecognizer.ERROR_CLIENT -> "error_client"
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "error_permission"
             SpeechRecognizer.ERROR_NETWORK -> "error_network"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "error_timeout"
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "error_network_timeout"
             SpeechRecognizer.ERROR_NO_MATCH -> "error_no_match"
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "error_busy"
             SpeechRecognizer.ERROR_SERVER -> "error_server"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "error_timeout"
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "error_speech_timeout"
             else -> "error_unknown"
         }
         sendError(errorMsg)

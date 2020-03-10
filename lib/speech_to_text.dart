@@ -13,6 +13,17 @@ typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
 
 /// Notified if errors occur during recognition or intialization.
 ///
+/// Possible errors per the Android docs are described here:
+/// https://developer.android.com/reference/android/speech/SpeechRecognizer
+///   "error_audio_error"
+///   "error_client"
+///   "error_permission" 
+///   "error_network"
+///   "error_network_timeout"
+///   "error_no_match" 
+///   "error_busy" 
+///   "error_server" 
+///   "error_speech_timeout"
 /// See the [onError] argument on the [initialize] method for use.
 typedef SpeechErrorListener = void Function(
     SpeechRecognitionError errorNotification);
