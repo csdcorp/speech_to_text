@@ -152,28 +152,34 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
         if (sdkVersionTooLow(result) || isNotInitialized(result)) {
             return
         }
+        Log.d(logTag, "Start listening")
         setupRecognizerIntent(languageTag, partialResults)
         pluginActivity.runOnUiThread { speechRecognizer?.startListening(recognizerIntent) }
         notifyListening(isRecording = true)
         pluginActivity.runOnUiThread { result.success(true) }
+        Log.d(logTag, "Start listening done")
     }
 
     private fun stopListening(result: Result) {
         if (sdkVersionTooLow(result) || isNotInitialized(result)) {
             return
         }
+        Log.d(logTag, "Stop listening")
         pluginActivity.runOnUiThread { speechRecognizer?.stopListening() }
         notifyListening(isRecording = false)
         pluginActivity.runOnUiThread { result.success(true) }
+        Log.d(logTag, "Stop listening done")
     }
 
     private fun cancelListening(result: Result) {
         if (sdkVersionTooLow(result) || isNotInitialized(result)) {
             return
         }
+        Log.d(logTag, "Cancel listening")
         pluginActivity.runOnUiThread { speechRecognizer?.cancel() }
         notifyListening(isRecording = false)
         pluginActivity.runOnUiThread { result.success(true) }
+        Log.d(logTag, "Cancel listening done")
     }
 
     private fun locales(result: Result) {
@@ -195,11 +201,13 @@ class SpeechToTextPlugin(activity: Activity, channel: MethodChannel) :
     }
 
     private fun notifyListening(isRecording: Boolean) {
+        Log.d(logTag, "Notify listening")
         val status = when (isRecording) {
             true -> SpeechToTextStatus.listening.name
             false -> SpeechToTextStatus.notListening.name
         }
         channel.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name, status)
+        Log.d(logTag, "Notify listening done")
     }
 
     private fun updateResults(speechBundle: Bundle?, isFinal: Boolean) {
