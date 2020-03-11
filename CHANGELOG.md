@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### New
+
+  * error_timeout has been separated into error_network_timeout and error_speech_timeout
+
 ## 1.0.0
 
 ### New
