@@ -17,12 +17,8 @@ dev_dependencies:
   build_runner: ^1.0.0
   json_serializable: ^3.0.0
 
-# The following section is specific to Flutter.
 flutter:
-  # This section identifies this Flutter project as a plugin project.
-  # The androidPackage and pluginClass identifiers should not ordinarily
-  # be modified. They are used by the tooling to maintain consistency when
-  # adding or updating assets for this project.
+
   plugin:
     androidPackage: com.csdcorp.speech_to_text
     pluginClass: SpeechToTextPlugin

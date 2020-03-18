@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v1.0.1-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+[![pub package](https://img.shields.io/badge/pub-v1.2.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
 
 A library that exposes device specific speech to text recognition capability.
 
@@ -11,15 +11,13 @@ conversion or always on listening.
 
 ## Recent Updates
 
+The 1.2.0 version uses the new Flutter 1.12.x plugin APIs, although it may work with older with
+older versions of Flutter it is not guaranteed. 
+
 The 1.0.0 version adds the ability to automatically cancel listening on a permanent error. 
 This is a new parameter on the `listen` method, defaulted to false for backward 
 compatibility. It also adds the ability to control whether partial and complete or only 
 complete results are sent during listening.  
-
-The 0.8.0 version exposes a list of possible speech transcriptions instead of just the 
-transcription with the highest confidence. The functionality should be backwards compatible,
-to find out more have a look at the details of `SpeechRecognitionResult` and 
-`SpeechRecognitionWords`. 
 
 *Note*: Feedback from any test devices is welcome. 
 

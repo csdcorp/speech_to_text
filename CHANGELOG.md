@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+### Breaking
+
+  * Upgraded to New Swift 1.12 plugin structure, may work with older Flutter version but not guaranteed
+  
 ## 1.1.0
 
 ### New
