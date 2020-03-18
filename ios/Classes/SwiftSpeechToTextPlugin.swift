@@ -102,7 +102,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     }
     
     private func hasPermission( _ result: @escaping FlutterResult) {
-        let has = SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.authorized
+        let has = SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.authorized &&
+            AVAudioSession.sharedInstance().recordPermission == AVAudioSession.RecordPermission.granted
         DispatchQueue.main.async {
             result( has )
         }
@@ -114,7 +115,13 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             SFSpeechRecognizer.requestAuthorization({(status)->Void in
                 success = status == SFSpeechRecognizerAuthorizationStatus.authorized
                 if ( success ) {
-                    self.setupSpeechRecognition(result)
+                    AVAudioSession.sharedInstance().requestRecordPermission({(granted: Bool)-> Void in
+                       if granted {
+                           self.setupSpeechRecognition(result)
+                       } else{
+                           self.initResult( false, result );
+                       }
+                    })
                 }
                 else {
                     self.initResult( false, result );
