@@ -17,12 +17,12 @@ typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
 /// https://developer.android.com/reference/android/speech/SpeechRecognizer
 ///   "error_audio_error"
 ///   "error_client"
-///   "error_permission" 
+///   "error_permission"
 ///   "error_network"
 ///   "error_network_timeout"
-///   "error_no_match" 
-///   "error_busy" 
-///   "error_server" 
+///   "error_no_match"
+///   "error_busy"
+///   "error_server"
 ///   "error_speech_timeout"
 /// See the [onError] argument on the [initialize] method for use.
 typedef SpeechErrorListener = void Function(
@@ -114,8 +114,8 @@ class SpeechToText {
   bool get isAvailable => _initWorked;
 
   /// True if [listen] succeeded and [stop] or [cancel] has not been called.
-  /// 
-  /// Also goes false when listening times out if listenFor was set. 
+  ///
+  /// Also goes false when listening times out if listenFor was set.
   bool get isListening => _listening;
   bool get isNotListening => !isListening;
 
@@ -304,7 +304,7 @@ class SpeechToText {
   }
 
   Future _handleCallbacks(MethodCall call) async {
-    print("SpeechToText call: ${call.method} ${call.arguments}");
+    // print("SpeechToText call: ${call.method} ${call.arguments}");
     switch (call.method) {
       case textRecognitionMethod:
         if (call.arguments is String) {
@@ -343,7 +343,7 @@ class SpeechToText {
   }
 
   Future<void> _onNotifyError(String errorJson) async {
-    if ( isNotListening ) {
+    if (isNotListening) {
       return;
     }
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
@@ -361,14 +361,14 @@ class SpeechToText {
   void _onNotifyStatus(String status) {
     _lastStatus = status;
     _listening = status == listeningStatus;
-    print(status);
+    // print(status);
     if (null != statusListener) {
       statusListener(status);
     }
   }
 
   void _onSoundLevelChange(double level) {
-    if ( isNotListening ) {
+    if (isNotListening) {
       return;
     }
     _lastSoundLevel = level;
