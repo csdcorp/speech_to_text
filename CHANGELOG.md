@@ -9,6 +9,15 @@
 ### New
 
   * the plugin now requests both speech and microphone permission on initialize on iOS
+  * added `debugLogging` parameter to the `initialize` method to control native logging
+
+### Fix
+
+  * The Android implementation now blocks duplicate results notifications. It appears that at least on some 
+  Android versions the final results notification onResults is notified twice when Android automatically
+  terminates the session due to a pause time. The de-duplication looks for successive notifications 
+  with < 100 ms between them and blocks the second. If you miss any onResult notifications please post 
+  an issue. 
 
 ## 1.1.0
 

@@ -74,10 +74,12 @@ public class SpeechToTextPlugin :
     private var activeResult: Result? = null
     private var initializedSuccessfully: Boolean = false
     private var permissionToRecordAudio: Boolean = false
+    private var debugLogging: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
     private var previousRecognizerLang: String? = null
     private var previousPartialResults: Boolean = true
+    private var lastFinalTime: Long = 0
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val defaultLanguageTag: String = Locale.getDefault().toLanguageTag()
 
@@ -139,7 +141,13 @@ public class SpeechToTextPlugin :
         try {
             when (call.method) {
                 "has_permission" -> hasPermission(result)
-                "initialize" -> initialize(result)
+                "initialize" -> {
+                    var dlog = call.argument<Boolean>("debugLogging")
+                    if (null != dlog) {
+                        debugLogging = dlog
+                    }
+                    initialize(result)
+                }
                 "listen" -> {
                     var localeId = call.argument<String>("localeId")
                     if (null == localeId) {
@@ -167,7 +175,7 @@ public class SpeechToTextPlugin :
         if (sdkVersionTooLow(result)) {
             return
         }
-        Log.d(logTag, "Start has_permission")
+        debugLog("Start has_permission")
         val localContext = pluginContext
         if (localContext != null) {
             val hasPerm = ContextCompat.checkSelfPermission(localContext,
@@ -180,7 +188,7 @@ public class SpeechToTextPlugin :
         if (sdkVersionTooLow(result)) {
             return
         }
-        Log.d(logTag, "Start initialize")
+        debugLog("Start initialize")
         if (null != activeResult) {
             result.error(SpeechToTextErrors.multipleRequests.name,
                     "Only one initialize at a time", null)
@@ -210,7 +218,7 @@ public class SpeechToTextPlugin :
         if (sdkVersionTooLow(result) || isNotInitialized(result)) {
             return
         }
-        Log.d(logTag, "Start listening")
+        debugLog("Start listening")
         setupRecognizerIntent(languageTag, partialResults)
         handler.post {
             run {
@@ -219,14 +227,14 @@ public class SpeechToTextPlugin :
         }
         notifyListening(isRecording = true)
         result.success(true)
-        Log.d(logTag, "Start listening done")
+        debugLog("Start listening done")
     }
 
     private fun stopListening(result: Result) {
         if (sdkVersionTooLow(result) || isNotInitialized(result)) {
             return
         }
-        Log.d(logTag, "Stop listening")
+        debugLog("Stop listening")
         handler.post {
             run {
                 speechRecognizer?.stopListening()
@@ -234,14 +242,14 @@ public class SpeechToTextPlugin :
         }
         notifyListening(isRecording = false)
         result.success(true)
-        Log.d(logTag, "Stop listening done")
+        debugLog("Stop listening done")
     }
 
     private fun cancelListening(result: Result) {
         if (sdkVersionTooLow(result) || isNotInitialized(result)) {
             return
         }
-        Log.d(logTag, "Cancel listening")
+        debugLog("Cancel listening")
         handler.post {
             run {
                 speechRecognizer?.cancel()
@@ -249,7 +257,7 @@ public class SpeechToTextPlugin :
         }
         notifyListening(isRecording = false)
         result.success(true)
-        Log.d(logTag, "Cancel listening done")
+        debugLog("Cancel listening done")
     }
 
     private fun locales(result: Result) {
@@ -271,16 +279,20 @@ public class SpeechToTextPlugin :
     }
 
     private fun notifyListening(isRecording: Boolean) {
-        Log.d(logTag, "Notify listening")
+        debugLog("Notify listening")
         val status = when (isRecording) {
             true -> SpeechToTextStatus.listening.name
             false -> SpeechToTextStatus.notListening.name
         }
         channel?.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name, status)
-        Log.d(logTag, "Notify listening done")
+        debugLog("Notify listening done")
     }
 
     private fun updateResults(speechBundle: Bundle?, isFinal: Boolean) {
+        if (isDuplicateFinal( isFinal )) {
+            debugLog("Discarding duplicate final")
+            return
+        }
         val userSaid = speechBundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         if (null != userSaid && userSaid.isNotEmpty()) {
             val speechResult = JSONObject()
@@ -299,9 +311,19 @@ public class SpeechToTextPlugin :
             }
             speechResult.put("alternates", alternates)
             val jsonResult = speechResult.toString()
+            debugLog("Calling results callback")
             channel?.invokeMethod(SpeechToTextCallbackMethods.textRecognition.name,
                     jsonResult)
         }
+    }
+
+    private fun isDuplicateFinal( isFinal: Boolean ) : Boolean {
+        if ( !isFinal ) {
+            return false
+        }
+        val delta = System.currentTimeMillis() - lastFinalTime
+        lastFinalTime = System.currentTimeMillis()
+        return delta >= 0 && delta < 100
     }
 
     private fun initializeIfPermitted(context: Context?) {
@@ -312,29 +334,29 @@ public class SpeechToTextPlugin :
         }
         permissionToRecordAudio = ContextCompat.checkSelfPermission(localContext,
                 Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        Log.d(logTag, "Checked permission")
+        debugLog("Checked permission")
         if (!permissionToRecordAudio) {
             val localActivity = currentActivity
             if (null != localActivity) {
-                Log.d(logTag, "Requesting permission")
+                debugLog("Requesting permission")
                 ActivityCompat.requestPermissions(localActivity,
                         arrayOf(Manifest.permission.RECORD_AUDIO), speechToTextPermissionCode)
             } else {
-                Log.d(logTag, "no permission, no activity, completing")
+                debugLog("no permission, no activity, completing")
                 completeInitialize()
             }
         } else {
-            Log.d(logTag, "has permission, completing")
+            debugLog("has permission, completing")
             completeInitialize()
         }
-        Log.d(logTag, "leaving initializeIfPermitted")
+        debugLog("leaving initializeIfPermitted")
     }
 
     private fun completeInitialize() {
 
-        Log.d(logTag, "completeInitialize")
+        debugLog("completeInitialize")
         if (permissionToRecordAudio) {
-            Log.d(logTag, "Testing recognition availability")
+            debugLog("Testing recognition availability")
             if (!SpeechRecognizer.isRecognitionAvailable(pluginContext)) {
                 Log.e(logTag, "Speech recognition not available on this device")
                 activeResult?.error(SpeechToTextErrors.recognizerNotAvailable.name,
@@ -343,9 +365,9 @@ public class SpeechToTextPlugin :
                 return
             }
 
-            Log.d(logTag, "Creating recognizer")
+            debugLog("Creating recognizer")
             speechRecognizer = createSpeechRecognizer(pluginContext).apply {
-                Log.d(logTag, "Setting listener")
+                debugLog("Setting listener")
                 setRecognitionListener(this@SpeechToTextPlugin)
             }
             if (null == speechRecognizer) {
@@ -356,20 +378,20 @@ public class SpeechToTextPlugin :
                 activeResult = null
             }
 
-            Log.d(logTag, "before setup intent")
+            debugLog("before setup intent")
             setupRecognizerIntent(defaultLanguageTag, true)
-            Log.d(logTag, "after setup intent")
+            debugLog("after setup intent")
         }
 
         initializedSuccessfully = permissionToRecordAudio
-        Log.d(logTag, "sending result")
+        debugLog("sending result")
         activeResult?.success(permissionToRecordAudio)
-        Log.d(logTag, "leaving complete")
+        debugLog("leaving complete")
         activeResult = null
     }
 
     private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean) {
-        Log.d(logTag, "setupRecognizerIntent")
+        debugLog("setupRecognizerIntent")
         if (previousRecognizerLang == null ||
                 previousRecognizerLang != languageTag ||
                 partialResults != previousPartialResults) {
@@ -378,20 +400,20 @@ public class SpeechToTextPlugin :
             handler.post {
                 run {
                     recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                        Log.d(logTag, "In RecognizerIntent apply")
+                        debugLog("In RecognizerIntent apply")
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                        Log.d(logTag, "put model")
+                        debugLog("put model")
                         val localContext = pluginContext
                         if (null != localContext) {
                             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
                                     localContext.applicationInfo.packageName)
                         }
-                        Log.d(logTag, "put package")
+                        debugLog("put package")
                         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, partialResults)
-                        Log.d(logTag, "put partial")
+                        debugLog("put partial")
                         if (languageTag != Locale.getDefault().toLanguageTag()) {
                             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag);
-                            Log.d(logTag, "put languageTag")
+                            debugLog("put languageTag")
                         }
                     }
                 }
@@ -433,6 +455,12 @@ public class SpeechToTextPlugin :
             else -> "error_unknown"
         }
         sendError(errorMsg)
+    }
+
+    private fun debugLog( msg: String ) {
+        if ( debugLogging ) {
+            Log.d( logTag, msg )
+        }
     }
 
     private fun sendError(errorMsg: String) {

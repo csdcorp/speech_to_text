@@ -153,15 +153,21 @@ class SpeechToText {
   /// timeout, or failure of the device speech recognition.
   /// [onStatus] is an optional listener for status changes from
   /// listening to not listening.
+  /// [debugLogging] controls whether there is detailed logging from the underlying
+  /// plugins. It is off by default, usually only useful for troubleshooting issues
+  /// with a paritcular OS version or device, fairly verbose
   Future<bool> initialize(
-      {SpeechErrorListener onError, SpeechStatusListener onStatus}) async {
+      {SpeechErrorListener onError,
+      SpeechStatusListener onStatus,
+      debugLogging = false}) async {
     if (_initWorked) {
       return Future.value(_initWorked);
     }
     errorListener = onError;
     statusListener = onStatus;
     channel.setMethodCallHandler(_handleCallbacks);
-    _initWorked = await channel.invokeMethod('initialize');
+    _initWorked = await channel
+        .invokeMethod('initialize', {"debugLogging": debugLogging});
     return _initWorked;
   }
 
@@ -332,6 +338,7 @@ class SpeechToText {
 
   void _onTextRecognition(String resultJson) {
     _recognized = true;
+    // print("Recognized text $resultJson");
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     SpeechRecognitionResult speechResult =
         SpeechRecognitionResult.fromJson(resultMap);

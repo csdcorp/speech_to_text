@@ -1,8 +1,8 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v1.2.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+[![pub package](https://img.shields.io/badge/pub-v2.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
 
-A library that exposes device specific speech to text recognition capability.
+A library that exposes device specific speech recognition capability.
 
 This plugin contains a set of classes that make it easy to use the speech recognition 
 capabilities of the mobile device in Flutter. It supports both Android and iOS. The 
@@ -11,8 +11,10 @@ conversion or always on listening.
 
 ## Recent Updates
 
-The 1.2.0 version uses the new Flutter 1.12.x plugin APIs, although it may work with older with
-older versions of Flutter it is not guaranteed. 
+The 2.0.0 version uses the new Flutter 1.12.x plugin APIs, although it may work with older with
+older versions of Flutter it is not guaranteed. It also blocks duplicate notifications on some 
+Android versions, if you feel you have missed an `onResult` notification please post an issue. 
+See the change log for more details. 
 
 The 1.0.0 version adds the ability to automatically cancel listening on a permanent error. 
 This is a new parameter on the `listen` method, defaulted to false for backward 
