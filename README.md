@@ -73,3 +73,27 @@ is shown below or they will not be found. The example application for the plugin
 * `speech_to_text_cancel.m4r` - played when the cancel method is called.
 * `speech_to_text_stop.m4r` - played when the stop method is called.
 
+## Troubleshooting
+
+### Not working on a particular Android device
+The symptom for this issue is that the `initialize` method will always fail. If you turn on debug logging 
+using the `debugLogging: true` flag on the `initialize` method you'll see `'Speech recognition unavailable'`
+in the Android log. There's a lengthy issue discussion here https://github.com/csdcorp/speech_to_text/issues/36 
+about this. The issue seems to be that the recognizer is now always automatically enabled on the device. Two 
+key things helped resolve the issue in this case at least. 
+
+#### First 
+1. Go to Google Play
+2. Search for 'Google'
+3. You should find this app: https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox
+If 'Disabled' enable it
+
+This is the SO post that helped: https://stackoverflow.com/questions/28769320/how-to-check-wether-speech-recognition-is-available-or-not
+
+#### Second
+Ensure the app has the required permissions. The symptom for this that you get a permanent error notification 
+ 'error_audio_error` when starting a listen session. Here's a Stack Overflow post that addresses that 
+ https://stackoverflow.com/questions/46376193/android-speechrecognizer-audio-recording-error
+ Here's the important excerpt: 
+ >You should go to system setting, Apps, Google app, then enable its permission of microphone. 
+
