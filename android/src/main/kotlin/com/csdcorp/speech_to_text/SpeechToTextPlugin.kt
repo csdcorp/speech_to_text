@@ -101,6 +101,7 @@ public class SpeechToTextPlugin :
         @JvmStatic
         fun registerWith(registrar: Registrar) {
             val speechPlugin = SpeechToTextPlugin()
+            speechPlugin.currentActivity = registrar.activity()
             registrar.addRequestPermissionsResultListener(speechPlugin)
             speechPlugin.onAttachedToEngine(registrar.context(), registrar.messenger())
         }
