@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.1
+  * Resolves an issue with the Android implementation not handling permission requests properly on apps 
+  that didn't use the 1.12.x plugin APIs for registration. The permission dialog would not appear and 
+  permission was denied.  
+
+### Fix
+
 ## 2.0.0
 
 ### Breaking
