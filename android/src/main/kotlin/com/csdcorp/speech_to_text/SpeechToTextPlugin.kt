@@ -74,6 +74,7 @@ public class SpeechToTextPlugin :
     private var activeResult: Result? = null
     private var initializedSuccessfully: Boolean = false
     private var permissionToRecordAudio: Boolean = false
+    private var listening = false
     private var debugLogging: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
@@ -215,8 +216,16 @@ public class SpeechToTextPlugin :
         return !initializedSuccessfully
     }
 
+    private fun isListening(): Boolean {
+        return listening
+    }
+
+    private fun isNotListening(): Boolean {
+        return !listening
+    }
+
     private fun startListening(result: Result, languageTag: String, partialResults: Boolean) {
-        if (sdkVersionTooLow(result) || isNotInitialized(result)) {
+        if (sdkVersionTooLow(result) || isNotInitialized(result) || isListening()) {
             return
         }
         debugLog("Start listening")
@@ -232,7 +241,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun stopListening(result: Result) {
-        if (sdkVersionTooLow(result) || isNotInitialized(result)) {
+        if (sdkVersionTooLow(result) || isNotInitialized(result) || isNotListening()) {
             return
         }
         debugLog("Stop listening")
@@ -247,7 +256,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun cancelListening(result: Result) {
-        if (sdkVersionTooLow(result) || isNotInitialized(result)) {
+        if (sdkVersionTooLow(result) || isNotInitialized(result) || isNotListening()) {
             return
         }
         debugLog("Cancel listening")
@@ -281,6 +290,7 @@ public class SpeechToTextPlugin :
 
     private fun notifyListening(isRecording: Boolean) {
         debugLog("Notify listening")
+        listening = isRecording
         val status = when (isRecording) {
             true -> SpeechToTextStatus.listening.name
             false -> SpeechToTextStatus.notListening.name
