@@ -1,11 +1,22 @@
 # Changelog
 
+## 2.1.0
+### Breaking
+  * `listenFor` now calls `stop` rather than `cancel` as this seems like more useful behaviour
+
+### Fix
+  * Android no longer stops or cancels the speech recognizer if it has already been shutdown by a 
+  timeout or other platform behaviour. 
+  * Android no longer tries to restart the listener when it is already active
+  * Now properly notifies errors that happen after listening stops due to platform callback rather than 
+  client request. See https://github.com/csdcorp/speech_to_text/issues/51
+
 ## 2.0.1
+### Fix
   * Resolves an issue with the Android implementation not handling permission requests properly on apps 
   that didn't use the 1.12.x plugin APIs for registration. The permission dialog would not appear and 
   permission was denied.  
 
-### Fix
 
 ## 2.0.0
 
