@@ -70,6 +70,10 @@ class SpeechToText {
   bool _recognized = false;
   bool _listening = false;
   bool _cancelOnError = false;
+
+  /// True if not listening or the user called cancel / stop, false
+  /// if cancel/stop were invoked by timeout or error condition.
+  bool _userEnded = false;
   String _lastRecognized = "";
   String _lastStatus = "";
   double _lastSoundLevel = 0;
@@ -182,6 +186,11 @@ class SpeechToText {
   /// *Note:* Cannot be used until a successful [initialize] call. Should
   /// only be used after a successful [listen] call.
   Future<void> stop() async {
+    _userEnded = true;
+    return _stop();
+  }
+
+  Future<void> _stop() async {
     if (!_initWorked) {
       return;
     }
@@ -200,6 +209,11 @@ class SpeechToText {
   /// *Note* Cannot be used until a successful [initialize] call. Should only
   /// be used after a successful [listen] call.
   Future<void> cancel() async {
+    _userEnded = true;
+    return _cancel();
+  }
+
+  Future<void> _cancel() async {
     if (!_initWorked) {
       return;
     }
@@ -250,6 +264,7 @@ class SpeechToText {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
+    _userEnded = false;
     _cancelOnError = cancelOnError;
     _recognized = false;
     _resultListener = onResult;
@@ -261,7 +276,7 @@ class SpeechToText {
     channel.invokeMethod(listenMethod, listenParams);
     if (null != listenFor) {
       _listenTimer = Timer(listenFor, () {
-        cancel();
+        _stop();
       });
     }
   }
@@ -350,18 +365,18 @@ class SpeechToText {
   }
 
   Future<void> _onNotifyError(String errorJson) async {
-    if (isNotListening) {
+    if (isNotListening && _userEnded) {
       return;
     }
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
     SpeechRecognitionError speechError =
         SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
-    if (_cancelOnError && speechError.permanent) {
-      await cancel();
-    }
     if (null != errorListener) {
       errorListener(speechError);
+    }
+    if (_cancelOnError && speechError.permanent) {
+      await _cancel();
     }
   }
 

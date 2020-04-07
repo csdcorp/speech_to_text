@@ -257,8 +257,7 @@ void main() {
           MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
       expect(speech.isListening, isFalse);
     });
-    test('Error not sent after cancel',
-        () async {
+    test('Error not sent after cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
       await speech.cancel();
@@ -266,6 +265,16 @@ void main() {
           MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 0);
+    });
+    test('Error still sent after implicit cancel', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen(cancelOnError: true);
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      await speech.processMethodCall(
+          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      expect(speech.isListening, isFalse);
+      expect(listener.speechErrors, 2);
     });
   });
   group('locales', () {
