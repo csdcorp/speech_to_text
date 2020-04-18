@@ -97,3 +97,16 @@ Ensure the app has the required permissions. The symptom for this that you get a
  Here's the important excerpt: 
  >You should go to system setting, Apps, Google app, then enable its permission of microphone. 
 
+### iOS recognition guidelines
+Apple has quite a good guide on the user experience for using speech, the original is here 
+https://developer.apple.com/documentation/speech/sfspeechrecognizer This is the section  that I think is particularly relevant:
+
+>#### Create a Great User Experience for Speech Recognition
+>Here are some tips to consider when adding speech recognition support to your app.
+
+>**Be prepared to handle failures caused by speech recognition limits.** Because speech recognition is a network-based service, limits are enforced so that the service can remain freely available to all apps. Individual devices may be limited in the number of recognitions that can be performed per day, and each app may be throttled globally based on the number of requests it makes per day. If a recognition request fails quickly (within a second or two of starting), check to see if the recognition service became unavailable. If it is, you may want to ask users to try again later.
+
+>**Plan for a one-minute limit on audio duration.** Speech recognition places a relatively high burden on battery life and network usage. To minimize this burden, the framework stops speech recognition tasks that last longer than one minute. This limit is similar to the one for keyboard-related dictation.
+Remind the user when your app is recording. For example, display a visual indicator and play sounds at the beginning and end of speech recognition to help users understand that they're being actively recorded. You can also display speech as it is being recognized so that users understand what your app is doing and see any mistakes made during the recognition process.
+
+>**Do not perform speech recognition on private or sensitive information.** Some speech is not appropriate for recognition. Don't send passwords, health or financial data, and other sensitive speech for recognition.

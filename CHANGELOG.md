@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0
+
+### New
+  * improved error handling and logging in the iOS implementation
+  * added general guides for iOS to the README
+
 ## 2.1.0
 ### Breaking
   * `listenFor` now calls `stop` rather than `cancel` as this seems like more useful behaviour

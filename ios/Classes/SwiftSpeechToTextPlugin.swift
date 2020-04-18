@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import Speech
+import os.log
 
 public enum SwiftSpeechToTextMethods: String {
     case has_permission
@@ -57,7 +58,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private let jsonEncoder = JSONEncoder()
     private let busForNodeTap = 0
     private let speechBufferSize: AVAudioFrameCount = 1024
-    
+    private static var subsystem = Bundle.main.bundleIdentifier!
+    private let pluginLog = OSLog(subsystem: "com.csdcorp.speechToText", category: "plugin")
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugin.csdcorp.com/speech_to_text", binaryMessenger: registrar.messenger())
         let instance = SwiftSpeechToTextPlugin( channel, registrar: registrar )
@@ -79,9 +82,11 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             guard let argsArr = call.arguments as? Dictionary<String,AnyObject>,
                 let partialResults = argsArr["partialResults"] as? Bool
                 else {
+                    DispatchQueue.main.async {
                     result(FlutterError( code: SpeechToTextErrors.missingOrInvalidArg.rawValue,
                                          message:"Missing arg partialResults",
                                          details: nil ))
+                    }
                     return
             }
             var localeStr: String? = nil
@@ -96,8 +101,10 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         case SwiftSpeechToTextMethods.locales.rawValue:
             locales( result )
         default:
-            print("Unrecognized method: \(call.method)")
+            os_log("Unrecognized method: %{PUBLIC}@", log: pluginLog, type: .error, call.method)
+            DispatchQueue.main.async {
             result( FlutterMethodNotImplemented)
+            }
         }
     }
     
@@ -111,7 +118,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     private func initialize( _ result: @escaping FlutterResult) {
         var success = false
-        if ( SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.notDetermined ) {
+        let status = SFSpeechRecognizer.authorizationStatus()
+        switch status {
+        case SFSpeechRecognizerAuthorizationStatus.notDetermined:
             SFSpeechRecognizer.requestAuthorization({(status)->Void in
                 success = status == SFSpeechRecognizerAuthorizationStatus.authorized
                 if ( success ) {
@@ -119,21 +128,28 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                        if granted {
                            self.setupSpeechRecognition(result)
                        } else{
-                           self.initResult( false, result );
+                           self.sendBoolResult( false, result );
+                        os_log("User denied permission", log: self.pluginLog, type: .info)
                        }
                     })
                 }
                 else {
-                    self.initResult( false, result );
+                    self.sendBoolResult( false, result );
                 }
             });
-        }
-        else {
+        case SFSpeechRecognizerAuthorizationStatus.denied:
+            os_log("Permission permanently denied", log: self.pluginLog, type: .info)
+            sendBoolResult( false, result );
+        case SFSpeechRecognizerAuthorizationStatus.restricted:
+            os_log("Device restriction prevented initialize", log: self.pluginLog, type: .info)
+            sendBoolResult( false, result );
+        default:
+            os_log("Has permissions continuing with setup", log: self.pluginLog, type: .debug)
             setupSpeechRecognition(result)
         }
     }
     
-    fileprivate func initResult( _ value: Bool, _ result: @escaping FlutterResult) {
+    fileprivate func sendBoolResult( _ value: Bool, _ result: @escaping FlutterResult) {
         DispatchQueue.main.async {
             result( value )
         }
@@ -165,13 +181,13 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private func setupSpeechRecognition( _ result: @escaping FlutterResult) {
         setupRecognizerForLocale( locale: Locale.current )
         guard recognizer != nil else {
-            initResult( false, result );
+            sendBoolResult( false, result );
             return
         }
         recognizer?.delegate = self
         setupListeningSound()
 
-        initResult( true, result );
+        sendBoolResult( true, result );
     }
 
     private func setupRecognizerForLocale( locale: Locale ) {
@@ -194,14 +210,14 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         currentTask?.finish()
         stopCurrentListen( )
         successSound?.play()
-        result( true )
+        sendBoolResult( true, result );
     }
     
     private func cancelSpeech( _ result: @escaping FlutterResult) {
         currentTask?.cancel()
         stopCurrentListen( )
         cancelSound?.play()
-        result( true )
+        sendBoolResult( true, result );
     }
     
     private func stopCurrentListen( ) {
@@ -215,6 +231,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             }
         }
         catch {
+            os_log("Error stopping listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
         }
         currentRequest = nil
         currentTask = nil
@@ -235,7 +252,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             let inputNode = self.audioEngine.inputNode
             self.currentRequest = SFSpeechAudioBufferRecognitionRequest()
             guard let currentRequest = self.currentRequest else {
-                result( false )
+                sendBoolResult( false, result );
                 return
             }
             currentRequest.shouldReportPartialResults = true
@@ -250,7 +267,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
         }
         catch {
-            result( false )
+            os_log("Error starting listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
+            sendBoolResult( false, result );
         }
     }
     
@@ -270,7 +288,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 localeNames.append(idName)
             }
         }
+        DispatchQueue.main.async {
         result(localeNames)
+        }
     }
     
     private func buildIdNameForLocale( forIdentifier: String ) -> String? {
@@ -296,7 +316,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             let speechMsg = try jsonEncoder.encode(speechInfo)
             invokeFlutter( SwiftSpeechToTextCallbackMethods.textRecognition, arguments: String( data:speechMsg, encoding: .utf8) )
         } catch {
-            print("Could not encode JSON")
+            os_log("Could not encode JSON", log: pluginLog, type: .error)
         }
     }
     
@@ -325,6 +345,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
 extension SwiftSpeechToTextPlugin : SFSpeechRecognizerDelegate {
     public func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
         let availability = available ? SpeechToTextStatus.available.rawValue : SpeechToTextStatus.unavailable.rawValue
+        os_log("Availability changed: %{PUBLIC}@", log: pluginLog, type: .debug, availability)
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: availability )
     }
 }
@@ -336,26 +357,36 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
     }
     
     public func speechRecognitionTaskFinishedReadingAudio(_ task: SFSpeechRecognitionTask) {
+        reportError(source: "FinishedReadingAudio", error: task.error)
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
     }
     
     public func speechRecognitionTaskWasCancelled(_ task: SFSpeechRecognitionTask) {
+        reportError(source: "TaskWasCancelled", error: task.error)
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishSuccessfully successfully: Bool) {
+        reportError(source: "FinishSuccessfully", error: task.error)
         stopCurrentListen( )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didHypothesizeTranscription transcription: SFTranscription) {
+        reportError(source: "HypothesizeTranscription", error: task.error)
         handleResult( [transcription], isFinal: false )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishRecognition recognitionResult: SFSpeechRecognitionResult) {
+        reportError(source: "FinishRecognition", error: task.error)
         let isFinal = recognitionResult.isFinal
         handleResult( recognitionResult.transcriptions, isFinal: isFinal )
     }
     
+    private func reportError( source: String, error: Error?) {
+        if ( nil != error) {
+            os_log("%{PUBLIC}@ with error: %{PUBLIC}@", log: pluginLog, type: .debug, source, error.debugDescription)
+        }
+    }
 }
 
 @available(iOS 10.0, *)
