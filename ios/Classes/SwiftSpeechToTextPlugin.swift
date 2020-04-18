@@ -157,13 +157,14 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     fileprivate func setupListeningSound() {
         listeningSound = loadSound("assets/sounds/speech_to_text_listening.m4r")
+        listeningSound?.delegate = self
         successSound = loadSound("assets/sounds/speech_to_text_stop.m4r")
         cancelSound = loadSound("assets/sounds/speech_to_text_cancel.m4r")
     }
     
-    fileprivate func loadSound( _ soundPath: String ) -> AVAudioPlayer? {
+    fileprivate func loadSound( _ assetPath: String ) -> AVAudioPlayer? {
         var player: AVAudioPlayer? = nil
-        let soundKey = registrar.lookupKey(forAsset: soundPath )
+        let soundKey = registrar.lookupKey(forAsset: assetPath )
         guard !soundKey.isEmpty else {
             return player
         }
@@ -244,9 +245,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         do {
             returnPartialResults = partialResults
             setupRecognizerForLocale(locale: getLocale(localeStr))
-            listeningSound?.play()
             rememberedAudioCategory = self.audioSession.category
             try self.audioSession.setCategory(AVAudioSession.Category.playAndRecord)
+            listeningSound?.play()
             try self.audioSession.setMode(AVAudioSession.Mode.measurement)
             try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             let inputNode = self.audioEngine.inputNode
@@ -394,6 +395,6 @@ extension SwiftSpeechToTextPlugin : AVAudioPlayerDelegate {
     
     public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer,
                                      successfully flag: Bool) {
-        
+        print("Played the start sound \(flag)")
     }
 }
