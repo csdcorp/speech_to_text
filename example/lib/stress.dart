@@ -14,7 +14,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _hasSpeech = false;
+  bool _stressTest = false;
   double level = 0.0;
+  int _stressLoops = 0;
   String lastWords = "";
   String lastError = "";
   String lastStatus = "";
@@ -67,6 +69,10 @@ class _MyAppState extends State<MyApp> {
                     FlatButton(
                       child: Text('Initialize'),
                       onPressed: _hasSpeech ? null : initSpeechState,
+                    ),
+                    FlatButton(
+                      child: Text('Stress Test'),
+                      onPressed: stressTest,
                     ),
                   ],
                 ),
@@ -196,6 +202,34 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  void stressTest() {
+    if (_stressTest) {
+      return;
+    }
+    _stressLoops = 0;
+    _stressTest = true;
+    print("Starting stress test...");
+    startListening();
+  }
+
+  void changeStatusForStress(String status) {
+    if (!_stressTest) {
+      return;
+    }
+    if (speech.isListening) {
+      stopListening();
+    } else {
+      if (_stressLoops >= 100) {
+        _stressTest = false;
+        print("Stress test complete.");
+        return;
+      }
+      print("Stress loop: $_stressLoops");
+      ++_stressLoops;
+      startListening();
+    }
+  }
+
   void startListening() {
     lastWords = "";
     lastError = "";
@@ -242,6 +276,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void statusListener(String status) {
+    changeStatusForStress(status);
     setState(() {
       lastStatus = "$status";
     });

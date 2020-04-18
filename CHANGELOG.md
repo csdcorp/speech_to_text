@@ -5,6 +5,7 @@
 ### New
   * improved error handling and logging in the iOS implementation
   * added general guides for iOS to the README
+  * moved stress testing out of the main example 
 
 ## 2.1.0
 ### Breaking
