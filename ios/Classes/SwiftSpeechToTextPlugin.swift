@@ -395,6 +395,6 @@ extension SwiftSpeechToTextPlugin : AVAudioPlayerDelegate {
     
     public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer,
                                      successfully flag: Bool) {
-        print("Played the start sound \(flag)")
+        // print("Played the start sound \(flag)")
     }
 }
