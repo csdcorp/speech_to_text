@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -15,6 +16,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _hasSpeech = false;
   double level = 0.0;
+  double minSoundLevel = 50000;
+  double maxSoundLevel = -50000;
   String lastWords = "";
   String lastError = "";
   String lastStatus = "";
@@ -230,6 +233,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void soundLevelListener(double level) {
+    minSoundLevel = min(minSoundLevel, level);
+    maxSoundLevel = max(maxSoundLevel, level);
+    //print("sound level $level: $minSoundLevel - $maxSoundLevel ");
     setState(() {
       this.level = level;
     });

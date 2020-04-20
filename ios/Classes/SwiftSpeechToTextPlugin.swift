@@ -17,6 +17,7 @@ public enum SwiftSpeechToTextCallbackMethods: String {
     case textRecognition
     case notifyStatus
     case notifyError
+    case soundLevelChange
 }
 
 public enum SpeechToTextStatus: String {
@@ -267,6 +268,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             let recordingFormat = inputNode.outputFormat(forBus: self.busForNodeTap)
             inputNode.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
                 currentRequest.append(buffer)
+                self.updateSoundLevel( buffer: buffer )
             }
             
             self.audioEngine.prepare()
@@ -277,6 +279,23 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             os_log("Error starting listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
             sendBoolResult( false, result );
         }
+    }
+    
+    private func updateSoundLevel( buffer: AVAudioPCMBuffer) {
+        guard
+          let channelData = buffer.floatChannelData
+          else {
+            return
+        }
+
+        let channelDataValue = channelData.pointee
+        let channelDataValueArray = stride(from: 0,
+                                           to: Int(buffer.frameLength),
+                                           by: buffer.stride).map{ channelDataValue[$0] }
+        let frameLength = Float(buffer.frameLength)
+        let rms = sqrt(channelDataValueArray.map{ $0 * $0 }.reduce(0, +) / frameLength )
+        let avgPower = 20 * log10(rms)
+        self.invokeFlutter( SwiftSpeechToTextCallbackMethods.soundLevelChange, arguments: avgPower )
     }
     
     /// Build a list of localId:name with the current locale first
