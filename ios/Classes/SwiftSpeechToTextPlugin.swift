@@ -239,7 +239,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             try self.audioSession.setActive(false, options: .notifyOthersOnDeactivation)
         }
         catch {
-            os_log("Error deactivation: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
+            os_log("Error deactivation: %{PUBLIC}@", log: pluginLog, type: .info, error.localizedDescription)
         }
         currentRequest = nil
         currentTask = nil
