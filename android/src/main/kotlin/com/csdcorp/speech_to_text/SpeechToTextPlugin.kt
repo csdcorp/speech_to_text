@@ -67,7 +67,7 @@ public class SpeechToTextPlugin :
     private var pluginContext: Context? = null
     private var channel: MethodChannel? = null
     private val minSdkForSpeechSupport = 21
-    private val speechToTextPermissionCode = 78521
+    private val speechToTextPermissionCode = 28521
     private val missingConfidence: Double = -1.0
     private val logTag = "SpeechToTextPlugin"
     private var currentActivity: Activity? = null
