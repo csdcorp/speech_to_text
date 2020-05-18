@@ -6,6 +6,10 @@
   * improved error handling and logging in the iOS implementation
   * added general guides for iOS to the README
   * moved stress testing out of the main example 
+  * iOS now defaults to using the speaker rather than the receiver for start /stop sounds when no headphones
+### Fix
+  * iOS now properly deactivates the audio session when no longer listening
+  * start and stop sounds on iOS should be more reliable when available
 
 ## 2.1.0
 ### Breaking

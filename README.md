@@ -11,15 +11,12 @@ conversion or always on listening.
 
 ## Recent Updates
 
+The 2.2.0 version improves audio session handling and start / stop sound playback on iOS. 
+
 The 2.0.0 version uses the new Flutter 1.12.x plugin APIs, although it may work with older with
 older versions of Flutter it is not guaranteed. It also blocks duplicate notifications on some 
 Android versions, if you feel you have missed an `onResult` notification please post an issue. 
 See the change log for more details. 
-
-The 1.0.0 version adds the ability to automatically cancel listening on a permanent error. 
-This is a new parameter on the `listen` method, defaulted to false for backward 
-compatibility. It also adds the ability to control whether partial and complete or only 
-complete results are sent during listening.  
 
 *Note*: Feedback from any test devices is welcome. 
 
