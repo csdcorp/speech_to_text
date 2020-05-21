@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v2.1.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+[![pub package](https://img.shields.io/badge/pub-v2.3.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
 
 A library that exposes device specific speech recognition capability.
 
@@ -71,6 +71,40 @@ is shown below or they will not be found. The example application for the plugin
 * `speech_to_text_stop.m4r` - played when the stop method is called.
 
 ## Troubleshooting
+
+### SDK version error trying to compile for Android
+```
+Manifest merger failed : uses-sdk:minSdkVersion 16 cannot be smaller than version 21 declared in library [:speech_to_text] 
+```
+The speech_to_text plugin requires at least Android SDK 21 because some of the speech functions in Android 
+were only introduced in that version. To fix this error you need to change the `build.gradle` entry to reflect
+this version. Here's what the relevant part of that file looked like as of this writing:
+```
+   defaultConfig {
+        applicationId "com.example.app"
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+```
+
+### Incorrect Swift version trying to compile for iOS
+```
+/Users/markvandergon/flutter/.pub-cache/hosted/pub.dartlang.org/speech_to_text-1.1.0/ios/Classes/SwiftSpeechToTextPlugin.swift:224:44: error: value of type 'SwiftSpeechToTextPlugin' has no member 'AVAudioSession'
+                rememberedAudioCategory = self.AVAudioSession.Category
+                                          ~~~~ ^~~~~~~~~~~~~~
+    /Users/markvandergon/flutter/.pub-cache/hosted/pub.dartlang.org/speech_to_text-1.1.0/ios/Classes/SwiftSpeechToTextPlugin.swift:227:63: error: type 'Int' has no member 'notifyOthersOnDeactivation'
+                try self.audioSession.setActive(true, withFlags: .notifyOthersOnDeactivation)
+```
+This happens when the Swift language version is not set correctly. See this thread for help https://github.com/csdcorp/speech_to_text/issues/45.
+
+### Swift not supported trying to compile for iOS
+```
+`speech_to_text` does not specify a Swift version and none of the targets (`Runner`) integrating it have the `SWIFT_VERSION` attribute set.
+```
+This usually happens for older projects that only support Objective-C. See this thread for help https://github.com/csdcorp/speech_to_text/issues/88. 
 
 ### Not working on a particular Android device
 The symptom for this issue is that the `initialize` method will always fail. If you turn on debug logging 

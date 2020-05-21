@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.0
+
+### New
+  * added compile troubleshooting help to README.md
+
 ## 2.2.0
 
 ### New
