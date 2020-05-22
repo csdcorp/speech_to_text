@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: takuyaohashi/setup-flutter@v1
+      - uses: subosito/flutter-action@v1.3.2
         with:
-          flutter-version: 'v1.12.13+hotfix.5'
+          flutter-version: '1.17.1'
           channel: 'stable'
+      - run: flutter pub get
       - run: flutter test
