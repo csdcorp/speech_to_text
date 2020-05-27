@@ -235,19 +235,22 @@ class _MyAppState extends State<MyApp> {
   void soundLevelListener(double level) {
     minSoundLevel = min(minSoundLevel, level);
     maxSoundLevel = max(maxSoundLevel, level);
-    //print("sound level $level: $minSoundLevel - $maxSoundLevel ");
+    // print("sound level $level: $minSoundLevel - $maxSoundLevel ");
     setState(() {
       this.level = level;
     });
   }
 
   void errorListener(SpeechRecognitionError error) {
+    // print("Received error status: $error, listening: ${speech.isListening}");
     setState(() {
       lastError = "${error.errorMsg} - ${error.permanent}";
     });
   }
 
   void statusListener(String status) {
+    // print(
+    // "Received listener status: $status, listening: ${speech.isListening}");
     setState(() {
       lastStatus = "$status";
     });
