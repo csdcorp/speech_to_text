@@ -317,7 +317,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             let recordingFormat = inputNode.outputFormat(forBus: self.busForNodeTap)
             inputNode.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
                 currentRequest.append(buffer)
-//                self.updateSoundLevel( buffer: buffer )
+                self.updateSoundLevel( buffer: buffer )
             }
 
             self.audioEngine.prepare()
