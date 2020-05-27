@@ -39,6 +39,10 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
     speech.stop()
 ```
 
+### Initialize once
+The `initialize` method only needs to be called once per application session. After that `listen`, 
+`start`, `stop`, and `cancel` can be used to interact with the plugin. 
+
 ## Permissions
 
 Applications using this plugin require user permissions. 
