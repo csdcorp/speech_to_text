@@ -3,6 +3,8 @@
 ## 2.3.0
 
 ### New
+  * new parameter `onDevice` on the `listen` method enforces on device recognition for sensitive content
+  * onSoundLevelChange now supported on iOS
   * added compile troubleshooting help to README.md
 
 ## 2.2.0

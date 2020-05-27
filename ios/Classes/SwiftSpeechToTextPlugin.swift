@@ -28,6 +28,8 @@ public enum SpeechToTextStatus: String {
 }
 
 public enum SpeechToTextErrors: String {
+    case onDeviceError
+    case noRecognizerError
     case missingOrInvalidArg
 }
 
@@ -83,11 +85,11 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             initialize( result )
         case SwiftSpeechToTextMethods.listen.rawValue:
             guard let argsArr = call.arguments as? Dictionary<String,AnyObject>,
-                let partialResults = argsArr["partialResults"] as? Bool
+                let partialResults = argsArr["partialResults"] as? Bool, let onDevice = argsArr["onDevice"] as? Bool
                 else {
                     DispatchQueue.main.async {
                     result(FlutterError( code: SpeechToTextErrors.missingOrInvalidArg.rawValue,
-                                         message:"Missing arg partialResults",
+                                         message:"Missing arg both partialResults and onDevice are required",
                                          details: nil ))
                     }
                     return
@@ -96,7 +98,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             if let localeParam = argsArr["localeId"] as? String {
                 localeStr = localeParam
             }
-            listenForSpeech( result, localeStr: localeStr, partialResults: partialResults )
+            listenForSpeech( result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice )
         case SwiftSpeechToTextMethods.stop.rawValue:
             stopSpeech( result )
         case SwiftSpeechToTextMethods.cancel.rawValue:
@@ -286,7 +288,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         listening = false
     }
     
-    private func listenForSpeech( _ result: @escaping FlutterResult, localeStr: String?, partialResults: Bool ) {
+    private func listenForSpeech( _ result: @escaping FlutterResult, localeStr: String?, partialResults: Bool, onDevice: Bool ) {
         if ( nil != currentTask || listening ) {
             sendBoolResult( false, result );
             return
@@ -294,6 +296,19 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         do {
             returnPartialResults = partialResults
             setupRecognizerForLocale(locale: getLocale(localeStr))
+            guard let localRecognizer = recognizer else {
+                result(FlutterError( code: SpeechToTextErrors.noRecognizerError.rawValue,
+                                     message:"Failed to create speech recognizer",
+                                     details: nil ))
+                return
+            }
+            if ( onDevice ) {
+                if #available(iOS 13.0, *), !localRecognizer.supportsOnDeviceRecognition {
+                    result(FlutterError( code: SpeechToTextErrors.onDeviceError.rawValue,
+                                         message:"on device recognition is not supported on this device",
+                                         details: nil ))
+                }
+            }
             rememberedAudioCategory = self.audioSession.category
             try self.audioSession.setCategory(AVAudioSession.Category.playAndRecord, options: .defaultToSpeaker)
 //            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
@@ -313,6 +328,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 return
             }
             currentRequest.shouldReportPartialResults = true
+            if #available(iOS 13.0, *), onDevice {
+                currentRequest.requiresOnDeviceRecognition = true
+            }
             self.currentTask = self.recognizer?.recognitionTask(with: currentRequest, delegate: self )
             let recordingFormat = inputNode.outputFormat(forBus: self.busForNodeTap)
             inputNode.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in

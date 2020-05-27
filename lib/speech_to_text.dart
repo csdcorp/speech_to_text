@@ -254,13 +254,18 @@ class SpeechToText {
   ///
   /// [partialResults] if true the listen reports results as they are recognized,
   /// when false only final results are reported. Defaults to true.
+  ///
+  /// [onDevice] if true the listen attempts to recognize locally with speech never
+  /// leaving the device. If it cannot do this the listen attempt will fail. This is
+  /// usually only needed for sensitive content where privacy or security is a concern.
   Future listen(
       {SpeechResultListener onResult,
       Duration listenFor,
       String localeId,
       SpeechSoundLevelChange onSoundLevelChange,
       cancelOnError = false,
-      partialResults = true}) async {
+      partialResults = true,
+      onDevice = false}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
@@ -269,7 +274,10 @@ class SpeechToText {
     _recognized = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
-    Map<String, dynamic> listenParams = {"partialResults": partialResults};
+    Map<String, dynamic> listenParams = {
+      "partialResults": partialResults,
+      "onDevice": onDevice
+    };
     if (null != localeId) {
       listenParams["localeId"] = localeId;
     }
