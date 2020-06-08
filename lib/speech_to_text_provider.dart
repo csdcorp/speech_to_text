@@ -73,10 +73,19 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// Start listening for new events, set [partialResults] to true to receive interim
   /// recognition results.
   ///
+  /// [listenFor] sets the maximum duration that it will listen for, after
+  /// that it automatically stops the listen for you.
+  ///
+  /// [pauseFor] sets the maximum duration of a pause in speech with no words
+  /// detected, after that it automatically stops the listen for you.
+  ///
   /// Call this only after a successful [initialize] call
-  void listen({bool partialResults = false}) {
+  void listen(
+      {bool partialResults = false, Duration listenFor, Duration pauseFor}) {
     _speechToText.listen(
         partialResults: partialResults,
+        listenFor: listenFor,
+        pauseFor: pauseFor,
         cancelOnError: true,
         onResult: _onListenResult);
   }

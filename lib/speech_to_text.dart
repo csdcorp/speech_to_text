@@ -421,14 +421,14 @@ class SpeechToText {
 
   void _onTextRecognition(String resultJson) {
     _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
-    if (!_partialResults) {
+    Map<String, dynamic> resultMap = jsonDecode(resultJson);
+    SpeechRecognitionResult speechResult =
+        SpeechRecognitionResult.fromJson(resultMap);
+    if (!_partialResults && !speechResult.finalResult) {
       return;
     }
     _recognized = true;
     // print("Recognized text $resultJson");
-    Map<String, dynamic> resultMap = jsonDecode(resultJson);
-    SpeechRecognitionResult speechResult =
-        SpeechRecognitionResult.fromJson(resultMap);
 
     _lastRecognized = speechResult.recognizedWords;
     if (null != _resultListener) {

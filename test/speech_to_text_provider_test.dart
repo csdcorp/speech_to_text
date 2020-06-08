@@ -76,7 +76,7 @@ void main() {
     });
     test('notifies on partial words', () async {
       fakeAsync((fa) {
-        setupForListen(provider, fa, speechListener);
+        setupForListen(provider, fa, speechListener, partialResults: true);
         speechListener.reset();
         speechHandler.notifyPartialWords();
         fa.flushMicrotasks();
@@ -127,10 +127,11 @@ void main() {
 }
 
 void setupForListen(SpeechToTextProvider provider, FakeAsync fa,
-    TestSpeechListener speechListener) {
+    TestSpeechListener speechListener,
+    {bool partialResults = false}) {
   provider.initialize();
   fa.flushMicrotasks();
   speechListener.reset();
-  provider.listen();
+  provider.listen(partialResults: partialResults);
   fa.flushMicrotasks();
 }
