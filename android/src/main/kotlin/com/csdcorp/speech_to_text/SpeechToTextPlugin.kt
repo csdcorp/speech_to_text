@@ -39,6 +39,7 @@ enum class SpeechToTextErrors {
     unimplemented,
     noLanguageIntent,
     recognizerNotAvailable,
+    missingOrInvalidArg,
     unknown
 }
 
@@ -54,6 +55,13 @@ enum class SpeechToTextStatus {
     notListening,
     unavailable,
     available,
+}
+
+enum class ListenMode {
+    deviceDefault,
+    dictation,
+    search,
+    confirmation,
 }
 
 const val pluginChannelName = "plugin.csdcorp.com/speech_to_text"
@@ -80,6 +88,7 @@ public class SpeechToTextPlugin :
     private var recognizerIntent: Intent? = null
     private var previousRecognizerLang: String? = null
     private var previousPartialResults: Boolean = true
+    private var previousListenMode: ListenMode = ListenMode.deviceDefault
     private var lastFinalTime: Long = 0
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val defaultLanguageTag: String = Locale.getDefault().toLanguageTag()
@@ -159,7 +168,13 @@ public class SpeechToTextPlugin :
                     if (null == partialResults) {
                         partialResults = true
                     }
-                    startListening(result, localeId, partialResults)
+                    val listenModeIndex = call.argument<Int>("listenMode")
+                    if ( null == listenModeIndex ) {
+                        result.error(SpeechToTextErrors.missingOrInvalidArg.name,
+                                "listenMode is required", null)
+                        return
+                    }
+                    startListening(result, localeId, partialResults, listenModeIndex )
                 }
                 "stop" -> stopListening(result)
                 "cancel" -> cancelListening(result)
@@ -224,12 +239,17 @@ public class SpeechToTextPlugin :
         return !listening
     }
 
-    private fun startListening(result: Result, languageTag: String, partialResults: Boolean) {
+    private fun startListening(result: Result, languageTag: String, partialResults: Boolean,
+                               listenModeIndex: Int) {
         if (sdkVersionTooLow(result) || isNotInitialized(result) || isListening()) {
             return
         }
         debugLog("Start listening")
-        setupRecognizerIntent(languageTag, partialResults)
+        var listenMode = ListenMode.deviceDefault
+        if ( listenModeIndex == ListenMode.dictation.ordinal) {
+            listenMode = ListenMode.dictation
+        }
+        setupRecognizerIntent(languageTag, partialResults, listenMode)
         handler.post {
             run {
                 speechRecognizer?.startListening(recognizerIntent)
@@ -390,7 +410,7 @@ public class SpeechToTextPlugin :
             }
 
             debugLog("before setup intent")
-            setupRecognizerIntent(defaultLanguageTag, true)
+            setupRecognizerIntent(defaultLanguageTag, true, ListenMode.deviceDefault)
             debugLog("after setup intent")
         }
 
@@ -401,13 +421,14 @@ public class SpeechToTextPlugin :
         activeResult = null
     }
 
-    private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean) {
+    private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean, listenMode: ListenMode) {
         debugLog("setupRecognizerIntent")
         if (previousRecognizerLang == null ||
                 previousRecognizerLang != languageTag ||
-                partialResults != previousPartialResults) {
+                partialResults != previousPartialResults || previousListenMode != listenMode ) {
             previousRecognizerLang = languageTag;
             previousPartialResults = partialResults
+            previousListenMode = listenMode
             handler.post {
                 run {
                     recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {

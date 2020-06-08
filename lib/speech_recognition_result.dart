@@ -103,7 +103,7 @@ class SpeechRecognitionWords {
   static const double confidenceThreshold = 0.8;
   static const double missingConfidence = -1;
 
-  SpeechRecognitionWords(this.recognizedWords, this.confidence);
+  const SpeechRecognitionWords(this.recognizedWords, this.confidence);
 
   /// true if there is confidence in this recognition, false otherwise.
   ///

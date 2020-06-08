@@ -6,6 +6,7 @@
   * new parameter `onDevice` on the `listen` method enforces on device recognition for sensitive content
   * onSoundLevelChange now supported on iOS
   * added compile troubleshooting help to README.md
+  * `SpeechToTextProvider` is an alternate and simpler way to interact with the `SpeechToText` plugin.
 
 ## 2.2.0
 

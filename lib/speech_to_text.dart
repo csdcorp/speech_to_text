@@ -6,6 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
+enum ListenMode {
+  deviceDefault,
+  dictation,
+  search,
+  confirmation,
+}
+
 /// Notified as words are recognized with the current set of recognized words.
 ///
 /// See the [onResult] argument on the [listen] method for use.
@@ -246,7 +253,9 @@ class SpeechToText {
   ///
   /// [onSoundLevelChange] is an optional listener that is notified when the
   /// sound level of the input changes. Use this to update the UI in response to
-  /// more or less input. Currently this is only supported on Android.
+  /// more or less input. The values currently differ between Ancroid and iOS,
+  /// haven't yet been able to determine from the Android documentation what the
+  /// value means. On iOS the value returned is in decibels.
   ///
   /// [cancelOnError] if true then listening is automatically canceled on a
   /// permanent error. This defaults to false. When false cancel should be
@@ -265,7 +274,8 @@ class SpeechToText {
       SpeechSoundLevelChange onSoundLevelChange,
       cancelOnError = false,
       partialResults = true,
-      onDevice = false}) async {
+      onDevice = false,
+      ListenMode listenMode = ListenMode.confirmation}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
@@ -276,7 +286,8 @@ class SpeechToText {
     _soundLevelChange = onSoundLevelChange;
     Map<String, dynamic> listenParams = {
       "partialResults": partialResults,
-      "onDevice": onDevice
+      "onDevice": onDevice,
+      "listenMode": listenMode.index,
     };
     if (null != localeId) {
       listenParams["localeId"] = localeId;
