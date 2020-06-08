@@ -15,6 +15,7 @@ class TestSpeechChannelHandler {
   bool cancelInvoked = false;
   bool stopInvoked = false;
   bool localesInvoked = false;
+  bool hasPermissionResult = true;
   String listeningStatusResponse = SpeechToText.listeningStatus;
   String listenLocale;
   List<String> locales = [];
@@ -53,6 +54,9 @@ class TestSpeechChannelHandler {
 
   Future<dynamic> methodCallHandler(MethodCall methodCall) async {
     switch (methodCall.method) {
+      case "has_permission":
+        return hasPermissionResult;
+        break;
       case "initialize":
         initInvoked = true;
         return initResult;

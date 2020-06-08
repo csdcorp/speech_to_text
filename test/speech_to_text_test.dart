@@ -5,107 +5,49 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import 'test_speech_channel_handler.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  bool initResult;
-  bool initInvoked;
-  bool listenInvoked;
-  bool cancelInvoked;
-  bool stopInvoked;
-  bool localesInvoked;
-  String listeningStatusResponse;
-  String listenLocale;
   TestSpeechListener listener;
+  TestSpeechChannelHandler speechHandler;
   SpeechToText speech;
-  List<String> locales = [];
-  String localeId1 = "en_US";
-  String localeId2 = "fr_CA";
-  String name1 = "English US";
-  String name2 = "French Canada";
-  String locale1 = "$localeId1:$name1";
-  String locale2 = "$localeId2:$name2";
-  final String firstRecognizedWords = 'hello';
-  final String secondRecognizedWords = 'hello there';
-  final double firstConfidence = 0.85;
-  final double secondConfidence = 0.62;
-  final String firstRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"finalResult":false}';
-  final String secondRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":false}';
-  final SpeechRecognitionWords firstWords =
-      SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
-  final SpeechRecognitionWords secondWords =
-      SpeechRecognitionWords(secondRecognizedWords, secondConfidence);
-  final SpeechRecognitionResult firstRecognizedResult =
-      SpeechRecognitionResult([firstWords], false);
-  final SpeechRecognitionResult secondRecognizedResult =
-      SpeechRecognitionResult([secondWords], false);
-  final String transientErrorJson = '{"errorMsg":"network","permanent":false}';
-  final String permanentErrorJson = '{"errorMsg":"network","permanent":true}';
-  final double level1 = 0.5;
-  final double level2 = 10;
 
   setUp(() {
-    initResult = true;
-    initInvoked = false;
-    listenInvoked = false;
-    cancelInvoked = false;
-    stopInvoked = false;
-    localesInvoked = false;
-    listeningStatusResponse = SpeechToText.listeningStatus;
-    locales = [];
     listener = TestSpeechListener();
     speech = SpeechToText.withMethodChannel(SpeechToText.speechChannel);
-    speech.channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      switch (methodCall.method) {
-        case "initialize":
-          initInvoked = true;
-          return initResult;
-          break;
-        case "cancel":
-          cancelInvoked = true;
-          return true;
-          break;
-        case "stop":
-          stopInvoked = true;
-          return true;
-          break;
-        case SpeechToText.listenMethod:
-          listenInvoked = true;
-          listenLocale = methodCall.arguments["localeId"];
-          await speech.processMethodCall(MethodCall(
-              SpeechToText.notifyStatusMethod, listeningStatusResponse));
-          return initResult;
-          break;
-        case "locales":
-          localesInvoked = true;
-          return locales;
-          break;
-        default:
-      }
-      return initResult;
-    });
+    speechHandler = TestSpeechChannelHandler(speech);
+    speech.channel.setMockMethodCallHandler(speechHandler.methodCallHandler);
   });
 
   tearDown(() {
     speech.channel.setMockMethodCallHandler(null);
   });
 
+  group('hasPermission', () {
+    test('true if platform reports true', () async {
+      expect(await speech.hasPermission, true);
+    });
+    test('false if platform reports false', () async {
+      speechHandler.hasPermissionResult = false;
+      expect(await speech.hasPermission, false);
+    });
+  });
   group('init', () {
     test('succeeds on platform success', () async {
       expect(await speech.initialize(), true);
-      expect(initInvoked, true);
+      expect(speechHandler.initInvoked, true);
       expect(speech.isAvailable, true);
     });
     test('only invokes once', () async {
       expect(await speech.initialize(), true);
-      initInvoked = false;
+      speechHandler.initInvoked = false;
       expect(await speech.initialize(), true);
-      expect(initInvoked, false);
+      expect(speechHandler.initInvoked, false);
     });
     test('fails on platform failure', () async {
-      initResult = false;
+      speechHandler.initResult = false;
       expect(await speech.initialize(), false);
       expect(speech.isAvailable, false);
     });
@@ -122,7 +64,7 @@ void main() {
     });
     test('fails with exception if init fails', () async {
       try {
-        initResult = false;
+        speechHandler.initResult = false;
         await speech.initialize();
         await speech.listen();
         fail("Expected an exception.");
@@ -133,8 +75,8 @@ void main() {
     test('invokes listen after successful init', () async {
       await speech.initialize();
       await speech.listen();
-      expect(listenLocale, isNull);
-      expect(listenInvoked, true);
+      expect(speechHandler.listenLocale, isNull);
+      expect(speechHandler.listenInvoked, true);
     });
     test('stops listen after listenFor duration', () async {
       fakeAsync((fa) {
@@ -153,8 +95,8 @@ void main() {
         speech.initialize();
         fa.flushMicrotasks();
         speech.listen(listenFor: Duration(seconds: 1));
-        speech.processMethodCall(MethodCall(
-            SpeechToText.textRecognitionMethod, firstRecognizedJson));
+        speech.processMethodCall(MethodCall(SpeechToText.textRecognitionMethod,
+            TestSpeechChannelHandler.firstRecognizedJson));
         fa.flushMicrotasks();
         expect(speech.isListening, isTrue);
         fa.elapse(Duration(seconds: 1));
@@ -172,6 +114,32 @@ void main() {
         expect(speech.isListening, isFalse);
       });
     });
+    test('stops listen after pauseFor with longer listenFor duration',
+        () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(
+            pauseFor: Duration(seconds: 1), listenFor: Duration(seconds: 5));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 1));
+        expect(speech.isListening, isFalse);
+      });
+    });
+    test('stops listen after listenFor with longer pauseFor duration',
+        () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(
+            listenFor: Duration(seconds: 1), pauseFor: Duration(seconds: 5));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 1));
+        expect(speech.isListening, isFalse);
+      });
+    });
     test('keeps listening after pauseFor with speech event', () async {
       fakeAsync((fa) {
         speech.initialize();
@@ -179,8 +147,8 @@ void main() {
         speech.listen(pauseFor: Duration(seconds: 2));
         fa.flushMicrotasks();
         fa.elapse(Duration(seconds: 1));
-        speech.processMethodCall(MethodCall(
-            SpeechToText.textRecognitionMethod, firstRecognizedJson));
+        speech.processMethodCall(MethodCall(SpeechToText.textRecognitionMethod,
+            TestSpeechChannelHandler.firstRecognizedJson));
         fa.flushMicrotasks();
         fa.elapse(Duration(seconds: 1));
         expect(speech.isListening, isTrue);
@@ -188,29 +156,37 @@ void main() {
     });
     test('uses localeId if provided', () async {
       await speech.initialize();
-      await speech.listen(localeId: localeId1);
-      expect(listenInvoked, true);
-      expect(listenLocale, localeId1);
+      await speech.listen(localeId: TestSpeechChannelHandler.localeId1);
+      expect(speechHandler.listenInvoked, true);
+      expect(speechHandler.listenLocale, TestSpeechChannelHandler.localeId1);
     });
     test('calls speech listener', () async {
       await speech.initialize();
       await speech.listen(onResult: listener.onSpeechResult);
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson));
+      await speech.processMethodCall(MethodCall(
+          SpeechToText.textRecognitionMethod,
+          TestSpeechChannelHandler.firstRecognizedJson));
       expect(listener.speechResults, 1);
-      expect(listener.results, [firstRecognizedResult]);
-      expect(speech.lastRecognizedWords, firstRecognizedWords);
+      expect(listener.results, [speechHandler.firstRecognizedResult]);
+      expect(speech.lastRecognizedWords,
+          TestSpeechChannelHandler.firstRecognizedWords);
     });
     test('calls speech listener with multiple', () async {
       await speech.initialize();
       await speech.listen(onResult: listener.onSpeechResult);
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson));
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.textRecognitionMethod, secondRecognizedJson));
+      await speech.processMethodCall(MethodCall(
+          SpeechToText.textRecognitionMethod,
+          TestSpeechChannelHandler.firstRecognizedJson));
+      await speech.processMethodCall(MethodCall(
+          SpeechToText.textRecognitionMethod,
+          TestSpeechChannelHandler.secondRecognizedJson));
       expect(listener.speechResults, 2);
-      expect(listener.results, [firstRecognizedResult, secondRecognizedResult]);
-      expect(speech.lastRecognizedWords, secondRecognizedWords);
+      expect(listener.results, [
+        speechHandler.firstRecognizedResult,
+        speechHandler.secondRecognizedResult
+      ]);
+      expect(speech.lastRecognizedWords,
+          TestSpeechChannelHandler.secondRecognizedWords);
     });
   });
 
@@ -229,101 +205,103 @@ void main() {
     test('invoked on listen', () async {
       await speech.initialize();
       await speech.listen(onSoundLevelChange: listener.onSoundLevel);
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.soundLevelChangeMethod, level1));
+      await speech.processMethodCall(MethodCall(
+          SpeechToText.soundLevelChangeMethod,
+          TestSpeechChannelHandler.level1));
       expect(listener.soundLevel, 1);
-      expect(listener.soundLevels, contains(level1));
+      expect(listener.soundLevels, contains(TestSpeechChannelHandler.level1));
     });
     test('sets lastLevel', () async {
       await speech.initialize();
       await speech.listen(onSoundLevelChange: listener.onSoundLevel);
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.soundLevelChangeMethod, level1));
-      expect(speech.lastSoundLevel, level1);
+      await speech.processMethodCall(MethodCall(
+          SpeechToText.soundLevelChangeMethod,
+          TestSpeechChannelHandler.level1));
+      expect(speech.lastSoundLevel, TestSpeechChannelHandler.level1);
     });
   });
 
   group('cancel', () {
     test('does nothing if not initialized', () async {
       speech.cancel();
-      expect(cancelInvoked, false);
+      expect(speechHandler.cancelInvoked, false);
     });
     test('cancels an active listen', () async {
       await speech.initialize();
       await speech.listen();
       await speech.cancel();
-      expect(cancelInvoked, true);
+      expect(speechHandler.cancelInvoked, true);
       expect(speech.isListening, isFalse);
     });
   });
   group('stop', () {
     test('does nothing if not initialized', () async {
       speech.stop();
-      expect(cancelInvoked, false);
+      expect(speechHandler.cancelInvoked, false);
     });
     test('stops an active listen', () async {
       await speech.initialize();
       speech.listen();
       speech.stop();
-      expect(stopInvoked, true);
+      expect(speechHandler.stopInvoked, true);
     });
   });
   group('error', () {
     test('notifies handler with transient', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.transientErrorJson));
       expect(listener.speechErrors, 1);
       expect(listener.errors.first.permanent, isFalse);
     });
     test('notifies handler with permanent', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.permanentErrorJson));
       expect(listener.speechErrors, 1);
       expect(listener.errors.first.permanent, isTrue);
     });
     test('continues listening on transient', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.transientErrorJson));
       expect(speech.isListening, isTrue);
     });
     test('continues listening on permanent if cancel not explicitly requested',
         () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.permanentErrorJson));
       expect(speech.isListening, isTrue);
     });
     test('stops listening on permanent if cancel explicitly requested',
         () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen(cancelOnError: true);
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.permanentErrorJson));
       expect(speech.isListening, isFalse);
     });
     test('Error not sent after cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
       await speech.cancel();
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.permanentErrorJson));
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 0);
     });
     test('Error still sent after implicit cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen(cancelOnError: true);
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
-      await speech.processMethodCall(
-          MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.permanentErrorJson));
+      await speech.processMethodCall(MethodCall(SpeechToText.notifyErrorMethod,
+          TestSpeechChannelHandler.permanentErrorJson));
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 2);
     });
@@ -349,35 +327,35 @@ void main() {
     test('handles an empty list', () async {
       await speech.initialize(onError: listener.onSpeechError);
       List<LocaleName> localeNames = await speech.locales();
-      expect(localesInvoked, isTrue);
+      expect(speechHandler.localesInvoked, isTrue);
       expect(localeNames, isEmpty);
     });
     test('returns expected locales', () async {
       await speech.initialize(onError: listener.onSpeechError);
-      locales.add(locale1);
-      locales.add(locale2);
+      speechHandler.locales.add(TestSpeechChannelHandler.locale1);
+      speechHandler.locales.add(TestSpeechChannelHandler.locale2);
       List<LocaleName> localeNames = await speech.locales();
-      expect(localeNames, hasLength(locales.length));
-      expect(localeNames[0].localeId, localeId1);
-      expect(localeNames[0].name, name1);
-      expect(localeNames[1].localeId, localeId2);
-      expect(localeNames[1].name, name2);
+      expect(localeNames, hasLength(speechHandler.locales.length));
+      expect(localeNames[0].localeId, TestSpeechChannelHandler.localeId1);
+      expect(localeNames[0].name, TestSpeechChannelHandler.name1);
+      expect(localeNames[1].localeId, TestSpeechChannelHandler.localeId2);
+      expect(localeNames[1].name, TestSpeechChannelHandler.name2);
     });
     test('skips incorrect locales', () async {
       await speech.initialize(onError: listener.onSpeechError);
-      locales.add("InvalidJunk");
-      locales.add(locale1);
+      speechHandler.locales.add("InvalidJunk");
+      speechHandler.locales.add(TestSpeechChannelHandler.locale1);
       List<LocaleName> localeNames = await speech.locales();
       expect(localeNames, hasLength(1));
-      expect(localeNames[0].localeId, localeId1);
-      expect(localeNames[0].name, name1);
+      expect(localeNames[0].localeId, TestSpeechChannelHandler.localeId1);
+      expect(localeNames[0].name, TestSpeechChannelHandler.name1);
     });
     test('system locale matches first returned locale', () async {
       await speech.initialize(onError: listener.onSpeechError);
-      locales.add(locale1);
-      locales.add(locale2);
+      speechHandler.locales.add(TestSpeechChannelHandler.locale1);
+      speechHandler.locales.add(TestSpeechChannelHandler.locale2);
       LocaleName current = await speech.systemLocale();
-      expect(current.localeId, localeId1);
+      expect(current.localeId, TestSpeechChannelHandler.localeId1);
     });
   });
   group('status', () {
