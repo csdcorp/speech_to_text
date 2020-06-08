@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -77,6 +79,11 @@ class SpeechToText {
   bool _recognized = false;
   bool _listening = false;
   bool _cancelOnError = false;
+  bool _partialResults = false;
+  int _listenStartedAt = 0;
+  int _lastSpeechEventAt = 0;
+  Duration _pauseFor;
+  Duration _listenFor;
 
   /// True if not listening or the user called cancel / stop, false
   /// if cancel/stop were invoked by timeout or error condition.
@@ -245,7 +252,10 @@ class SpeechToText {
   /// are recognized.
   ///
   /// [listenFor] sets the maximum duration that it will listen for, after
-  /// that it automatically cancels the listen for you.
+  /// that it automatically stops the listen for you.
+  ///
+  /// [pauseFor] sets the maximum duration of a pause in speech with no words
+  /// detected, after that it automatically stops the listen for you.
   ///
   /// [localeId] is an optional locale that can be used to listen in a language
   /// other than the current system default. See [locales] to find the list of
@@ -270,6 +280,7 @@ class SpeechToText {
   Future listen(
       {SpeechResultListener onResult,
       Duration listenFor,
+      Duration pauseFor,
       String localeId,
       SpeechSoundLevelChange onSoundLevelChange,
       cancelOnError = false,
@@ -284,8 +295,9 @@ class SpeechToText {
     _recognized = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
+    _partialResults = partialResults;
     Map<String, dynamic> listenParams = {
-      "partialResults": partialResults,
+      "partialResults": partialResults || null != pauseFor,
       "onDevice": onDevice,
       "listenMode": listenMode.index,
     };
@@ -293,10 +305,47 @@ class SpeechToText {
       listenParams["localeId"] = localeId;
     }
     channel.invokeMethod(listenMethod, listenParams);
-    if (null != listenFor) {
-      _listenTimer = Timer(listenFor, () {
-        _stop();
-      });
+    _listenStartedAt = clock.now().millisecondsSinceEpoch;
+    _setupListenAndPause(pauseFor, listenFor);
+  }
+
+  void _setupListenAndPause(Duration pauseFor, Duration listenFor) {
+    _pauseFor = null;
+    _listenFor = null;
+    if (null == pauseFor && null == listenFor) {
+      return;
+    }
+    var minDuration;
+    if (null == pauseFor) {
+      _listenFor = Duration(milliseconds: listenFor.inMilliseconds);
+      minDuration = listenFor;
+    } else if (null == listenFor) {
+      _pauseFor = Duration(milliseconds: pauseFor.inMilliseconds);
+      minDuration = pauseFor;
+    } else {
+      _listenFor = Duration(milliseconds: listenFor.inMilliseconds);
+      _pauseFor = Duration(milliseconds: pauseFor.inMilliseconds);
+      var minMillis = min(listenFor.inMilliseconds - _elapsedListenMillis,
+          pauseFor.inMilliseconds);
+      minDuration = Duration(milliseconds: minMillis);
+    }
+    _listenTimer = Timer(minDuration, _stopOnPauseOrListen);
+  }
+
+  int get _elapsedListenMillis =>
+      clock.now().millisecondsSinceEpoch - _listenStartedAt;
+  int get _elapsedSinceSpeechEvent =>
+      clock.now().millisecondsSinceEpoch - _lastSpeechEventAt;
+
+  void _stopOnPauseOrListen() {
+    if (null != _listenFor &&
+        _elapsedListenMillis >= _listenFor.inMilliseconds) {
+      _stop();
+    } else if (null != _pauseFor &&
+        _elapsedSinceSpeechEvent >= _pauseFor.inMilliseconds) {
+      _stop();
+    } else {
+      _setupListenAndPause(_pauseFor, _listenFor);
     }
   }
 
@@ -371,6 +420,10 @@ class SpeechToText {
   }
 
   void _onTextRecognition(String resultJson) {
+    _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
+    if (!_partialResults) {
+      return;
+    }
     _recognized = true;
     // print("Recognized text $resultJson");
     Map<String, dynamic> resultMap = jsonDecode(resultJson);

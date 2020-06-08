@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -134,6 +135,56 @@ void main() {
       await speech.listen();
       expect(listenLocale, isNull);
       expect(listenInvoked, true);
+    });
+    test('stops listen after listenFor duration', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(listenFor: Duration(seconds: 2));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 2));
+        expect(speech.isListening, isFalse);
+      });
+    });
+    test('stops listen after listenFor duration even with speech event',
+        () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(listenFor: Duration(seconds: 1));
+        speech.processMethodCall(MethodCall(
+            SpeechToText.textRecognitionMethod, firstRecognizedJson));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 1));
+        expect(speech.isListening, isFalse);
+      });
+    });
+    test('stops listen after pauseFor duration with no speech', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(pauseFor: Duration(seconds: 2));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 2));
+        expect(speech.isListening, isFalse);
+      });
+    });
+    test('keeps listening after pauseFor with speech event', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(pauseFor: Duration(seconds: 2));
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 1));
+        speech.processMethodCall(MethodCall(
+            SpeechToText.textRecognitionMethod, firstRecognizedJson));
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 1));
+        expect(speech.isListening, isTrue);
+      });
     });
     test('uses localeId if provided', () async {
       await speech.initialize();
