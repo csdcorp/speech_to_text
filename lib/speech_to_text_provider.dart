@@ -23,16 +23,20 @@ import 'package:speech_to_text/speech_to_text.dart';
 ///   var words = speechProvider.lastWords;
 /// });
 class SpeechToTextProvider extends ChangeNotifier {
-  final StreamController<SpeechRecognitionEvent> recognitionController =
+  final StreamController<SpeechRecognitionEvent> _recognitionController =
       StreamController.broadcast();
   final SpeechToText _speechToText;
   SpeechRecognitionResult _lastResult;
+  List<LocaleName> _locales;
+  LocaleName _systemLocale;
 
   /// Only construct one instance in an application.
   ///
   /// Do not call `initialize` on the [SpeechToText] that is passed as a parameter, instead
   /// call the [initialize] method on this class.
   SpeechToTextProvider(this._speechToText);
+
+  Stream<SpeechRecognitionEvent> get stream => _recognitionController.stream;
 
   /// Returns the last result received, may be null.
   SpeechRecognitionResult get lastResult => _lastResult;
@@ -45,13 +49,21 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// Returns true if [SpeechToText] was initialized successful and can now
   /// be used, false otherwse.
   Future<bool> initialize() async {
+    if (isAvailable) {
+      return isAvailable;
+    }
     bool availableBefore = _speechToText.isAvailable;
-    bool isAvailable =
+    bool available =
         await _speechToText.initialize(onStatus: _onStatus, onError: _onError);
-    if (availableBefore != isAvailable) {
+    if (available) {
+      _locales = [];
+      _locales.addAll(await _speechToText.locales());
+      _systemLocale = await _speechToText.systemLocale();
+    }
+    if (availableBefore != available) {
       notifyListeners();
     }
-    return isAvailable;
+    return available;
   }
 
   /// Returns true if the provider has been initialized and can be used to recognize speech.
@@ -69,6 +81,15 @@ class SpeechToTextProvider extends ChangeNotifier {
 
   /// Returns true if [SpeechToText] has a previous error.
   bool get hasError => _speechToText.hasError;
+
+  /// Returns true if [lastResult] has a last result.
+  bool get hasResults => _speechToText.hasError;
+
+  /// Returns the list of locales that are available on the device for speech recognition.
+  List<LocaleName> get locales => _locales;
+
+  /// Returns the locale that is currently set as active on the device.
+  LocaleName get systemLocale => _systemLocale;
 
   /// Start listening for new events, set [partialResults] to true to receive interim
   /// recognition results.
@@ -109,7 +130,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   }
 
   void _onError(SpeechRecognitionError errorNotification) {
-    recognitionController.add(SpeechRecognitionEvent(
+    _recognitionController.add(SpeechRecognitionEvent(
         SpeechRecognitionEventType.errorEvent,
         null,
         errorNotification,
@@ -118,14 +139,14 @@ class SpeechToTextProvider extends ChangeNotifier {
   }
 
   void _onStatus(String status) {
-    recognitionController.add(SpeechRecognitionEvent(
+    _recognitionController.add(SpeechRecognitionEvent(
         SpeechRecognitionEventType.statusChangeEvent, null, null, isListening));
     notifyListeners();
   }
 
   void _onListenResult(SpeechRecognitionResult result) {
     _lastResult = result;
-    recognitionController.add(SpeechRecognitionEvent(
+    _recognitionController.add(SpeechRecognitionEvent(
         result.finalResult
             ? SpeechRecognitionEventType.finalRecognitionEvent
             : SpeechRecognitionEventType.partialRecognitionEvent,
