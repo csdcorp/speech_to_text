@@ -168,6 +168,22 @@ void main() {
       });
     });
   });
+  group('locale', () {
+    test('locales empty before init', () async {
+      expect(provider.systemLocale, isNull);
+      expect(provider.locales, isEmpty);
+    });
+    test('set from SpeechToText after init', () async {
+      fakeAsync((fa) {
+        speechHandler.setupLocales();
+        provider.initialize();
+        fa.flushMicrotasks();
+        expect(
+            provider.systemLocale.localeId, TestSpeechChannelHandler.localeId1);
+        expect(provider.locales, hasLength(speechHandler.locales.length));
+      });
+    });
+  });
 }
 
 void setupForListen(SpeechToTextProvider provider, FakeAsync fa,

@@ -28,7 +28,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   final SpeechToText _speechToText;
   SpeechRecognitionResult _lastResult;
   double _lastLevel = 0;
-  List<LocaleName> _locales;
+  List<LocaleName> _locales = [];
   LocaleName _systemLocale;
 
   /// Only construct one instance in an application.

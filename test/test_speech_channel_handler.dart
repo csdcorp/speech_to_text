@@ -109,4 +109,10 @@ class TestSpeechChannelHandler {
     _speech.processMethodCall(
         MethodCall(SpeechToText.soundLevelChangeMethod, level2));
   }
+
+  void setupLocales() {
+    locales.clear();
+    locales.add(locale1);
+    locales.add(locale2);
+  }
 }
