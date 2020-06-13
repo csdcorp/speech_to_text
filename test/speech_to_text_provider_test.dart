@@ -26,7 +26,6 @@ void main() {
   });
 
   tearDown(() {
-    print("tearing down channel");
     speechToText.channel.setMockMethodCallHandler(null);
   });
 

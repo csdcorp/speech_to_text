@@ -94,6 +94,9 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// Start listening for new events, set [partialResults] to true to receive interim
   /// recognition results.
   ///
+  /// [soundLevel] set to true to be notified on changes to the input sound level
+  /// on the microphone.
+  ///
   /// [listenFor] sets the maximum duration that it will listen for, after
   /// that it automatically stops the listen for you.
   ///
@@ -102,14 +105,26 @@ class SpeechToTextProvider extends ChangeNotifier {
   ///
   /// Call this only after a successful [initialize] call
   void listen(
-      {bool partialResults = false, Duration listenFor, Duration pauseFor}) {
-    _speechToText.listen(
-        partialResults: partialResults,
-        listenFor: listenFor,
-        pauseFor: pauseFor,
-        cancelOnError: true,
-        onResult: _onListenResult,
-        onSoundLevelChange: _onSoundLevelChange);
+      {bool partialResults = false,
+      bool soundLevel = false,
+      Duration listenFor,
+      Duration pauseFor}) {
+    if (soundLevel) {
+      _speechToText.listen(
+          partialResults: partialResults,
+          listenFor: listenFor,
+          pauseFor: pauseFor,
+          cancelOnError: true,
+          onResult: _onListenResult,
+          onSoundLevelChange: _onSoundLevelChange);
+    } else {
+      _speechToText.listen(
+          partialResults: partialResults,
+          listenFor: listenFor,
+          pauseFor: pauseFor,
+          cancelOnError: true,
+          onResult: _onListenResult);
+    }
   }
 
   /// Stops a current active listening session.
@@ -164,7 +179,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   }
 
   void _onSoundLevelChange(double level) {
-    recognitionController.add(SpeechRecognitionEvent(
+    _recognitionController.add(SpeechRecognitionEvent(
         SpeechRecognitionEventType.soundLevelChangeEvent,
         null,
         null,
