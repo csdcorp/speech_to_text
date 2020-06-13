@@ -7,6 +7,7 @@
   * onSoundLevelChange now supported on iOS
   * added compile troubleshooting help to README.md
   * `SpeechToTextProvider` is an alternate and simpler way to interact with the `SpeechToText` plugin.
+  * new `provider_example.dart` example for usage of `SpeechToTextProvider`. 
 
 ## 2.2.0
 

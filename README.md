@@ -11,12 +11,10 @@ conversion or always on listening.
 
 ## Recent Updates
 
-The 2.2.0 version improves audio session handling and start / stop sound playback on iOS. 
+The 2.3.0 version adds `SpeechToTextProvider` as a simpler way to interact with the plugin. Checkout 
+the new `provider_example.dart` for intended usage. 
 
-The 2.0.0 version uses the new Flutter 1.12.x plugin APIs, although it may work with older with
-older versions of Flutter it is not guaranteed. It also blocks duplicate notifications on some 
-Android versions, if you feel you have missed an `onResult` notification please post an issue. 
-See the change log for more details. 
+The 2.2.0 version improves audio session handling and start / stop sound playback on iOS. 
 
 *Note*: Feedback from any test devices is welcome. 
 
