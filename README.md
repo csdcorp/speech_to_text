@@ -39,7 +39,11 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 ### Initialize once
 The `initialize` method only needs to be called once per application session. After that `listen`, 
-`start`, `stop`, and `cancel` can be used to interact with the plugin. 
+`start`, `stop`, and `cancel` can be used to interact with the plugin. Subsequent calls to `initialize` 
+are ignored which is safe but does mean that the `onStatus` and `onError` callbacks cannot be reset after
+the first call to `initialize`. For that reason there should be only one instance of the plugin per 
+application. The `SpeechToTextProvider` is one way to create a single instance and easily reuse it in 
+multiple widgets. 
 
 ## Permissions
 
