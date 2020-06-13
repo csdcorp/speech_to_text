@@ -167,7 +167,8 @@ void main() {
           SpeechToText.textRecognitionMethod,
           TestSpeechChannelHandler.firstRecognizedJson));
       expect(listener.speechResults, 1);
-      expect(listener.results, [speechHandler.firstRecognizedResult]);
+      expect(
+          listener.results, [TestSpeechChannelHandler.firstRecognizedResult]);
       expect(speech.lastRecognizedWords,
           TestSpeechChannelHandler.firstRecognizedWords);
     });
@@ -182,8 +183,8 @@ void main() {
           TestSpeechChannelHandler.secondRecognizedJson));
       expect(listener.speechResults, 2);
       expect(listener.results, [
-        speechHandler.firstRecognizedResult,
-        speechHandler.secondRecognizedResult
+        TestSpeechChannelHandler.firstRecognizedResult,
+        TestSpeechChannelHandler.secondRecognizedResult
       ]);
       expect(speech.lastRecognizedWords,
           TestSpeechChannelHandler.secondRecognizedWords);

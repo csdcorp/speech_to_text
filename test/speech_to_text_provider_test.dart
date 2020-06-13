@@ -1,5 +1,4 @@
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
