@@ -6,6 +6,7 @@ enum SpeechRecognitionEventType {
   partialRecognitionEvent,
   errorEvent,
   statusChangeEvent,
+  soundLevelChangeEvent,
 }
 
 /// A single event in a stream of speech recognition events.
@@ -17,11 +18,13 @@ class SpeechRecognitionEvent {
   final SpeechRecognitionError _error;
   final SpeechRecognitionResult _result;
   final bool _listening;
+  final double _level;
 
   SpeechRecognitionEvent(
-      this.eventType, this._result, this._error, this._listening);
+      this.eventType, this._result, this._error, this._listening, this._level);
 
   bool get isListening => _listening;
+  double get level => _level;
   SpeechRecognitionResult get recognitionResult => _result;
   SpeechRecognitionError get error => _error;
 }

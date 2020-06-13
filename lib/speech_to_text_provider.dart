@@ -108,7 +108,8 @@ class SpeechToTextProvider extends ChangeNotifier {
         listenFor: listenFor,
         pauseFor: pauseFor,
         cancelOnError: true,
-        onResult: _onListenResult);
+        onResult: _onListenResult,
+        onSoundLevelChange: _onSoundLevelChange);
   }
 
   /// Stops a current active listening session.
@@ -134,13 +135,18 @@ class SpeechToTextProvider extends ChangeNotifier {
         SpeechRecognitionEventType.errorEvent,
         null,
         errorNotification,
-        isListening));
+        isListening,
+        null));
     notifyListeners();
   }
 
   void _onStatus(String status) {
     _recognitionController.add(SpeechRecognitionEvent(
-        SpeechRecognitionEventType.statusChangeEvent, null, null, isListening));
+        SpeechRecognitionEventType.statusChangeEvent,
+        null,
+        null,
+        isListening,
+        null));
     notifyListeners();
   }
 
@@ -152,7 +158,18 @@ class SpeechToTextProvider extends ChangeNotifier {
             : SpeechRecognitionEventType.partialRecognitionEvent,
         result,
         null,
-        isListening));
+        isListening,
+        null));
+    notifyListeners();
+  }
+
+  void _onSoundLevelChange(double level) {
+    recognitionController.add(SpeechRecognitionEvent(
+        SpeechRecognitionEventType.soundLevelChangeEvent,
+        null,
+        null,
+        null,
+        level));
     notifyListeners();
   }
 }
