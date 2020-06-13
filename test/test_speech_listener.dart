@@ -13,6 +13,7 @@ class TestSpeechListener {
   bool hasError = false;
   SpeechRecognitionResult recognitionResult;
   SpeechRecognitionError lastError;
+  double soundLevel;
 
   TestSpeechListener(this._speechProvider);
 
@@ -30,5 +31,6 @@ class TestSpeechListener {
     recognitionResult = _speechProvider.lastResult;
     hasError = _speechProvider.hasError;
     lastError = _speechProvider.lastError;
+    soundLevel = _speechProvider.lastLevel;
   }
 }

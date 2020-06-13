@@ -104,4 +104,9 @@ class TestSpeechChannelHandler {
     _speech.processMethodCall(
         MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
   }
+
+  void notifySoundLevel() {
+    _speech.processMethodCall(
+        MethodCall(SpeechToText.soundLevelChangeMethod, level2));
+  }
 }

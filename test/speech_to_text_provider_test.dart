@@ -87,6 +87,30 @@ void main() {
       });
     });
   });
+  group('soundLevel', () {
+    test('notifies when requested', () async {
+      fakeAsync((fa) {
+        setupForListen(provider, fa, speechListener,
+            partialResults: true, soundLevel: true);
+        speechListener.reset();
+        speechHandler.notifySoundLevel();
+        fa.flushMicrotasks();
+        expect(speechListener.notified, isTrue);
+        expect(speechListener.soundLevel, TestSpeechChannelHandler.level2);
+      });
+    });
+    test('no notification by default', () async {
+      fakeAsync((fa) {
+        setupForListen(provider, fa, speechListener,
+            partialResults: true, soundLevel: false);
+        speechListener.reset();
+        speechHandler.notifySoundLevel();
+        fa.flushMicrotasks();
+        expect(speechListener.notified, isFalse);
+        expect(speechListener.soundLevel, 0);
+      });
+    });
+  });
   group('stop/cancel', () {
     test('notifies on stop', () async {
       fakeAsync((fa) {
@@ -127,10 +151,10 @@ void main() {
 
 void setupForListen(SpeechToTextProvider provider, FakeAsync fa,
     TestSpeechListener speechListener,
-    {bool partialResults = false}) {
+    {bool partialResults = false, bool soundLevel = false}) {
   provider.initialize();
   fa.flushMicrotasks();
   speechListener.reset();
-  provider.listen(partialResults: partialResults);
+  provider.listen(partialResults: partialResults, soundLevel: soundLevel);
   fa.flushMicrotasks();
 }

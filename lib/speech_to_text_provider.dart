@@ -27,6 +27,7 @@ class SpeechToTextProvider extends ChangeNotifier {
       StreamController.broadcast();
   final SpeechToText _speechToText;
   SpeechRecognitionResult _lastResult;
+  double _lastLevel = 0;
   List<LocaleName> _locales;
   LocaleName _systemLocale;
 
@@ -43,6 +44,12 @@ class SpeechToTextProvider extends ChangeNotifier {
 
   /// Returns the last error received, may be null.
   SpeechRecognitionError get lastError => _speechToText.lastError;
+
+  /// Returns the last sound level received.
+  ///
+  /// Note this is only available when the `soundLevel` is set to true on
+  /// a call to [listen], will be 0 at all other times.
+  double get lastLevel => _lastLevel;
 
   /// Initializes the provider and the contained [SpeechToText] instance.
   ///
@@ -109,6 +116,7 @@ class SpeechToTextProvider extends ChangeNotifier {
       bool soundLevel = false,
       Duration listenFor,
       Duration pauseFor}) {
+    _lastLevel = 0;
     if (soundLevel) {
       _speechToText.listen(
           partialResults: partialResults,
@@ -179,6 +187,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   }
 
   void _onSoundLevelChange(double level) {
+    _lastLevel = level;
     _recognitionController.add(SpeechRecognitionEvent(
         SpeechRecognitionEventType.soundLevelChangeEvent,
         null,
