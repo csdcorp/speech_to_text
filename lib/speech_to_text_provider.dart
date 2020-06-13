@@ -90,7 +90,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   bool get hasError => _speechToText.hasError;
 
   /// Returns true if [lastResult] has a last result.
-  bool get hasResults => _speechToText.hasError;
+  bool get hasResults => null != _lastResult;
 
   /// Returns the list of locales that are available on the device for speech recognition.
   List<LocaleName> get locales => _locales;
@@ -117,6 +117,7 @@ class SpeechToTextProvider extends ChangeNotifier {
       Duration listenFor,
       Duration pauseFor}) {
     _lastLevel = 0;
+    _lastResult = null;
     if (soundLevel) {
       _speechToText.listen(
           partialResults: partialResults,

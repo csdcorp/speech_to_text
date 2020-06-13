@@ -43,6 +43,10 @@ void main() {
       expect(provider.isAvailable, speechToText.isAvailable);
       expect(provider.isNotAvailable, !speechToText.isAvailable);
     });
+    test('hasError matches delegate after error', () async {
+      expect(await provider.initialize(), isTrue);
+      expect(provider.hasError, speechToText.hasError);
+    });
   });
   group('listening', () {
     test('notifies on initialize', () async {
@@ -58,6 +62,7 @@ void main() {
         setupForListen(provider, fa, speechListener);
         expect(speechListener.notified, isTrue);
         expect(speechListener.isListening, isTrue);
+        expect(provider.hasResults, isFalse);
       });
     });
     test('notifies on final words', () async {
@@ -67,10 +72,21 @@ void main() {
         speechHandler.notifyFinalWords();
         fa.flushMicrotasks();
         expect(speechListener.notified, isTrue);
+        expect(provider.hasResults, isTrue);
         var result = speechListener.recognitionResult;
         expect(result.recognizedWords,
             TestSpeechChannelHandler.secondRecognizedWords);
         expect(result.finalResult, isTrue);
+      });
+    });
+    test('hasResult false after listening before new results', () async {
+      fakeAsync((fa) {
+        setupForListen(provider, fa, speechListener);
+        speechHandler.notifyFinalWords();
+        provider.stop();
+        setupForListen(provider, fa, speechListener);
+        fa.flushMicrotasks();
+        expect(provider.hasResults, isFalse);
       });
     });
     test('notifies on partial words', () async {
@@ -80,6 +96,7 @@ void main() {
         speechHandler.notifyPartialWords();
         fa.flushMicrotasks();
         expect(speechListener.notified, isTrue);
+        expect(provider.hasResults, isTrue);
         var result = speechListener.recognitionResult;
         expect(result.recognizedWords,
             TestSpeechChannelHandler.firstRecognizedWords);
@@ -136,6 +153,10 @@ void main() {
     });
   });
   group('error handling', () {
+    test('hasError matches delegate default', () async {
+      expect(await provider.initialize(), isTrue);
+      expect(provider.hasError, speechToText.hasError);
+    });
     test('notifies on error', () async {
       fakeAsync((fa) {
         provider.initialize();
