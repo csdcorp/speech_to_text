@@ -31,6 +31,7 @@ public enum SpeechToTextStatus: String {
 public enum SpeechToTextErrors: String {
     case onDeviceError
     case noRecognizerError
+    case listenFailedError
     case missingOrInvalidArg
 }
 
@@ -51,6 +52,11 @@ struct SpeechRecognitionResult : Codable {
     let finalResult: Bool
 }
 
+enum TestError: Error {
+    case runtimeError(String)
+}
+
+
 @available(iOS 10.0, *)
 public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var channel: FlutterMethodChannel
@@ -65,6 +71,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var previousLocale: Locale?
     private var onPlayEnd: (() -> Void)?
     private var returnPartialResults: Bool = true
+    private var failedListen: Bool = false
     private var listening = false
     private let audioSession = AVAudioSession.sharedInstance()
     private let audioEngine = AVAudioEngine()
@@ -281,9 +288,23 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         stopAllPlayers()
         currentRequest?.endAudio()
         
-        audioEngine.stop()
-        let inputNode = audioEngine.inputNode
-        inputNode.removeTap(onBus: busForNodeTap);
+        do {
+            try trap {
+                self.audioEngine.stop()
+            }
+        }
+        catch {
+            os_log("Error stopping engine: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
+        }
+        do {
+            try trap {
+                let inputNode = self.audioEngine.inputNode
+                inputNode.removeTap(onBus: self.busForNodeTap);
+            }
+        }
+        catch {
+            os_log("Error removing trap: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
+        }
         do {
             if let rememberedAudioCategory = rememberedAudioCategory {
                 try self.audioSession.setCategory(rememberedAudioCategory)
@@ -310,6 +331,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             return
         }
         do {
+//            let inErrorTest = true
+            failedListen = false
             returnPartialResults = partialResults
             setupRecognizerForLocale(locale: getLocale(localeStr))
             guard let localRecognizer = recognizer else {
@@ -332,8 +355,11 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             if let sound = listeningSound {
                 self.onPlayEnd = {()->Void in
-                    self.listening = true
-                    self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
+                    if ( !self.failedListen ) {
+                        self.listening = true
+                        self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
+
+                    }
                 }
                 sound.play()
             }
@@ -368,7 +394,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                     self.updateSoundLevel( buffer: buffer )
                 }
             }
-            
+//            if ( inErrorTest ){
+//                throw TestError.runtimeError("for testing only")
+//            }
             self.audioEngine.prepare()
             try self.audioEngine.start()
             if nil == listeningSound {
@@ -377,8 +405,15 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             }
         }
         catch {
+            failedListen = true
             os_log("Error starting listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
-            sendBoolResult( false, result );
+            stopCurrentListen()
+            invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
+            DispatchQueue.main.async {
+                result(FlutterError( code: SpeechToTextErrors.listenFailedError.rawValue,
+                                     message:"Failed to start listen on device",
+                                     details: error.localizedDescription ))
+            }
         }
     }
     
