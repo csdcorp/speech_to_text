@@ -52,6 +52,11 @@ struct SpeechRecognitionResult : Codable {
     let finalResult: Bool
 }
 
+struct SpeechRecognitionError : Codable {
+    let errorMsg: String
+    let permanent: Bool
+}
+
 enum TestError: Error {
     case runtimeError(String)
 }
@@ -331,7 +336,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             return
         }
         do {
-//            let inErrorTest = true
+        //    let inErrorTest = true
             failedListen = false
             returnPartialResults = partialResults
             setupRecognizerForLocale(locale: getLocale(localeStr))
@@ -394,25 +399,29 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                     self.updateSoundLevel( buffer: buffer )
                 }
             }
-//            if ( inErrorTest ){
-//                throw TestError.runtimeError("for testing only")
-//            }
+        //    if ( inErrorTest ){
+        //        throw TestError.runtimeError("for testing only")
+        //    }
             self.audioEngine.prepare()
             try self.audioEngine.start()
             if nil == listeningSound {
                 listening = true
                 self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
             }
+            sendBoolResult( true, result );
         }
         catch {
             failedListen = true
             os_log("Error starting listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
             stopCurrentListen()
+            sendBoolResult( false, result );
             invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
-            DispatchQueue.main.async {
-                result(FlutterError( code: SpeechToTextErrors.listenFailedError.rawValue,
-                                     message:"Failed to start listen on device",
-                                     details: error.localizedDescription ))
+            let speechError = SpeechRecognitionError(errorMsg: "error_listen_failed", permanent: true )
+            do {
+                let errorResult = try jsonEncoder.encode(speechError)
+                invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyError, arguments: String( data:errorResult, encoding: .utf8) )
+            } catch {
+                os_log("Could not encode JSON", log: pluginLog, type: .error)
             }
         }
     }
