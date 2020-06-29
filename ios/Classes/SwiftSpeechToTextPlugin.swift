@@ -57,7 +57,7 @@ struct SpeechRecognitionError : Codable {
     let permanent: Bool
 }
 
-enum TestError: Error {
+enum SpeechToTextError: Error {
     case runtimeError(String)
 }
 
@@ -126,6 +126,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
                 return
             }
+            
             listenForSpeech( result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice, listenMode: listenMode )
         case SwiftSpeechToTextMethods.stop.rawValue:
             stopSpeech( result )
@@ -368,7 +369,11 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
                 sound.play()
             }
+            // self.audioEngine.reset();
             let inputNode = self.audioEngine.inputNode
+            if(inputNode.inputFormat(forBus: 0).channelCount == 0){
+                throw SpeechToTextError.runtimeError("Not enough available inputs.")
+            }
             self.currentRequest = SFSpeechAudioBufferRecognitionRequest()
             guard let currentRequest = self.currentRequest else {
                 sendBoolResult( false, result );
@@ -400,7 +405,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
             }
         //    if ( inErrorTest ){
-        //        throw TestError.runtimeError("for testing only")
+        //        throw SpeechToTextError.runtimeError("for testing only")
         //    }
             self.audioEngine.prepare()
             try self.audioEngine.start()
@@ -485,7 +490,10 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         let speechInfo = SpeechRecognitionResult(alternates: speechWords, finalResult: isFinal )
         do {
             let speechMsg = try jsonEncoder.encode(speechInfo)
-            invokeFlutter( SwiftSpeechToTextCallbackMethods.textRecognition, arguments: String( data:speechMsg, encoding: .utf8) )
+            if let speechStr = String( data:speechMsg, encoding: .utf8) {
+                os_log("Encoded JSON result: %{PUBLIC}@", log: pluginLog, type: .debug, speechStr )
+                invokeFlutter( SwiftSpeechToTextCallbackMethods.textRecognition, arguments: speechStr )
+            }
         } catch {
             os_log("Could not encode JSON", log: pluginLog, type: .error)
         }
