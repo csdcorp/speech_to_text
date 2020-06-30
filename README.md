@@ -65,7 +65,8 @@ Add the record audio permission to your _AndroidManifest.xml_ file, located in `
 ## Adding Sounds for iOS (optional)
 
 Android automatically plays system sounds when speech listening starts or stops but iOS does not. This plugin supports playing sounds to indicate listening status on iOS if sound files are available as assets in the application. To enable sounds in an application using this plugin add the sound files to the project and reference them in the assets section of the application `pubspec.yaml`. The location and filenames of the sound files must exactly match what 
-is shown below or they will not be found. The example application for the plugin shows the usage. 
+is shown below or they will not be found. The example application for the plugin shows the usage. *Note* These files should be very short as they delay 
+the start / end of the speech recognizer until the sound playback is complete. 
 ```yaml
   assets:
   - assets/sounds/speech_to_text_listening.m4r
@@ -116,7 +117,7 @@ This usually happens for older projects that only support Objective-C. See this 
 The symptom for this issue is that the `initialize` method will always fail. If you turn on debug logging 
 using the `debugLogging: true` flag on the `initialize` method you'll see `'Speech recognition unavailable'`
 in the Android log. There's a lengthy issue discussion here https://github.com/csdcorp/speech_to_text/issues/36 
-about this. The issue seems to be that the recognizer is now always automatically enabled on the device. Two 
+about this. The issue seems to be that the recognizer is not always automatically enabled on the device. Two 
 key things helped resolve the issue in this case at least. 
 
 #### First 
