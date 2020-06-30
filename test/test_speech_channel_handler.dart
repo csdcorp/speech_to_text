@@ -8,6 +8,13 @@ import 'package:speech_to_text/speech_to_text.dart';
 /// a call should be.
 class TestSpeechChannelHandler {
   final SpeechToText _speech;
+
+  bool listenException = false;
+
+  static const String listenExceptionCode = "listenFailedError";
+  static const String listenExceptionMessage = "Failed";
+  static const String listenExceptionDetails = "Device Listen Failure";
+
   TestSpeechChannelHandler(this._speech);
 
   bool initResult = true;
@@ -74,6 +81,12 @@ class TestSpeechChannelHandler {
         break;
       case SpeechToText.listenMethod:
         listenInvoked = true;
+        if (listenException) {
+          throw PlatformException(
+              code: listenExceptionCode,
+              message: listenExceptionMessage,
+              details: listenExceptionDetails);
+        }
         listenLocale = methodCall.arguments["localeId"];
         await _speech.processMethodCall(MethodCall(
             SpeechToText.notifyStatusMethod, listeningStatusResponse));

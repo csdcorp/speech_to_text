@@ -78,6 +78,18 @@ void main() {
       expect(speechHandler.listenLocale, isNull);
       expect(speechHandler.listenInvoked, true);
     });
+    test('converts platformException to listenFailed', () async {
+      await speech.initialize();
+      speechHandler.listenException = true;
+      try {
+        await speech.listen();
+        fail("Should have thrown");
+      } on ListenFailedException catch (e) {
+        expect(e.details, TestSpeechChannelHandler.listenExceptionDetails);
+      } catch (wrongE) {
+        fail("Should have been ListenFailedException");
+      }
+    });
     test('stops listen after listenFor duration', () async {
       fakeAsync((fa) {
         speech.initialize();

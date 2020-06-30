@@ -304,9 +304,15 @@ class SpeechToText {
     if (null != localeId) {
       listenParams["localeId"] = localeId;
     }
-    channel.invokeMethod(listenMethod, listenParams);
-    _listenStartedAt = clock.now().millisecondsSinceEpoch;
-    _setupListenAndPause(pauseFor, listenFor);
+    try {
+      bool started = await channel.invokeMethod(listenMethod, listenParams);
+      if (started) {
+        _listenStartedAt = clock.now().millisecondsSinceEpoch;
+        _setupListenAndPause(pauseFor, listenFor);
+      }
+    } on PlatformException catch (e) {
+      throw ListenFailedException(e.details);
+    }
   }
 
   void _setupListenAndPause(Duration pauseFor, Duration listenFor) {
@@ -494,5 +500,12 @@ class LocaleName {
 }
 
 /// Thrown when a method is called that requires successful
-/// initialization first. See [onDbReady]
+/// initialization first.
 class SpeechToTextNotInitializedException implements Exception {}
+
+/// Thrown when listen fails to properly start a speech listening session
+/// on the device
+class ListenFailedException implements Exception {
+  final String details;
+  ListenFailedException(this.details);
+}
