@@ -369,7 +369,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
                 sound.play()
             }
-            // self.audioEngine.reset();
+             self.audioEngine.reset();
             let inputNode = self.audioEngine.inputNode
             if(inputNode.inputFormat(forBus: 0).channelCount == 0){
                 throw SpeechToTextError.runtimeError("Not enough available inputs.")
