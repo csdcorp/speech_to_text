@@ -77,6 +77,7 @@ public class SpeechToTextPlugin :
     private val minSdkForSpeechSupport = 21
     private val speechToTextPermissionCode = 28521
     private val missingConfidence: Double = -1.0
+    private var speechThresholdRms = 7
     private val logTag = "SpeechToTextPlugin"
     private var currentActivity: Activity? = null
     private var activeResult: Result? = null
@@ -90,6 +91,9 @@ public class SpeechToTextPlugin :
     private var previousPartialResults: Boolean = true
     private var previousListenMode: ListenMode = ListenMode.deviceDefault
     private var lastFinalTime: Long = 0
+    private var speechStartTime: Long = 0
+    private var minRms: Float = 1000.0F
+    private var maxRms: Float = -100.0F
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val defaultLanguageTag: String = Locale.getDefault().toLanguageTag()
 
@@ -212,7 +216,6 @@ public class SpeechToTextPlugin :
             return
         }
         activeResult = result
-        val localContext = pluginContext
         initializeIfPermitted(pluginContext)
     }
 
@@ -244,6 +247,8 @@ public class SpeechToTextPlugin :
         if (sdkVersionTooLow(result) || isNotInitialized(result) || isListening()) {
             return
         }
+        minRms = 1000.0F
+        maxRms = -100.0F
         debugLog("Start listening")
         var listenMode = ListenMode.deviceDefault
         if ( listenModeIndex == ListenMode.dictation.ordinal) {
@@ -255,6 +260,7 @@ public class SpeechToTextPlugin :
                 speechRecognizer?.startListening(recognizerIntent)
             }
         }
+        speechStartTime = System.currentTimeMillis()
         notifyListening(isRecording = true)
         result.success(true)
         debugLog("Start listening done")
@@ -298,11 +304,6 @@ public class SpeechToTextPlugin :
         if (null == detailsIntent) {
             detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
         }
-        if (null == detailsIntent) {
-            result.error(SpeechToTextErrors.noLanguageIntent.name,
-                    "Could not get voice details", null)
-            return
-        }
         pluginContext?.sendOrderedBroadcast(
                 detailsIntent, null, LanguageDetailsChecker(result),
                 null, Activity.RESULT_OK, null, null)
@@ -328,7 +329,7 @@ public class SpeechToTextPlugin :
         if (null != userSaid && userSaid.isNotEmpty()) {
             val speechResult = JSONObject()
             speechResult.put("finalResult", isFinal)
-            val confidence = speechBundle?.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
+            val confidence = speechBundle.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
             val alternates = JSONArray()
             for (resultIndex in 0..userSaid.size - 1) {
                 val speechWords = JSONObject()
@@ -474,7 +475,13 @@ public class SpeechToTextPlugin :
     override fun onEndOfSpeech() = notifyListening(isRecording = false)
 
     override fun onError(errorCode: Int) {
-        val errorMsg = when (errorCode) {
+        val delta = System.currentTimeMillis() - speechStartTime
+        var errorReturn = errorCode
+        if ( SpeechRecognizer.ERROR_NO_MATCH == errorCode && maxRms < speechThresholdRms ) {
+            errorReturn = SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+        }
+        debugLog( "Error $errorCode after start at $delta $minRms / $maxRms")
+        val errorMsg = when (errorReturn) {
             SpeechRecognizer.ERROR_AUDIO -> "error_audio_error"
             SpeechRecognizer.ERROR_CLIENT -> "error_client"
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "error_permission"
@@ -507,6 +514,13 @@ public class SpeechToTextPlugin :
     }
 
     override fun onRmsChanged(rmsdB: Float) {
+        if ( rmsdB < minRms ) {
+            minRms = rmsdB
+        }
+        if ( rmsdB > maxRms ) {
+            maxRms = rmsdB
+        }
+        debugLog("rmsDB $minRms / $maxRms")
         handler.post {
             run {
                 channel?.invokeMethod(SpeechToTextCallbackMethods.soundLevelChange.name, rmsdB)
