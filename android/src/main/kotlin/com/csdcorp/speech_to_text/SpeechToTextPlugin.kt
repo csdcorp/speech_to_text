@@ -77,7 +77,7 @@ public class SpeechToTextPlugin :
     private val minSdkForSpeechSupport = 21
     private val speechToTextPermissionCode = 28521
     private val missingConfidence: Double = -1.0
-    private var speechThresholdRms = 7
+    private var speechThresholdRms = 9
     private val logTag = "SpeechToTextPlugin"
     private var currentActivity: Activity? = null
     private var activeResult: Result? = null
