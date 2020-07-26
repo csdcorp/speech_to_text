@@ -355,6 +355,11 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
             }
             rememberedAudioCategory = self.audioSession.category
+            // Attempt to fix sample rate problem see https://developer.apple.com/forums/thread/65656
+            if let audioUnit = audioEngine.inputNode.audioUnit {
+                AudioOutputUnitStop(audioUnit)
+                AudioUnitUninitialize(audioUnit)
+            }
             try self.audioSession.setCategory(AVAudioSession.Category.playAndRecord, options: .defaultToSpeaker)
             //            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
             try self.audioSession.setMode(AVAudioSession.Mode.default)
