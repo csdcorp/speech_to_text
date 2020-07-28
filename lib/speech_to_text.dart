@@ -80,6 +80,7 @@ class SpeechToText {
   bool _listening = false;
   bool _cancelOnError = false;
   bool _partialResults = false;
+  bool _notifiedFinal = false;
   int _listenStartedAt = 0;
   int _lastSpeechEventAt = 0;
   Duration _pauseFor;
@@ -94,6 +95,7 @@ class SpeechToText {
   Timer _listenTimer;
   LocaleName _systemLocale;
   SpeechRecognitionError _lastError;
+  SpeechRecognitionResult _lastSpeechResult;
   SpeechResultListener _resultListener;
   SpeechErrorListener errorListener;
   SpeechStatusListener statusListener;
@@ -210,6 +212,7 @@ class SpeechToText {
     }
     _shutdownListener();
     await channel.invokeMethod('stop');
+    Timer(Duration(milliseconds: 100), _notifyFinalResults);
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
@@ -291,8 +294,10 @@ class SpeechToText {
       throw SpeechToTextNotInitializedException();
     }
     _userEnded = false;
+    _lastSpeechResult = null;
     _cancelOnError = cancelOnError;
     _recognized = false;
+    _notifiedFinal = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
     _partialResults = partialResults;
@@ -321,7 +326,7 @@ class SpeechToText {
     if (null == pauseFor && null == listenFor) {
       return;
     }
-    var minDuration;
+    Duration minDuration;
     if (null == pauseFor) {
       _listenFor = Duration(milliseconds: listenFor.inMilliseconds);
       minDuration = listenFor;
@@ -335,6 +340,7 @@ class SpeechToText {
           pauseFor.inMilliseconds);
       minDuration = Duration(milliseconds: minMillis);
     }
+    // print("Waiting for ${minDuration.inMilliseconds}");
     _listenTimer = Timer(minDuration, _stopOnPauseOrListen);
   }
 
@@ -344,6 +350,7 @@ class SpeechToText {
       clock.now().millisecondsSinceEpoch - _lastSpeechEventAt;
 
   void _stopOnPauseOrListen() {
+    // print("Stop? $_elapsedListenMillis / $_elapsedSinceSpeechEvent");
     if (null != _listenFor &&
         _elapsedListenMillis >= _listenFor.inMilliseconds) {
       _stop();
@@ -426,10 +433,13 @@ class SpeechToText {
   }
 
   void _onTextRecognition(String resultJson) {
-    _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     SpeechRecognitionResult speechResult =
         SpeechRecognitionResult.fromJson(resultMap);
+    if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
+      _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
+    }
+    _lastSpeechResult = speechResult;
     if (!_partialResults && !speechResult.finalResult) {
       return;
     }
@@ -437,8 +447,20 @@ class SpeechToText {
     // print("Recognized text $resultJson");
 
     _lastRecognized = speechResult.recognizedWords;
+    if (speechResult.finalResult) {
+      _notifiedFinal = true;
+    }
     if (null != _resultListener) {
       _resultListener(speechResult);
+    }
+  }
+
+  void _notifyFinalResults() {
+    if (_notifiedFinal) return;
+    if (_lastSpeechResult != null && null != _resultListener) {
+      var finalResult = _lastSpeechResult.toFinal();
+      // print("Notifying final");
+      _resultListener(finalResult);
     }
   }
 

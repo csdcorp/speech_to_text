@@ -257,6 +257,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             sound.play()
         }
         else {
+            self.currentTask?.finish()
             stopCurrentListen( )
             sendBoolResult( true, result );
         }
@@ -292,8 +293,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     private func stopCurrentListen( ) {
         stopAllPlayers()
-        currentRequest?.endAudio()
-        
+        self.currentRequest?.endAudio()
+        invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
+
         do {
             try trap {
                 self.audioEngine.stop()
@@ -355,11 +357,6 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
             }
             rememberedAudioCategory = self.audioSession.category
-            // Attempt to fix sample rate problem see https://developer.apple.com/forums/thread/65656
-            if let audioUnit = audioEngine.inputNode.audioUnit {
-                AudioOutputUnitStop(audioUnit)
-                AudioUnitUninitialize(audioUnit)
-            }
             try self.audioSession.setCategory(AVAudioSession.Category.playAndRecord, options: .defaultToSpeaker)
             //            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
             try self.audioSession.setMode(AVAudioSession.Mode.default)
@@ -425,7 +422,6 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             os_log("Error starting listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
             stopCurrentListen()
             sendBoolResult( false, result );
-            invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
             let speechError = SpeechRecognitionError(errorMsg: "error_listen_failed", permanent: true )
             do {
                 let errorResult = try jsonEncoder.encode(speechError)
@@ -518,6 +514,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     }
     
     private func invokeFlutter( _ method: SwiftSpeechToTextCallbackMethods, arguments: Any? ) {
+        os_log("invokeFlutter %{PUBLIC}@", log: pluginLog, type: .debug, method.rawValue )
         DispatchQueue.main.async {
             self.channel.invokeMethod( method.rawValue, arguments: arguments )
         }
@@ -542,26 +539,31 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
     
     public func speechRecognitionTaskFinishedReadingAudio(_ task: SFSpeechRecognitionTask) {
         reportError(source: "FinishedReadingAudio", error: task.error)
+        os_log("Finished reading audio", log: pluginLog, type: .debug )
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
     }
     
     public func speechRecognitionTaskWasCancelled(_ task: SFSpeechRecognitionTask) {
         reportError(source: "TaskWasCancelled", error: task.error)
+        os_log("Canceled reading audio", log: pluginLog, type: .debug )
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishSuccessfully successfully: Bool) {
         reportError(source: "FinishSuccessfully", error: task.error)
+        os_log("FinishSuccessfully", log: pluginLog, type: .debug )
         stopCurrentListen( )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didHypothesizeTranscription transcription: SFTranscription) {
+        os_log("HypothesizeTranscription", log: pluginLog, type: .debug )
         reportError(source: "HypothesizeTranscription", error: task.error)
         handleResult( [transcription], isFinal: false )
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishRecognition recognitionResult: SFSpeechRecognitionResult) {
         reportError(source: "FinishRecognition", error: task.error)
+        os_log("FinishRecognition %{PUBLIC}@", log: pluginLog, type: .debug, recognitionResult.isFinal.description )
         let isFinal = recognitionResult.isFinal
         handleResult( recognitionResult.transcriptions, isFinal: isFinal )
     }

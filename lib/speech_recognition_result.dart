@@ -82,6 +82,10 @@ class SpeechRecognitionResult {
   factory SpeechRecognitionResult.fromJson(Map<String, dynamic> json) =>
       _$SpeechRecognitionResultFromJson(json);
   Map<String, dynamic> toJson() => _$SpeechRecognitionResultToJson(this);
+
+  toFinal() {
+    return SpeechRecognitionResult(_alternates, true);
+  }
 }
 
 /// A set of words recognized in a [SpeechRecognitionResult].
