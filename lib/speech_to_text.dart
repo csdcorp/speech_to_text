@@ -280,6 +280,11 @@ class SpeechToText {
   /// [onDevice] if true the listen attempts to recognize locally with speech never
   /// leaving the device. If it cannot do this the listen attempt will fail. This is
   /// usually only needed for sensitive content where privacy or security is a concern.
+  ///
+  /// [sampleRate] optional for compatibility with certain iOS devices, some devices
+  /// crash with `sampleRate != device's supported sampleRate`, try 44100 if seeing
+  /// crashes
+  ///
   Future listen(
       {SpeechResultListener onResult,
       Duration listenFor,
@@ -289,7 +294,8 @@ class SpeechToText {
       cancelOnError = false,
       partialResults = true,
       onDevice = false,
-      ListenMode listenMode = ListenMode.confirmation}) async {
+      ListenMode listenMode = ListenMode.confirmation,
+      sampleRate = 0}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
@@ -305,6 +311,7 @@ class SpeechToText {
       "partialResults": partialResults || null != pauseFor,
       "onDevice": onDevice,
       "listenMode": listenMode.index,
+      "sampleRate": sampleRate,
     };
     if (null != localeId) {
       listenParams["localeId"] = localeId;
