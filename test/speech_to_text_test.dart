@@ -166,6 +166,39 @@ void main() {
         expect(speech.isListening, isTrue);
       });
     });
+    test('creates finalResult true if none provided', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(
+            pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
+        fa.flushMicrotasks();
+        speech.processMethodCall(MethodCall(SpeechToText.textRecognitionMethod,
+            TestSpeechChannelHandler.firstRecognizedJson));
+        fa.flushMicrotasks();
+        // 2200 because it is the 2 second duration of the pauseFor then
+        // 200 milliseconds to create the synthetic result
+        fa.elapse(Duration(milliseconds: 2200));
+        expect(listener.results.last.finalResult, isTrue);
+      });
+    });
+    test('returns only one finalResult true if provided', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(
+            pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
+        fa.flushMicrotasks();
+        speech.processMethodCall(MethodCall(SpeechToText.textRecognitionMethod,
+            TestSpeechChannelHandler.finalRecognizedJson));
+        fa.flushMicrotasks();
+        // 2200 because it is the 2 second duration of the pauseFor then
+        // 200 milliseconds to create the synthetic result
+        fa.elapse(Duration(milliseconds: 2200));
+        expect(listener.results.last.finalResult, isTrue);
+        expect(listener.results, hasLength(1));
+      });
+    });
     test('uses localeId if provided', () async {
       await speech.initialize();
       await speech.listen(localeId: TestSpeechChannelHandler.localeId1);
