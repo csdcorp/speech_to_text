@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.1
+
+### Fix
+  * Updated the version number in the readme file, which I forget to do, every single time.
+
 ## 2.4.0
 
 ### New
