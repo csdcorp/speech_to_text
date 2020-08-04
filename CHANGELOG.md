@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.4.0
+
+### New
+  * new parameter `sampleRate` on the `listen` method supports some older iOS devices by allowing
+  customization to support the expected hardware sample rate. 44100 works with some older devices. 
+### Fix
+  * `pauseFor` now times out closer to the expected time and more reliably. Duplicate partial results were 
+  causing it to extend previously. 
+  * `finalResult` is now reliably true on the last result on iOS when `pauseFor` or `listenFor` timeout or 
+  `stop` is called directly. Previously it would only return true when the stop happened almost immediately 
+
+
 ## 2.3.0
 
 ### New
