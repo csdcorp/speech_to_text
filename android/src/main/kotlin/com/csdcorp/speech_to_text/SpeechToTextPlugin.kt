@@ -275,13 +275,11 @@ public class SpeechToTextPlugin :
         debugLog("Stop listening")
         handler.post {
             run {
-                if ( recognizerStops ) {
-                    speechRecognizer?.stopListening()
-                }
-                else {
-                    destroyRecognizer()
-                }
+                speechRecognizer?.stopListening()
             }
+        }
+        if ( !recognizerStops ) {
+            destroyRecognizer()
         }
         notifyListening(isRecording = false)
         result.success(true)
@@ -295,10 +293,8 @@ public class SpeechToTextPlugin :
         debugLog("Cancel listening")
         handler.post {
             run {
-                if ( recognizerStops ) {
-                    speechRecognizer?.cancel()
-                }
-                else {
+                speechRecognizer?.cancel()
+                if ( !recognizerStops ) {
                     destroyRecognizer()
                 }
             }
@@ -474,7 +470,12 @@ public class SpeechToTextPlugin :
     }
 
     private fun destroyRecognizer() {
-        speechRecognizer?.destroy();
+
+        handler.postDelayed( {
+                run {
+                    speechRecognizer?.destroy();
+                }
+        }, 50 )
         speechRecognizer = null;
     }
 
