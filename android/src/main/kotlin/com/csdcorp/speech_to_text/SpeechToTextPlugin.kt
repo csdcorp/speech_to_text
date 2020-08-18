@@ -77,6 +77,7 @@ public class SpeechToTextPlugin :
     private val minSdkForSpeechSupport = 21
     private val speechToTextPermissionCode = 28521
     private val missingConfidence: Double = -1.0
+    private val recognizerStops = false
     private var speechThresholdRms = 9
     private val logTag = "SpeechToTextPlugin"
     private var currentActivity: Activity? = null
@@ -247,6 +248,7 @@ public class SpeechToTextPlugin :
         if (sdkVersionTooLow(result) || isNotInitialized(result) || isListening()) {
             return
         }
+        createRecognizer()
         minRms = 1000.0F
         maxRms = -100.0F
         debugLog("Start listening")
@@ -273,7 +275,12 @@ public class SpeechToTextPlugin :
         debugLog("Stop listening")
         handler.post {
             run {
-                speechRecognizer?.stopListening()
+                if ( recognizerStops ) {
+                    speechRecognizer?.stopListening()
+                }
+                else {
+                    destroyRecognizer()
+                }
             }
         }
         notifyListening(isRecording = false)
@@ -288,7 +295,12 @@ public class SpeechToTextPlugin :
         debugLog("Cancel listening")
         handler.post {
             run {
-                speechRecognizer?.cancel()
+                if ( recognizerStops ) {
+                    speechRecognizer?.cancel()
+                }
+                else {
+                    destroyRecognizer()
+                }
             }
         }
         notifyListening(isRecording = false)
@@ -397,22 +409,7 @@ public class SpeechToTextPlugin :
                 return
             }
 
-            debugLog("Creating recognizer")
-            speechRecognizer = createSpeechRecognizer(pluginContext).apply {
-                debugLog("Setting listener")
-                setRecognitionListener(this@SpeechToTextPlugin)
-            }
-            if (null == speechRecognizer) {
-                Log.e(logTag, "Speech recognizer null")
-                activeResult?.error(
-                        SpeechToTextErrors.recognizerNotAvailable.name,
-                        "Speech recognizer null", "")
-                activeResult = null
-            }
-
-            debugLog("before setup intent")
-            setupRecognizerIntent(defaultLanguageTag, true, ListenMode.deviceDefault)
-            debugLog("after setup intent")
+            createRecognizer()
         }
 
         initializedSuccessfully = permissionToRecordAudio
@@ -420,6 +417,28 @@ public class SpeechToTextPlugin :
         activeResult?.success(permissionToRecordAudio)
         debugLog("leaving complete")
         activeResult = null
+    }
+
+    private fun createRecognizer() {
+        if ( null != speechRecognizer ) {
+            return
+        }
+        debugLog("Creating recognizer")
+        speechRecognizer = createSpeechRecognizer(pluginContext).apply {
+            debugLog("Setting listener")
+            setRecognitionListener(this@SpeechToTextPlugin)
+        }
+        if (null == speechRecognizer) {
+            Log.e(logTag, "Speech recognizer null")
+            activeResult?.error(
+                    SpeechToTextErrors.recognizerNotAvailable.name,
+                    "Speech recognizer null", "")
+            activeResult = null
+        }
+
+        debugLog("before setup intent")
+        setupRecognizerIntent(defaultLanguageTag, true, ListenMode.deviceDefault)
+        debugLog("after setup intent")
     }
 
     private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean, listenMode: ListenMode) {
@@ -452,6 +471,11 @@ public class SpeechToTextPlugin :
                 }
             }
         }
+    }
+
+    private fun destroyRecognizer() {
+        speechRecognizer?.destroy();
+        speechRecognizer = null;
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?,
