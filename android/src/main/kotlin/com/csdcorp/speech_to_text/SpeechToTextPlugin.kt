@@ -294,10 +294,10 @@ public class SpeechToTextPlugin :
         handler.post {
             run {
                 speechRecognizer?.cancel()
-                if ( !recognizerStops ) {
-                    destroyRecognizer()
-                }
             }
+        }
+        if ( !recognizerStops ) {
+            destroyRecognizer()
         }
         notifyListening(isRecording = false)
         result.success(true)
