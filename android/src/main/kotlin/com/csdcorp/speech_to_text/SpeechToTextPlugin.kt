@@ -473,10 +473,11 @@ public class SpeechToTextPlugin :
 
         handler.postDelayed( {
                 run {
+                    debugLog("Recognizer destroy")
                     speechRecognizer?.destroy();
+                    speechRecognizer = null;
                 }
         }, 50 )
-        speechRecognizer = null;
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?,
