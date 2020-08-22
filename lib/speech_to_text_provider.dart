@@ -110,12 +110,17 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// [pauseFor] sets the maximum duration of a pause in speech with no words
   /// detected, after that it automatically stops the listen for you.
   ///
+  /// [localeId] is an optional locale that can be used to listen in a language
+  /// other than the current system default. See [locales] to find the list of
+  /// supported languages for listening.
+  ///
   /// Call this only after a successful [initialize] call
   void listen(
       {bool partialResults = false,
       bool soundLevel = false,
       Duration listenFor,
-      Duration pauseFor}) {
+      Duration pauseFor,
+      String localeId}) {
     _lastLevel = 0;
     _lastResult = null;
     if (soundLevel) {
@@ -125,14 +130,16 @@ class SpeechToTextProvider extends ChangeNotifier {
           pauseFor: pauseFor,
           cancelOnError: true,
           onResult: _onListenResult,
-          onSoundLevelChange: _onSoundLevelChange);
+          onSoundLevelChange: _onSoundLevelChange,
+          localeId: localeId);
     } else {
       _speechToText.listen(
           partialResults: partialResults,
           listenFor: listenFor,
           pauseFor: pauseFor,
           cancelOnError: true,
-          onResult: _onListenResult);
+          onResult: _onListenResult,
+          localeId: localeId);
     }
   }
 

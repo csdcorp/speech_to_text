@@ -54,7 +54,7 @@ class _SpeechProviderExampleWidgetState
   String _currentLocaleId = "";
 
   void _setCurrentLocale(SpeechToTextProvider speechProvider) {
-    if (speechProvider.isAvailable) {
+    if (speechProvider.isAvailable && _currentLocaleId.isEmpty) {
       _currentLocaleId = speechProvider.systemLocale.localeId;
     }
   }
@@ -62,13 +62,13 @@ class _SpeechProviderExampleWidgetState
   @override
   Widget build(BuildContext context) {
     var speechProvider = Provider.of<SpeechToTextProvider>(context);
-    _setCurrentLocale(speechProvider);
     if (speechProvider.isNotAvailable) {
       return Center(
         child: Text(
             'Speech recognition not available, no permission or not available on the device.'),
       );
     }
+    _setCurrentLocale(speechProvider);
     return Column(children: [
       Center(
         child: Text(
@@ -87,7 +87,8 @@ class _SpeechProviderExampleWidgetState
                   onPressed:
                       !speechProvider.isAvailable || speechProvider.isListening
                           ? null
-                          : () => speechProvider.listen(partialResults: true),
+                          : () => speechProvider.listen(
+                              partialResults: true, localeId: _currentLocaleId),
                 ),
                 FlatButton(
                   child: Text('Stop'),
