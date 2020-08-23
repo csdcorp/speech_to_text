@@ -78,7 +78,6 @@ public class SpeechToTextPlugin :
     private val brokenStopSdk = 29
     private val speechToTextPermissionCode = 28521
     private val missingConfidence: Double = -1.0
-    private val recognizerStops = false
     private var speechThresholdRms = 9
     private val logTag = "SpeechToTextPlugin"
     private var recognizerStops = true
