@@ -75,11 +75,13 @@ public class SpeechToTextPlugin :
     private var pluginContext: Context? = null
     private var channel: MethodChannel? = null
     private val minSdkForSpeechSupport = 21
+    private val brokenStopSdk = 29
     private val speechToTextPermissionCode = 28521
     private val missingConfidence: Double = -1.0
     private val recognizerStops = false
     private var speechThresholdRms = 9
     private val logTag = "SpeechToTextPlugin"
+    private var recognizerStops = true
     private var currentActivity: Activity? = null
     private var activeResult: Result? = null
     private var initializedSuccessfully: Boolean = false
@@ -210,6 +212,7 @@ public class SpeechToTextPlugin :
         if (sdkVersionTooLow(result)) {
             return
         }
+        recognizerStops = Build.VERSION.SDK_INT != brokenStopSdk
         debugLog("Start initialize")
         if (null != activeResult) {
             result.error(SpeechToTextErrors.multipleRequests.name,
