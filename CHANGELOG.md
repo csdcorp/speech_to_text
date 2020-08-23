@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.5.0
+
+### New
+  * new parameter `localeId` on the `SpeechToTextProvider` `listen` method supports selecting a 
+  non default languge for the recognizer when using the provider. 
+### Fix
+  * A work around for a bug in Android 10(29) that made `stop` and `cancel` not work. The plugin now
+  calls `destroy` on the Android `SpeechRecognizer` which terminates the listen session immediately. 
+  There is a downside to this approach in that it does not always report results that were in process 
+  when `destroy` was called, however it does mean that `stop` works. 
+  * The example for `SpeechToTextProvider`, `provider_example.dart` had an error that made it always 
+  use the default language and ignore the drop-down selection. This has been corrected. 
+
 ## 2.4.1
 
 ### Fix

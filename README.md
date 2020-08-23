@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v2.4.1-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+[![pub package](https://img.shields.io/badge/pub-v2.5.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
 
 A library that exposes device specific speech recognition capability.
 
@@ -11,10 +11,13 @@ conversion or always on listening.
 
 ## Recent Updates
 
+The 2.5.0 version adds `localeId` to  `listen` on `SpeechToTextProvider` to better support multiple languages. 
+It also addresses a bug in Android that made the `stop` method not work on Android 10(29). This 
+is a work around that is not as good as actually having a fix for the Android issue but does at least 
+mean that it stops listening when requested.
+
 The 2.3.0 version adds `SpeechToTextProvider` as a simpler way to interact with the plugin. Checkout 
 the new `provider_example.dart` for intended usage. 
-
-The 2.2.0 version improves audio session handling and start / stop sound playback on iOS. 
 
 *Note*: Feedback from any test devices is welcome. 
 
