@@ -180,11 +180,11 @@ class SpeechToText {
       {SpeechErrorListener onError,
       SpeechStatusListener onStatus,
       debugLogging = false}) async {
+    errorListener = onError;
+    statusListener = onStatus;
     if (_initWorked) {
       return Future.value(_initWorked);
     }
-    errorListener = onError;
-    statusListener = onStatus;
     channel.setMethodCallHandler(_handleCallbacks);
     _initWorked = await channel
         .invokeMethod('initialize', {"debugLogging": debugLogging});
