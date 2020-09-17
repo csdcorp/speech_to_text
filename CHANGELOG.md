@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.6.0
+
+### New
+  * new parameter `onDevice` on the `SpeechToTextProvider` `listen` method supports forcing offline 
+  recognition. 
+  * Added a new Tips section to the README doc to answer some common questions. 
+### Fix
+  * Android now correctly returns multiple possible matches with confidence
+  * Android now supports the `onDevice` flag properly, note that at least some Android devices need 
+  an offline language pack installed for each target language to enable offline recognition. 
+
 ## 2.5.0
 
 ### New

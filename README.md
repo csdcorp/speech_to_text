@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v2.5.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+[![pub package](https://img.shields.io/badge/pub-v2.6.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
 
 A library that exposes device specific speech recognition capability.
 
@@ -79,6 +79,30 @@ the start / end of the speech recognizer until the sound playback is complete.
 * `speech_to_text_listening.m4r` - played when the listen method is called.
 * `speech_to_text_cancel.m4r` - played when the cancel method is called.
 * `speech_to_text_stop.m4r` - played when the stop method is called.
+
+
+## Tips
+
+### Switching Recognition Language
+The speech_to_text plugin uses the default locale for the device for speech recognition by default. However it also 
+supports using any language installed on the device. To find the available languages and select a particular language 
+use these properties.
+
+There's a `locales` property on the `SpeechToText` instance that provides the list of locales installed on the device 
+as `LocaleName` instances. Then the `listen` method takes an optional `localeId` named param which would be the `localeId`
+ property of any of the values returned in `locales`. A call looks like this:
+ ```dart
+    var locales = await speech.locales();
+
+    // Some UI or other code to select a locale from the list
+    // resulting in an index, selectedLocale
+
+    var selectedLocale = locales[selectedLocale];
+    speech.listen(
+        onResult: resultListener,
+        localeId: selectedLocale.localeId,
+        );
+ ```
 
 ## Troubleshooting
 
