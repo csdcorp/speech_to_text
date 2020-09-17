@@ -101,6 +101,13 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// Start listening for new events, set [partialResults] to true to receive interim
   /// recognition results.
   ///
+  /// [partialResults] if true the listen reports results as they are recognized,
+  /// when false only final results are reported. Defaults to false.
+  ///
+  /// [onDevice] if true the listen attempts to recognize locally with speech never
+  /// leaving the device. If it cannot do this the listen attempt will fail. This is
+  /// usually only needed for sensitive content where privacy or security is a concern.
+  ///
   /// [soundLevel] set to true to be notified on changes to the input sound level
   /// on the microphone.
   ///
@@ -117,6 +124,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// Call this only after a successful [initialize] call
   void listen(
       {bool partialResults = false,
+      onDevice = false,
       bool soundLevel = false,
       Duration listenFor,
       Duration pauseFor,
@@ -126,6 +134,7 @@ class SpeechToTextProvider extends ChangeNotifier {
     if (soundLevel) {
       _speechToText.listen(
           partialResults: partialResults,
+          onDevice: onDevice,
           listenFor: listenFor,
           pauseFor: pauseFor,
           cancelOnError: true,
@@ -135,6 +144,7 @@ class SpeechToTextProvider extends ChangeNotifier {
     } else {
       _speechToText.listen(
           partialResults: partialResults,
+          onDevice: onDevice,
           listenFor: listenFor,
           pauseFor: pauseFor,
           cancelOnError: true,
