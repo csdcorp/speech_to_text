@@ -102,7 +102,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// recognition results.
   ///
   /// [partialResults] if true the listen reports results as they are recognized,
-  /// when false only final results are reported. Defaults to false.
+  /// when false only final results are reported. Defaults to true.
   ///
   /// [onDevice] if true the listen attempts to recognize locally with speech never
   /// leaving the device. If it cannot do this the listen attempt will fail. This is
@@ -123,7 +123,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   ///
   /// Call this only after a successful [initialize] call
   void listen(
-      {bool partialResults = false,
+      {bool partialResults = true,
       onDevice = false,
       bool soundLevel = false,
       Duration listenFor,
