@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.7.0
+
+### New
+  * the example had `onDevice` true which is a rarely used flag and was causing confusion 
+  * the `partialResults` option for the `SpeechToTextProvider.listen` was defaulted to `false` 
+  which is a less common usage and didn't match the default for `SpeechToText.listen` so it 
+  has been changed to `true`
+
 ## 2.6.0
 
 ### New
