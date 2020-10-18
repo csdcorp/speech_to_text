@@ -2,30 +2,27 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
+import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 import 'test_speech_channel_handler.dart';
 import 'test_speech_listener.dart';
+import 'test_speech_to_text_platform.dart';
 
 void main() {
   SpeechToTextProvider provider;
   SpeechToText speechToText;
-  TestSpeechChannelHandler speechHandler;
+  TestSpeechToTextPlatform testPlatform;
   TestSpeechListener speechListener;
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
-    speechToText = SpeechToText.withMethodChannel(SpeechToText.speechChannel);
-    speechHandler = TestSpeechChannelHandler(speechToText);
-    speechToText.channel
-        .setMockMethodCallHandler(speechHandler.methodCallHandler);
+    testPlatform = TestSpeechToTextPlatform();
+    SpeechToTextPlatform.instance = testPlatform;
+    speechToText = SpeechToText.withMethodChannel();
     provider = SpeechToTextProvider(speechToText);
     speechListener = TestSpeechListener(provider);
     provider.addListener(speechListener.onNotify);
-  });
-
-  tearDown(() {
-    speechToText.channel.setMockMethodCallHandler(null);
   });
 
   group('delegates', () {
@@ -59,6 +56,7 @@ void main() {
     test('notifies on listening', () async {
       fakeAsync((fa) {
         setupForListen(provider, fa, speechListener);
+        testPlatform.notifyListening();
         expect(speechListener.notified, isTrue);
         expect(speechListener.isListening, isTrue);
         expect(provider.hasResults, isFalse);
@@ -68,7 +66,7 @@ void main() {
       fakeAsync((fa) {
         setupForListen(provider, fa, speechListener);
         speechListener.reset();
-        speechHandler.notifyFinalWords();
+        testPlatform.notifyFinalWords();
         fa.flushMicrotasks();
         expect(speechListener.notified, isTrue);
         expect(provider.hasResults, isTrue);
@@ -81,7 +79,7 @@ void main() {
     test('hasResult false after listening before new results', () async {
       fakeAsync((fa) {
         setupForListen(provider, fa, speechListener);
-        speechHandler.notifyFinalWords();
+        testPlatform.notifyFinalWords();
         provider.stop();
         setupForListen(provider, fa, speechListener);
         fa.flushMicrotasks();
@@ -92,7 +90,7 @@ void main() {
       fakeAsync((fa) {
         setupForListen(provider, fa, speechListener, partialResults: true);
         speechListener.reset();
-        speechHandler.notifyPartialWords();
+        testPlatform.notifyPartialWords();
         fa.flushMicrotasks();
         expect(speechListener.notified, isTrue);
         expect(provider.hasResults, isTrue);
@@ -108,8 +106,9 @@ void main() {
       fakeAsync((fa) {
         setupForListen(provider, fa, speechListener,
             partialResults: true, soundLevel: true);
+        testPlatform.notifyListening();
         speechListener.reset();
-        speechHandler.notifySoundLevel();
+        testPlatform.notifySoundLevel();
         fa.flushMicrotasks();
         expect(speechListener.notified, isTrue);
         expect(speechListener.soundLevel, TestSpeechChannelHandler.level2);
@@ -120,7 +119,7 @@ void main() {
         setupForListen(provider, fa, speechListener,
             partialResults: true, soundLevel: false);
         speechListener.reset();
-        speechHandler.notifySoundLevel();
+        testPlatform.notifySoundLevel();
         fa.flushMicrotasks();
         expect(speechListener.notified, isFalse);
         expect(speechListener.soundLevel, 0);
@@ -161,7 +160,7 @@ void main() {
         provider.initialize();
         setupForListen(provider, fa, speechListener);
         speechListener.reset();
-        speechHandler.notifyPermanentError();
+        testPlatform.notifyPermanentError();
         expect(speechListener.notified, isTrue);
         expect(speechListener.hasError, isTrue);
       });
@@ -174,12 +173,12 @@ void main() {
     });
     test('set from SpeechToText after init', () async {
       fakeAsync((fa) {
-        speechHandler.setupLocales();
+        testPlatform.setupLocales();
         provider.initialize();
         fa.flushMicrotasks();
         expect(
             provider.systemLocale.localeId, TestSpeechChannelHandler.localeId1);
-        expect(provider.locales, hasLength(speechHandler.locales.length));
+        expect(provider.locales, hasLength(testPlatform.localesResult.length));
       });
     });
   });

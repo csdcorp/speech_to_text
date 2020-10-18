@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v2.7.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild)
+[![pub package](https://img.shields.io/badge/pub-v3.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -10,6 +10,9 @@ target use cases for this library are commands and short phrases, not continuous
 conversion or always on listening. 
 
 ## Recent Updates
+
+The 3.0.0 version uses the newer style of plugin development based on a common platform interface package. 
+This will make it easier to support web and other platforms. 
 
 The 2.5.0 version adds `localeId` to  `listen` on `SpeechToTextProvider` to better support multiple languages. 
 It also addresses a bug in Android that made the `stop` method not work on Android 10(29). This 
@@ -123,6 +126,11 @@ this version. Here's what the relevant part of that file looked like as of this 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 ```
+
+### Recording audio on Android
+
+It is not currently possible to record audio on Android while doing speech recognition. The only solution right now is to 
+stop recording while the speech recognizer is active and then start again after. 
 
 ### Incorrect Swift version trying to compile for iOS
 ```

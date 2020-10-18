@@ -5,10 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Flutter",
+            "name": "speech_to_text",
+            "cwd": "speech_to_text",
             "request": "launch",
-            "type": "dart",
-            "program": "example/lib/main.dart"
+            "type": "dart"
+        },
+        {
+            "name": "speech_to_text_platform_interface",
+            "cwd": "speech_to_text_platform_interface",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "example",
+            "cwd": "speech_to_text/example",
+            "request": "launch",
+            "type": "dart"
         }
     ]
 }

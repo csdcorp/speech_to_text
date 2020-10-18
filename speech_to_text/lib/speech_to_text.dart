@@ -7,12 +7,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 enum ListenMode {
   deviceDefault,
   dictation,
   search,
   confirmation,
+}
+
+/// A single locale with a [name], localized to the current system locale,
+/// and a [localeId] which can be used in the [listen] method to choose a
+/// locale for speech recognition.
+class LocaleName {
+  final String localeId;
+  final String name;
+  LocaleName(this.localeId, this.name);
 }
 
 /// Notified as words are recognized with the current set of recognized words.
@@ -71,10 +81,7 @@ class SpeechToText {
   static const String notListeningStatus = "notListening";
   static const String listeningStatus = "listening";
 
-  static const MethodChannel speechChannel =
-      const MethodChannel('plugin.csdcorp.com/speech_to_text');
-  static final SpeechToText _instance =
-      SpeechToText.withMethodChannel(speechChannel);
+  static final SpeechToText _instance = SpeechToText.withMethodChannel();
   bool _initWorked = false;
   bool _recognized = false;
   bool _listening = false;
@@ -101,11 +108,10 @@ class SpeechToText {
   SpeechStatusListener statusListener;
   SpeechSoundLevelChange _soundLevelChange;
 
-  final MethodChannel channel;
   factory SpeechToText() => _instance;
 
   @visibleForTesting
-  SpeechToText.withMethodChannel(this.channel);
+  SpeechToText.withMethodChannel();
 
   /// True if words have been recognized during the current [listen] call.
   ///
@@ -155,7 +161,7 @@ class SpeechToText {
   /// Note that applications cannot ask for permission again if the user has
   /// denied them permission in the past.
   Future<bool> get hasPermission async {
-    bool hasPermission = await channel.invokeMethod('has_permission');
+    bool hasPermission = await SpeechToTextPlatform.instance.hasPermission();
     return hasPermission;
   }
 
@@ -185,9 +191,12 @@ class SpeechToText {
     }
     errorListener = onError;
     statusListener = onStatus;
-    channel.setMethodCallHandler(_handleCallbacks);
-    _initWorked = await channel
-        .invokeMethod('initialize', {"debugLogging": debugLogging});
+    SpeechToTextPlatform.instance.onTextRecognition = _onTextRecognition;
+    SpeechToTextPlatform.instance.onError = _onNotifyError;
+    SpeechToTextPlatform.instance.onStatus = _onNotifyStatus;
+    SpeechToTextPlatform.instance.onSoundLevel = _onSoundLevelChange;
+    _initWorked = await SpeechToTextPlatform.instance
+        .initialize(debugLogging: debugLogging);
     return _initWorked;
   }
 
@@ -211,7 +220,7 @@ class SpeechToText {
       return;
     }
     _shutdownListener();
-    await channel.invokeMethod('stop');
+    await SpeechToTextPlatform.instance.stop();
     Timer(Duration(milliseconds: 100), _notifyFinalResults);
   }
 
@@ -235,7 +244,7 @@ class SpeechToText {
       return;
     }
     _shutdownListener();
-    await channel.invokeMethod('cancel');
+    await SpeechToTextPlatform.instance.cancel();
   }
 
   /// Starts a listening session for speech and converts it to text,
@@ -307,17 +316,13 @@ class SpeechToText {
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
     _partialResults = partialResults;
-    Map<String, dynamic> listenParams = {
-      "partialResults": partialResults || null != pauseFor,
-      "onDevice": onDevice,
-      "listenMode": listenMode.index,
-      "sampleRate": sampleRate,
-    };
-    if (null != localeId) {
-      listenParams["localeId"] = localeId;
-    }
     try {
-      bool started = await channel.invokeMethod(listenMethod, listenParams);
+      bool started = await SpeechToTextPlatform.instance.listen(
+          partialResults: partialResults || null != pauseFor,
+          onDevice: onDevice,
+          listenMode: listenMode.index,
+          sampleRate: sampleRate,
+          localeId: localeId);
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
         _setupListenAndPause(pauseFor, listenFor);
@@ -383,7 +388,7 @@ class SpeechToText {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
-    final List<dynamic> locales = await channel.invokeMethod('locales');
+    final List<dynamic> locales = await SpeechToTextPlatform.instance.locales();
     List<LocaleName> filteredLocales = locales
         .map((locale) {
           var components = locale.split(":");
@@ -410,33 +415,6 @@ class SpeechToText {
       await locales();
     }
     return Future.value(_systemLocale);
-  }
-
-  Future _handleCallbacks(MethodCall call) async {
-    // print("SpeechToText call: ${call.method} ${call.arguments}");
-    switch (call.method) {
-      case textRecognitionMethod:
-        if (call.arguments is String) {
-          _onTextRecognition(call.arguments);
-        }
-        break;
-      case notifyErrorMethod:
-        if (call.arguments is String) {
-          await _onNotifyError(call.arguments);
-        }
-        break;
-      case notifyStatusMethod:
-        if (call.arguments is String) {
-          _onNotifyStatus(call.arguments);
-        }
-        break;
-      case soundLevelChangeMethod:
-        if (call.arguments is double) {
-          _onSoundLevelChange(call.arguments);
-        }
-        break;
-      default:
-    }
   }
 
   void _onTextRecognition(String resultJson) {
@@ -512,20 +490,6 @@ class SpeechToText {
     _listenTimer?.cancel();
     _listenTimer = null;
   }
-
-  @visibleForTesting
-  Future processMethodCall(MethodCall call) async {
-    return await _handleCallbacks(call);
-  }
-}
-
-/// A single locale with a [name], localized to the current system locale,
-/// and a [localeId] which can be used in the [listen] method to choose a
-/// locale for speech recognition.
-class LocaleName {
-  final String localeId;
-  final String name;
-  LocaleName(this.localeId, this.name);
 }
 
 /// Thrown when a method is called that requires successful

@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.0
+
+### New
+  * Now using a platform interface to prepare for web support
+
+### New
+
 ## 2.7.0
 
 ### New

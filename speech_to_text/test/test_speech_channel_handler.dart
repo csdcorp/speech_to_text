@@ -88,8 +88,8 @@ class TestSpeechChannelHandler {
               details: listenExceptionDetails);
         }
         listenLocale = methodCall.arguments["localeId"];
-        await _speech.processMethodCall(MethodCall(
-            SpeechToText.notifyStatusMethod, listeningStatusResponse));
+        // await _speech.processMethodCall(MethodCall(
+        //     SpeechToText.notifyStatusMethod, listeningStatusResponse));
         return initResult;
         break;
       case "locales":
@@ -102,28 +102,28 @@ class TestSpeechChannelHandler {
   }
 
   void notifyFinalWords() {
-    _speech.processMethodCall(
-        MethodCall(SpeechToText.textRecognitionMethod, finalRecognizedJson));
+    // _speech.processMethodCall(
+    //     MethodCall(SpeechToText.textRecognitionMethod, finalRecognizedJson));
   }
 
   void notifyPartialWords() {
-    _speech.processMethodCall(
-        MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson));
+    // _speech.processMethodCall(
+    //     MethodCall(SpeechToText.textRecognitionMethod, firstRecognizedJson));
   }
 
   void notifyPermanentError() {
-    _speech.processMethodCall(
-        MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
+    // _speech.processMethodCall(
+    //     MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
   }
 
   void notifyTransientError() {
-    _speech.processMethodCall(
-        MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
+    // _speech.processMethodCall(
+    //     MethodCall(SpeechToText.notifyErrorMethod, transientErrorJson));
   }
 
   void notifySoundLevel() {
-    _speech.processMethodCall(
-        MethodCall(SpeechToText.soundLevelChangeMethod, level2));
+    // _speech.processMethodCall(
+    //     MethodCall(SpeechToText.soundLevelChangeMethod, level2));
   }
 
   void setupLocales() {
