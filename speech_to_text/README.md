@@ -155,6 +155,19 @@ in the Android log. There's a lengthy issue discussion here https://github.com/c
 about this. The issue seems to be that the recognizer is not always automatically enabled on the device. Two 
 key things helped resolve the issue in this case at least. 
 
+### Not working on an Android emulator
+The above tip about getting it working on an Android device is also useful for emulators. Some users have reported seeing another error on Android simulators - sdk gphone x86 (Pixel 3a API 30). 
+AUDIO_RECORD perms were in Manifest, also manually set Mic perms in Android Settings. When running sample app, Initialize works, but Start failed the log looks as follows.
+```
+D/SpeechToTextPlugin(12555): put partial
+D/SpeechToTextPlugin(12555): put languageTag
+D/SpeechToTextPlugin(12555): Error 9 after start at 35 1000.0 / -100.0
+D/SpeechToTextPlugin(12555): Cancel listening
+```
+
+#### Resolved by
+Resolved it by Opening Google, clicking Mic icon and granting it perms, then everything on the App works...
+
 #### First 
 1. Go to Google Play
 2. Search for 'Google'
