@@ -5,7 +5,8 @@
 ### New
   * Now using a platform interface to prepare for web support
 
-### New
+### Fix
+  * Android `stop` now completes even if not initialized
 
 ## 2.7.0
 

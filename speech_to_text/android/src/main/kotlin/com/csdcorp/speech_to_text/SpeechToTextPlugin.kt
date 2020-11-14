@@ -199,7 +199,8 @@ public class SpeechToTextPlugin :
     }
 
     private fun hasPermission(result: Result) {
-        if (sdkVersionTooLow(result)) {
+        if (sdkVersionTooLow()) {
+            result.success(false)
             return
         }
         debugLog("Start has_permission")
@@ -212,7 +213,8 @@ public class SpeechToTextPlugin :
     }
 
     private fun initialize(result: Result) {
-        if (sdkVersionTooLow(result)) {
+        if (sdkVersionTooLow()) {
+            result.success(false)
             return
         }
         recognizerStops = Build.VERSION.SDK_INT != brokenStopSdk
@@ -226,18 +228,14 @@ public class SpeechToTextPlugin :
         initializeIfPermitted(pluginContext)
     }
 
-    private fun sdkVersionTooLow(result: Result): Boolean {
+    private fun sdkVersionTooLow(): Boolean {
         if (Build.VERSION.SDK_INT < minSdkForSpeechSupport) {
-            result.success(false)
             return true;
         }
         return false;
     }
 
-    private fun isNotInitialized(result: Result): Boolean {
-        if (!initializedSuccessfully || null == pluginContext) {
-            result.success(false)
-        }
+    private fun isNotInitialized(): Boolean {
         return !initializedSuccessfully
     }
 
@@ -251,7 +249,8 @@ public class SpeechToTextPlugin :
 
     private fun startListening(result: Result, languageTag: String, partialResults: Boolean,
                                listenModeIndex: Int, onDevice: Boolean) {
-        if (sdkVersionTooLow(result) || isNotInitialized(result) || isListening()) {
+        if (sdkVersionTooLow() || isNotInitialized() || isListening()) {
+            result.success(false)
             return
         }
         createRecognizer()
@@ -275,7 +274,8 @@ public class SpeechToTextPlugin :
     }
 
     private fun stopListening(result: Result) {
-        if (sdkVersionTooLow(result) || isNotInitialized(result) || isNotListening()) {
+        if (sdkVersionTooLow() || isNotInitialized() || isNotListening()) {
+            result.success(false)
             return
         }
         debugLog("Stop listening")
@@ -293,7 +293,8 @@ public class SpeechToTextPlugin :
     }
 
     private fun cancelListening(result: Result) {
-        if (sdkVersionTooLow(result) || isNotInitialized(result) || isNotListening()) {
+        if (sdkVersionTooLow() || isNotInitialized() || isNotListening()) {
+            result.success(false)
             return
         }
         debugLog("Cancel listening")
@@ -311,7 +312,8 @@ public class SpeechToTextPlugin :
     }
 
     private fun locales(result: Result) {
-        if (sdkVersionTooLow(result) || isNotInitialized(result)) {
+        if (sdkVersionTooLow() || isNotInitialized()) {
+            result.success(false)
             return
         }
         var detailsIntent = RecognizerIntent.getVoiceDetailsIntent(pluginContext)
