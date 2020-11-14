@@ -77,6 +77,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var onPlayEnd: (() -> Void)?
     private var returnPartialResults: Bool = true
     private var failedListen: Bool = false
+    private var onDeviceStatus: Bool = false
     private var listening = false
     private let audioSession = AVAudioSession.sharedInstance()
     private let audioEngine = AVAudioEngine()
@@ -220,6 +221,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         guard recognizer != nil else {
             sendBoolResult( false, result );
             return
+        }
+        if #available(iOS 13.0, *), let localRecognizer = recognizer {
+            onDeviceStatus = localRecognizer.supportsOnDeviceRecognition
         }
         recognizer?.delegate = self
         setupListeningSound()
