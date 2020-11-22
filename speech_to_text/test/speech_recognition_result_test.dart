@@ -10,8 +10,6 @@ void main() {
   final double secondConfidence = 0.62;
   final String firstRecognizedJson =
       '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"finalResult":false}';
-  final String secondRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":false}';
   final SpeechRecognitionWords firstWords =
       SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
   final SpeechRecognitionWords secondWords =

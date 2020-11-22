@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.1
+
+### Fix
+  * Minor static code analysis improvements (addicted to pub points)
+
 ## 3.0.0
 
 ### New

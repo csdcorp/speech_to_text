@@ -82,7 +82,9 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
       partialResults = true,
       onDevice = false,
       int listenMode,
-      sampleRate = 0}) async {}
+      sampleRate = 0}) async {
+    return false;
+  }
 
   /// returns the list of speech locales available on the device.
   ///

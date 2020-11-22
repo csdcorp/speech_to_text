@@ -112,6 +112,7 @@ class TestSpeechChannelHandler {
   }
 
   void notifyPermanentError() {
+    if (null != _speech) {}
     // _speech.processMethodCall(
     //     MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
   }
