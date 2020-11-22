@@ -3,10 +3,13 @@
 ## 3.0.0
 
 ### New
-  * Now using a platform interface to prepare for web support
+  * Now using a platform interface to prepare for web support. Although this should not 
+  cause any functional changes it is a major refactoring. 
 
 ### Fix
   * Android `stop` now completes even if not initialized
+  * iOS onDevice initialization is more reliable
+  * No longer crashes on iOS version < 10
 
 ## 2.7.0
 
