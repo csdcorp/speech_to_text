@@ -4,6 +4,26 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'method_channel_speech_to_text.dart';
 
+/// Holds a configuration option for a specific platform implementation.
+///
+/// These options should be used rarely as the plugin interface should
+/// try, as far as possible, to be identical on all platforms. These
+/// options allow specific behaviour only available on or required on
+/// a platform to be tailored.
+class SpeechConfigOption {
+  /// Defines the platform implementation the option is for, this is
+  /// meaningful only to the implementation.
+  final String platform;
+
+  /// The name of the option, meaningful only to the implementation.
+  final String name;
+
+  /// Value of the option, meaningful only to the implementation.
+  final dynamic value;
+
+  SpeechConfigOption(this.platform, this.name, this.value);
+}
+
 /// The interface that implementations of url_launcher must implement.
 ///
 /// Platform implementations should extend this class rather than implement it as `speech_to_text`
@@ -56,10 +76,14 @@ abstract class SpeechToTextPlatform extends PlatformInterface {
   /// should be used. False usually means that the user has denied
   /// permission to use speech.
   ///
+  /// [options] can be used to control the behaviour of platform specific
+  /// implementations.
+  ///
   /// [debugLogging] controls whether there is detailed logging from the underlying
   /// plugins. It is off by default, usually only useful for troubleshooting issues
   /// with a paritcular OS version or device, fairly verbose
-  Future<bool> initialize({debugLogging = false}) {
+  Future<bool> initialize(
+      {debugLogging = false, List<SpeechConfigOption> options}) {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 
