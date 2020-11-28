@@ -81,6 +81,11 @@ class SpeechToText {
   static const String notListeningStatus = "notListening";
   static const String listeningStatus = "listening";
 
+  static final SpeechConfigOption androidAlwaysUseStop =
+      SpeechConfigOption('android', 'alwaysUseStop', true);
+  static final SpeechConfigOption androidIntentLookup =
+      SpeechConfigOption('android', 'intentLookup', true);
+
   static final SpeechToText _instance = SpeechToText.withMethodChannel();
   bool _initWorked = false;
   bool _recognized = false;
@@ -182,10 +187,14 @@ class SpeechToText {
   /// [debugLogging] controls whether there is detailed logging from the underlying
   /// plugins. It is off by default, usually only useful for troubleshooting issues
   /// with a paritcular OS version or device, fairly verbose
+  ///
+  /// [options] pass platform specific configuration options to the
+  /// platform specific implementation.
   Future<bool> initialize(
       {SpeechErrorListener onError,
       SpeechStatusListener onStatus,
-      debugLogging = false}) async {
+      debugLogging = false,
+      List<SpeechConfigOption> options}) async {
     if (_initWorked) {
       return Future.value(_initWorked);
     }
@@ -196,7 +205,7 @@ class SpeechToText {
     SpeechToTextPlatform.instance.onStatus = _onNotifyStatus;
     SpeechToTextPlatform.instance.onSoundLevel = _onSoundLevelChange;
     _initWorked = await SpeechToTextPlatform.instance
-        .initialize(debugLogging: debugLogging);
+        .initialize(debugLogging: debugLogging, options: options);
     return _initWorked;
   }
 

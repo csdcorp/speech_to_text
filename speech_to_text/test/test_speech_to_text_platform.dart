@@ -61,7 +61,8 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
   }
 
   @override
-  Future<bool> initialize({debugLogging = false}) async {
+  Future<bool> initialize(
+      {debugLogging = false, List<SpeechConfigOption> options}) async {
     initInvoked = true;
     return initResult;
   }

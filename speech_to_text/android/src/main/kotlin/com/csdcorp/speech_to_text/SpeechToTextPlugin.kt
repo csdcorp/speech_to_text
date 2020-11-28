@@ -24,8 +24,11 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONObject
 import android.content.Context
 import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.pm.ResolveInfo
 import android.os.Handler
 import android.os.Looper
+import android.speech.RecognitionService
 import android.util.Log
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -87,6 +90,8 @@ public class SpeechToTextPlugin :
     private var permissionToRecordAudio: Boolean = false
     private var listening = false
     private var debugLogging: Boolean = false
+    private var alwaysUseStop: Boolean = false
+    private var intentLookup: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
     private var previousRecognizerLang: String? = null
@@ -163,6 +168,14 @@ public class SpeechToTextPlugin :
                     if (null != dlog) {
                         debugLogging = dlog
                     }
+                    var ausOpt = call.argument<Boolean>("alwaysUseStop")
+                    if (null != ausOpt) {
+                        alwaysUseStop = ausOpt == true
+                    }
+                    var iOpt = call.argument<Boolean>("intentLookup")
+                    if (null != iOpt) {
+                        intentLookup = iOpt == true
+                    }
                     initialize(result)
                 }
                 "listen" -> {
@@ -217,7 +230,7 @@ public class SpeechToTextPlugin :
             result.success(false)
             return
         }
-        recognizerStops = Build.VERSION.SDK_INT != brokenStopSdk
+        recognizerStops = Build.VERSION.SDK_INT != brokenStopSdk || alwaysUseStop
         debugLog("Start initialize")
         if (null != activeResult) {
             result.error(SpeechToTextErrors.multipleRequests.name,
@@ -423,14 +436,27 @@ public class SpeechToTextPlugin :
         activeResult = null
     }
 
+    private fun Context.findComponentName(): ComponentName? {
+        val list: List<ResolveInfo> = packageManager.queryIntentServices(Intent(RecognitionService.SERVICE_INTERFACE), 0)
+        return list.firstOrNull()?.serviceInfo?.let { ComponentName(it.packageName, it.name) }
+    }
+
     private fun createRecognizer() {
         if ( null != speechRecognizer ) {
             return
         }
         debugLog("Creating recognizer")
-        speechRecognizer = createSpeechRecognizer(pluginContext).apply {
-            debugLog("Setting listener")
-            setRecognitionListener(this@SpeechToTextPlugin)
+        if ( intentLookup ) {
+            speechRecognizer = createSpeechRecognizer(pluginContext,pluginContext?.findComponentName()).apply {
+                debugLog("Setting listener")
+                setRecognitionListener(this@SpeechToTextPlugin)
+            }
+        }
+        else {
+            speechRecognizer = createSpeechRecognizer(pluginContext).apply {
+                debugLog("Setting listener")
+                setRecognitionListener(this@SpeechToTextPlugin)
+            }
         }
         if (null == speechRecognizer) {
             Log.e(logTag, "Speech recognizer null")
