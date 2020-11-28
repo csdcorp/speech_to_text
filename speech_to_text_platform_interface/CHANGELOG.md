@@ -1,3 +1,6 @@
+## 1.4.1
+- uses platform options in method channel call
+
 ## 1.4.0
 - platform specific configuration properties added to initialize
 
