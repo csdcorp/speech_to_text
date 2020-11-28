@@ -35,7 +35,7 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     var params = <String, Object>{
       'debugLogging': debugLogging,
     };
-    options.forEach((option) => params[option.name] = option.value);
+    options?.forEach((option) => params[option.name] = option.value);
     return _channel.invokeMethod<bool>(
       'initialize',
       params,

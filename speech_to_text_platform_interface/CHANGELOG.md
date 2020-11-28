@@ -1,3 +1,6 @@
+## 1.4.2
+- bug fix for null options
+
 ## 1.4.1
 - uses platform options in method channel call
 
