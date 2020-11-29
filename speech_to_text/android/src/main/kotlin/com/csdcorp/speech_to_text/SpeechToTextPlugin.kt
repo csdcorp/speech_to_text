@@ -335,7 +335,7 @@ public class SpeechToTextPlugin :
             detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
         }
         pluginContext?.sendOrderedBroadcast(
-                detailsIntent, null, LanguageDetailsChecker(result),
+                detailsIntent, null, LanguageDetailsChecker(result, debugLogging),
                 null, Activity.RESULT_OK, null, null)
     }
 
@@ -600,27 +600,28 @@ public class SpeechToTextPlugin :
 }
 
 // See https://stackoverflow.com/questions/10538791/how-to-set-the-language-in-speech-recognition-on-android/10548680#10548680
-class LanguageDetailsChecker(flutterResult: Result) : BroadcastReceiver() {
+class LanguageDetailsChecker(flutterResult: Result, logging: Boolean ) : BroadcastReceiver() {
     private val logTag = "SpeechToTextPlugin"
     private val result: Result = flutterResult
+    private val debugLogging: Boolean = logging
     private var supportedLanguages: List<String>? = null
 
     private var languagePreference: String? = null
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d( logTag, "Received extra language broadcast" )
+        debugLog( "Received extra language broadcast" )
         val results = getResultExtras(true)
         if (results.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)) {
             languagePreference = results.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)
         }
-        if (false && results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
-            Log.d( logTag, "Extra supported languages" )
+        if (results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
+            debugLog( "Extra supported languages" )
             supportedLanguages = results.getStringArrayList(
                     RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)
             createResponse(supportedLanguages)
         }
         else {
-            Log.d( logTag, "No extra supported languages" )
+            debugLog(  "No extra supported languages" )
             createResponse( ArrayList<String>())
         }
     }
@@ -645,6 +646,12 @@ class LanguageDetailsChecker(flutterResult: Result) : BroadcastReceiver() {
     private fun buildIdNameForLocale(locale: Locale): String {
         val name = locale.displayName.replace(':', ' ')
         return "${locale.language}_${locale.country}:$name"
+    }
+
+    private fun debugLog( msg: String ) {
+        if ( debugLogging ) {
+            Log.d( logTag, msg )
+        }
     }
 }
 
