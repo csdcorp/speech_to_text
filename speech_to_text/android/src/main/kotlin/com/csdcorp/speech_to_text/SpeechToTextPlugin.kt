@@ -35,6 +35,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
 import org.json.JSONArray
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 enum class SpeechToTextErrors {
@@ -600,20 +601,27 @@ public class SpeechToTextPlugin :
 
 // See https://stackoverflow.com/questions/10538791/how-to-set-the-language-in-speech-recognition-on-android/10548680#10548680
 class LanguageDetailsChecker(flutterResult: Result) : BroadcastReceiver() {
+    private val logTag = "SpeechToTextPlugin"
     private val result: Result = flutterResult
     private var supportedLanguages: List<String>? = null
 
     private var languagePreference: String? = null
 
     override fun onReceive(context: Context, intent: Intent) {
+        Log.d( logTag, "Received extra language broadcast" )
         val results = getResultExtras(true)
         if (results.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)) {
             languagePreference = results.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)
         }
-        if (results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
+        if (false && results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
+            Log.d( logTag, "Extra supported languages" )
             supportedLanguages = results.getStringArrayList(
                     RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)
             createResponse(supportedLanguages)
+        }
+        else {
+            Log.d( logTag, "No extra supported languages" )
+            createResponse( ArrayList<String>())
         }
     }
 
