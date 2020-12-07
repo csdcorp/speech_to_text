@@ -1,8 +1,6 @@
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 class SpeechToTextPlugin extends SpeechToTextPlatform {
-  @override
-
   /// Returns true if the user has already granted permission to access the
   /// microphone, does not prompt the user.
   ///
@@ -11,6 +9,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   /// call will prompt the user for permission if it is allowed to do so.
   /// Note that applications cannot ask for permission again if the user has
   /// denied them permission in the past.
+  @override
   Future<bool> hasPermission() async {
     return false;
   }
@@ -26,6 +25,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   /// [debugLogging] controls whether there is detailed logging from the underlying
   /// plugins. It is off by default, usually only useful for troubleshooting issues
   /// with a paritcular OS version or device, fairly verbose
+  @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption> options}) async {
     return false;
@@ -41,6 +41,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   ///
   /// *Note:* Cannot be used until a successful [initialize] call. Should
   /// only be used after a successful [listen] call.
+  @override
   Future<void> stop() async {}
 
   /// Cancels the current listen for speech if active, does nothing if not.
@@ -53,6 +54,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   ///
   /// *Note* Cannot be used until a successful [initialize] call. Should only
   /// be used after a successful [listen] call.
+  @override
   Future<void> cancel() async {}
 
   /// Starts a listening session for speech and converts it to text.
@@ -78,6 +80,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   /// crash with `sampleRate != device's supported sampleRate`, try 44100 if seeing
   /// crashes
   ///
+  @override
   Future<bool> listen(
       {String localeId,
       partialResults = true,
@@ -89,6 +92,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
 
   /// returns the list of speech locales available on the device.
   ///
+  @override
   Future<List<dynamic>> locales() async {
     return [];
   }

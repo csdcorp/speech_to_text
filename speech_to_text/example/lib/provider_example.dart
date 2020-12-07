@@ -51,7 +51,7 @@ class SpeechProviderExampleWidget extends StatefulWidget {
 
 class _SpeechProviderExampleWidgetState
     extends State<SpeechProviderExampleWidget> {
-  String _currentLocaleId = "";
+  String _currentLocaleId = '';
 
   void _setCurrentLocale(SpeechToTextProvider speechProvider) {
     if (speechProvider.isAvailable && _currentLocaleId.isEmpty) {
@@ -186,7 +186,7 @@ class _SpeechProviderExampleWidgetState
     ]);
   }
 
-  _switchLang(selectedVal) {
+  void _switchLang(selectedVal) {
     setState(() {
       _currentLocaleId = selectedVal;
     });

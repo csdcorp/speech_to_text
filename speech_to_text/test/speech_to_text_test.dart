@@ -52,7 +52,7 @@ void main() {
     test('fails with exception if not initialized', () async {
       try {
         await speech.listen();
-        fail("Expected an exception.");
+        fail('Expected an exception.');
       } on SpeechToTextNotInitializedException {
         // This is a good result
       }
@@ -62,7 +62,7 @@ void main() {
         testPlatform.initResult = false;
         await speech.initialize();
         await speech.listen();
-        fail("Expected an exception.");
+        fail('Expected an exception.');
       } on SpeechToTextNotInitializedException {
         // This is a good result
       }
@@ -78,11 +78,11 @@ void main() {
       testPlatform.listenException = true;
       try {
         await speech.listen();
-        fail("Should have thrown");
+        fail('Should have thrown');
       } on ListenFailedException catch (e) {
         expect(e.details, TestSpeechToTextPlatform.listenExceptionDetails);
       } catch (wrongE) {
-        fail("Should have been ListenFailedException");
+        fail('Should have been ListenFailedException');
       }
     });
     test('stops listen after listenFor duration', () async {
@@ -264,7 +264,7 @@ void main() {
 
   group('cancel', () {
     test('does nothing if not initialized', () async {
-      speech.cancel();
+      await speech.cancel();
       expect(testPlatform.cancelInvoked, false);
     });
     test('cancels an active listen', () async {
@@ -277,13 +277,13 @@ void main() {
   });
   group('stop', () {
     test('does nothing if not initialized', () async {
-      speech.stop();
+      await speech.stop();
       expect(testPlatform.stopInvoked, false);
     });
     test('stops an active listen', () async {
       await speech.initialize();
       await speech.listen();
-      speech.stop();
+      await speech.stop();
       expect(testPlatform.stopInvoked, true);
     });
   });
@@ -348,7 +348,7 @@ void main() {
     test('fails with exception if not initialized', () async {
       try {
         await speech.locales();
-        fail("Expected an exception.");
+        fail('Expected an exception.');
       } on SpeechToTextNotInitializedException {
         // This is a good result
       }
@@ -357,14 +357,14 @@ void main() {
       LocaleName current;
       try {
         current = await speech.systemLocale();
-        fail("Expected an exception.");
+        fail('Expected an exception.');
       } on SpeechToTextNotInitializedException {
         expect(current, isNull);
       }
     });
     test('handles an empty list', () async {
       await speech.initialize();
-      List<LocaleName> localeNames = await speech.locales();
+      var localeNames = await speech.locales();
       expect(testPlatform.localesInvoked, true);
       expect(localeNames, isEmpty);
     });
@@ -372,7 +372,7 @@ void main() {
       await speech.initialize();
       testPlatform.localesResult.addAll(
           [TestSpeechChannelHandler.locale1, TestSpeechChannelHandler.locale2]);
-      List<LocaleName> localeNames = await speech.locales();
+      var localeNames = await speech.locales();
       expect(localeNames, hasLength(2));
       expect(localeNames[0].localeId, TestSpeechChannelHandler.localeId1);
       expect(localeNames[0].name, TestSpeechChannelHandler.name1);
@@ -382,10 +382,10 @@ void main() {
     test('skips incorrect locales', () async {
       await speech.initialize();
       testPlatform.localesResult.addAll([
-        "InvalidJunk",
+        'InvalidJunk',
         TestSpeechChannelHandler.locale1,
       ]);
-      List<LocaleName> localeNames = await speech.locales();
+      var localeNames = await speech.locales();
       expect(localeNames, hasLength(1));
       expect(localeNames[0].localeId, TestSpeechChannelHandler.localeId1);
       expect(localeNames[0].name, TestSpeechChannelHandler.name1);
@@ -394,7 +394,7 @@ void main() {
       await speech.initialize();
       testPlatform.localesResult.addAll(
           [TestSpeechChannelHandler.locale1, TestSpeechChannelHandler.locale2]);
-      LocaleName current = await speech.systemLocale();
+      var current = await speech.systemLocale();
       expect(current.localeId, TestSpeechChannelHandler.localeId1);
     });
   });

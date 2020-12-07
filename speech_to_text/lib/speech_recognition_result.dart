@@ -31,7 +31,7 @@ class SpeechRecognitionResult {
   ///
   /// This is the same as the first value of [alternates].
   String get recognizedWords =>
-      _alternates.isNotEmpty ? _alternates.first.recognizedWords : "";
+      _alternates.isNotEmpty ? _alternates.first.recognizedWords : '';
 
   /// False means the words are an interim result, true means
   /// they are the final recognition.
@@ -65,7 +65,7 @@ class SpeechRecognitionResult {
 
   @override
   String toString() {
-    return "SpeechRecognitionResult words: $_alternates, final: $finalResult";
+    return 'SpeechRecognitionResult words: $_alternates, final: $finalResult';
   }
 
   @override
@@ -83,7 +83,7 @@ class SpeechRecognitionResult {
       _$SpeechRecognitionResultFromJson(json);
   Map<String, dynamic> toJson() => _$SpeechRecognitionResultToJson(this);
 
-  toFinal() {
+  SpeechRecognitionResult toFinal() {
     return SpeechRecognitionResult(_alternates, true);
   }
 }
@@ -124,7 +124,7 @@ class SpeechRecognitionWords {
 
   @override
   String toString() {
-    return "SpeechRecognitionWords words: $recognizedWords,  confidence: $confidence";
+    return 'SpeechRecognitionWords words: $recognizedWords,  confidence: $confidence';
   }
 
   @override

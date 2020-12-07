@@ -3,12 +3,16 @@
 ## 3.1.0
 
 ### New
+  * now compatible with Android SDK 30
   * `initialize` now supports the `options` parameter to supply platform specific options during initialization. 
   * `SpeechToText.androidAlwaysStop` supported as an option. Forces the plugin to use the speech recognizer `stop` 
   method even on SDK versions where that might fail. See https://github.com/csdcorp/speech_to_text/issues/150
   * `SpeechToText.androidIntentLookup` looks up the intent name instead of using the default. This can work around 
   some issues with security exceptions when trying to use the default. See 
   https://github.com/csdcorp/speech_to_text/issues/153
+
+### Fix
+  * Phones that don't report extra languages no longer hang on `locales` call
 
 ## 3.0.1
 

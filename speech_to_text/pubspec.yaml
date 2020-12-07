@@ -13,6 +13,7 @@ dependencies:
   speech_to_text_platform_interface: ^1.4.2
   json_annotation: ^3.0.0
   clock: ^1.0.1
+  pedantic: ^1.9.2
   # speech_to_text_web: ^1.0.0
 
 dev_dependencies:

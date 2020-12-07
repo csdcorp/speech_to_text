@@ -68,6 +68,18 @@ Add the record audio permission to your _AndroidManifest.xml_ file, located in `
 * `android.permission.RECORD_AUDIO` - this permission is required for microphone access.
 * `android.permission.INTERNET` - this permission is required because speech recognition may use remote services.
 
+#### Android SDK 30 or later
+
+If you are targeting Android SDK, i.e. you set your `targetSDKVersion` to 30 or later, then you will need to add the following to your `AndroidManifest.xml` right after the permissions section. See the example app for the complete usage. 
+
+```xml
+<queries>
+    <intent>
+        <action android:name="android.speech.RecognitionService" />
+    </intent>
+</queries>
+```
+
 ## Adding Sounds for iOS (optional)
 
 Android automatically plays system sounds when speech listening starts or stops but iOS does not. This plugin supports playing sounds to indicate listening status on iOS if sound files are available as assets in the application. To enable sounds in an application using this plugin add the sound files to the project and reference them in the assets section of the application `pubspec.yaml`. The location and filenames of the sound files must exactly match what 

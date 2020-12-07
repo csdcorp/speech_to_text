@@ -77,9 +77,9 @@ class SpeechToText {
   static const String textRecognitionMethod = 'textRecognition';
   static const String notifyErrorMethod = 'notifyError';
   static const String notifyStatusMethod = 'notifyStatus';
-  static const String soundLevelChangeMethod = "soundLevelChange";
-  static const String notListeningStatus = "notListening";
-  static const String listeningStatus = "listening";
+  static const String soundLevelChangeMethod = 'soundLevelChange';
+  static const String notListeningStatus = 'notListening';
+  static const String listeningStatus = 'listening';
 
   static final SpeechConfigOption androidAlwaysUseStop =
       SpeechConfigOption('android', 'alwaysUseStop', true);
@@ -101,8 +101,8 @@ class SpeechToText {
   /// True if not listening or the user called cancel / stop, false
   /// if cancel/stop were invoked by timeout or error condition.
   bool _userEnded = false;
-  String _lastRecognized = "";
-  String _lastStatus = "";
+  String _lastRecognized = '';
+  String _lastStatus = '';
   double _lastSoundLevel = 0;
   Timer _listenTimer;
   LocaleName _systemLocale;
@@ -166,7 +166,7 @@ class SpeechToText {
   /// Note that applications cannot ask for permission again if the user has
   /// denied them permission in the past.
   Future<bool> get hasPermission async {
-    bool hasPermission = await SpeechToTextPlatform.instance.hasPermission();
+    var hasPermission = await SpeechToTextPlatform.instance.hasPermission();
     return hasPermission;
   }
 
@@ -326,7 +326,7 @@ class SpeechToText {
     _soundLevelChange = onSoundLevelChange;
     _partialResults = partialResults;
     try {
-      bool started = await SpeechToTextPlatform.instance.listen(
+      var started = await SpeechToTextPlatform.instance.listen(
           partialResults: partialResults || null != pauseFor,
           onDevice: onDevice,
           listenMode: listenMode.index,
@@ -397,10 +397,10 @@ class SpeechToText {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
-    final List<dynamic> locales = await SpeechToTextPlatform.instance.locales();
-    List<LocaleName> filteredLocales = locales
+    final locales = await SpeechToTextPlatform.instance.locales();
+    var filteredLocales = locales
         .map((locale) {
-          var components = locale.split(":");
+          var components = locale.split(':');
           if (components.length != 2) {
             return null;
           }
@@ -428,8 +428,7 @@ class SpeechToText {
 
   void _onTextRecognition(String resultJson) {
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
-    SpeechRecognitionResult speechResult =
-        SpeechRecognitionResult.fromJson(resultMap);
+    var speechResult = SpeechRecognitionResult.fromJson(resultMap);
     if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
       _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
     }
@@ -463,8 +462,7 @@ class SpeechToText {
       return;
     }
     Map<String, dynamic> errorMap = jsonDecode(errorJson);
-    SpeechRecognitionError speechError =
-        SpeechRecognitionError.fromJson(errorMap);
+    var speechError = SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
     if (null != errorListener) {
       errorListener(speechError);
@@ -493,7 +491,7 @@ class SpeechToText {
     }
   }
 
-  _shutdownListener() {
+  void _shutdownListener() {
     _listening = false;
     _recognized = false;
     _listenTimer?.cancel();

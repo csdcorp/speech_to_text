@@ -17,10 +17,10 @@ class _MyAppState extends State<MyApp> {
   bool _stressTest = false;
   double level = 0.0;
   int _stressLoops = 0;
-  String lastWords = "";
-  String lastError = "";
-  String lastStatus = "";
-  String _currentLocaleId = "";
+  String lastWords = '';
+  String lastError = '';
+  String lastStatus = '';
+  String _currentLocaleId = '';
   List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
 
@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initSpeechState() async {
-    bool hasSpeech = await speech.initialize(
+    var hasSpeech = await speech.initialize(
         onError: errorListener, onStatus: statusListener);
     if (hasSpeech) {
       _localeNames = await speech.locales();
@@ -209,7 +209,7 @@ class _MyAppState extends State<MyApp> {
     }
     _stressLoops = 0;
     _stressTest = true;
-    print("Starting stress test...");
+    print('Starting stress test...');
     startListening();
   }
 
@@ -222,18 +222,18 @@ class _MyAppState extends State<MyApp> {
     } else {
       if (_stressLoops >= 100) {
         _stressTest = false;
-        print("Stress test complete.");
+        print('Stress test complete.');
         return;
       }
-      print("Stress loop: $_stressLoops");
+      print('Stress loop: $_stressLoops');
       ++_stressLoops;
       startListening();
     }
   }
 
   void startListening() {
-    lastWords = "";
-    lastError = "";
+    lastWords = '';
+    lastError = '';
     speech.listen(
         onResult: resultListener,
         listenFor: Duration(seconds: 10),
@@ -260,7 +260,7 @@ class _MyAppState extends State<MyApp> {
 
   void resultListener(SpeechRecognitionResult result) {
     setState(() {
-      lastWords = "${result.recognizedWords} - ${result.finalResult}";
+      lastWords = '${result.recognizedWords} - ${result.finalResult}';
     });
   }
 
@@ -272,18 +272,18 @@ class _MyAppState extends State<MyApp> {
 
   void errorListener(SpeechRecognitionError error) {
     setState(() {
-      lastError = "${error.errorMsg} - ${error.permanent}";
+      lastError = '${error.errorMsg} - ${error.permanent}';
     });
   }
 
   void statusListener(String status) {
     changeStatusForStress(status);
     setState(() {
-      lastStatus = "$status";
+      lastStatus = '$status';
     });
   }
 
-  _switchLang(selectedVal) {
+  void _switchLang(selectedVal) {
     setState(() {
       _currentLocaleId = selectedVal;
     });

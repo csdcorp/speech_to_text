@@ -18,10 +18,11 @@ class _MyAppState extends State<MyApp> {
   double level = 0.0;
   double minSoundLevel = 50000;
   double maxSoundLevel = -50000;
-  String lastWords = "";
-  String lastError = "";
-  String lastStatus = "";
-  String _currentLocaleId = "";
+  String lastWords = '';
+  String lastError = '';
+  String lastStatus = '';
+  String _currentLocaleId = '';
+  int resultListened = 0;
   List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
 
@@ -31,8 +32,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initSpeechState() async {
-    bool hasSpeech = await speech.initialize(
-        onError: errorListener, onStatus: statusListener);
+    var hasSpeech = await speech.initialize(
+        onError: errorListener, onStatus: statusListener, debugLogging: true);
     if (hasSpeech) {
       _localeNames = await speech.locales();
 
@@ -203,11 +204,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   void startListening() {
-    lastWords = "";
-    lastError = "";
+    lastWords = '';
+    lastError = '';
     speech.listen(
         onResult: resultListener,
-        listenFor: Duration(seconds: 10),
+        listenFor: Duration(seconds: 5),
+        pauseFor: Duration(seconds: 5),
+        partialResults: false,
         localeId: _currentLocaleId,
         onSoundLevelChange: soundLevelListener,
         cancelOnError: true,
@@ -230,8 +233,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   void resultListener(SpeechRecognitionResult result) {
+    ++resultListened;
+    print('Result listener $resultListened');
     setState(() {
-      lastWords = "${result.recognizedWords} - ${result.finalResult}";
+      lastWords = '${result.recognizedWords} - ${result.finalResult}';
     });
   }
 
@@ -247,19 +252,19 @@ class _MyAppState extends State<MyApp> {
   void errorListener(SpeechRecognitionError error) {
     // print("Received error status: $error, listening: ${speech.isListening}");
     setState(() {
-      lastError = "${error.errorMsg} - ${error.permanent}";
+      lastError = '${error.errorMsg} - ${error.permanent}';
     });
   }
 
   void statusListener(String status) {
     // print(
-    // "Received listener status: $status, listening: ${speech.isListening}");
+    // 'Received listener status: $status, listening: ${speech.isListening}');
     setState(() {
-      lastStatus = "$status";
+      lastStatus = '$status';
     });
   }
 
-  _switchLang(selectedVal) {
+  void _switchLang(selectedVal) {
     setState(() {
       _currentLocaleId = selectedVal;
     });

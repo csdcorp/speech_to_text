@@ -11,9 +11,9 @@ class TestSpeechChannelHandler {
 
   bool listenException = false;
 
-  static const String listenExceptionCode = "listenFailedError";
-  static const String listenExceptionMessage = "Failed";
-  static const String listenExceptionDetails = "Device Listen Failure";
+  static const String listenExceptionCode = 'listenFailedError';
+  static const String listenExceptionMessage = 'Failed';
+  static const String listenExceptionDetails = 'Device Listen Failure';
 
   TestSpeechChannelHandler(this._speech);
 
@@ -27,12 +27,12 @@ class TestSpeechChannelHandler {
   String listeningStatusResponse = SpeechToText.listeningStatus;
   String listenLocale;
   List<String> locales = [];
-  static const String localeId1 = "en_US";
-  static const String localeId2 = "fr_CA";
-  static const String name1 = "English US";
-  static const String name2 = "French Canada";
-  static const String locale1 = "$localeId1:$name1";
-  static const String locale2 = "$localeId2:$name2";
+  static const String localeId1 = 'en_US';
+  static const String localeId2 = 'fr_CA';
+  static const String name1 = 'English US';
+  static const String name2 = 'French Canada';
+  static const String locale1 = '$localeId1:$name1';
+  static const String locale2 = '$localeId2:$name2';
   static const String firstRecognizedWords = 'hello';
   static const String secondRecognizedWords = 'hello there';
   static const double firstConfidence = 0.85;
@@ -58,24 +58,24 @@ class TestSpeechChannelHandler {
   static const String permanentErrorJson =
       '{"errorMsg":"network","permanent":true}';
   static final SpeechRecognitionError firstError =
-      SpeechRecognitionError("network", true);
+      SpeechRecognitionError('network', true);
   static const double level1 = 0.5;
   static const double level2 = 10;
 
   Future<dynamic> methodCallHandler(MethodCall methodCall) async {
     switch (methodCall.method) {
-      case "has_permission":
+      case 'has_permission':
         return hasPermissionResult;
         break;
-      case "initialize":
+      case 'initialize':
         initInvoked = true;
         return initResult;
         break;
-      case "cancel":
+      case 'cancel':
         cancelInvoked = true;
         return true;
         break;
-      case "stop":
+      case 'stop':
         stopInvoked = true;
         return true;
         break;
@@ -87,12 +87,12 @@ class TestSpeechChannelHandler {
               message: listenExceptionMessage,
               details: listenExceptionDetails);
         }
-        listenLocale = methodCall.arguments["localeId"];
+        listenLocale = methodCall.arguments['localeId'];
         // await _speech.processMethodCall(MethodCall(
         //     SpeechToText.notifyStatusMethod, listeningStatusResponse));
         return initResult;
         break;
-      case "locales":
+      case 'locales':
         localesInvoked = true;
         return locales;
         break;

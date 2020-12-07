@@ -28,7 +28,7 @@ class SpeechRecognitionError {
 
   @override
   String toString() {
-    return "SpeechRecognitionError msg: $errorMsg, permanent: $permanent";
+    return 'SpeechRecognitionError msg: $errorMsg, permanent: $permanent';
   }
 
   @override

@@ -59,8 +59,8 @@ class SpeechToTextProvider extends ChangeNotifier {
     if (isAvailable) {
       return isAvailable;
     }
-    bool availableBefore = _speechToText.isAvailable;
-    bool available =
+    var availableBefore = _speechToText.isAvailable;
+    var available =
         await _speechToText.initialize(onStatus: _onStatus, onError: _onError);
     if (available) {
       _locales = [];

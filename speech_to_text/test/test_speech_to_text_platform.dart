@@ -5,9 +5,9 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 class TestSpeechToTextPlatform extends SpeechToTextPlatform {
-  static const String listenExceptionCode = "listenFailedError";
-  static const String listenExceptionMessage = "Failed";
-  static const String listenExceptionDetails = "Device Listen Failure";
+  static const String listenExceptionCode = 'listenFailedError';
+  static const String listenExceptionMessage = 'Failed';
+  static const String listenExceptionDetails = 'Device Listen Failure';
 
   bool initResult = true;
   bool initInvoked = false;
@@ -20,12 +20,12 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
   String listeningStatusResponse = SpeechToText.listeningStatus;
   String listenLocale;
   List<String> localesResult = [];
-  static const String localeId1 = "en_US";
-  static const String localeId2 = "fr_CA";
-  static const String name1 = "English US";
-  static const String name2 = "French Canada";
-  static const String locale1 = "$localeId1:$name1";
-  static const String locale2 = "$localeId2:$name2";
+  static const String localeId1 = 'en_US';
+  static const String localeId2 = 'fr_CA';
+  static const String name1 = 'English US';
+  static const String name2 = 'French Canada';
+  static const String locale1 = '$localeId1:$name1';
+  static const String locale2 = '$localeId2:$name2';
   static const String firstRecognizedWords = 'hello';
   static const String secondRecognizedWords = 'hello there';
   static const double firstConfidence = 0.85;
@@ -51,7 +51,7 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
   static const String permanentErrorJson =
       '{"errorMsg":"network","permanent":true}';
   static final SpeechRecognitionError firstError =
-      SpeechRecognitionError("network", true);
+      SpeechRecognitionError('network', true);
   static const double level1 = 0.5;
   static const double level2 = 10;
 
