@@ -21,6 +21,13 @@
             "cwd": "speech_to_text/example",
             "request": "launch",
             "type": "dart"
+        },
+        {
+            "name": "web example",
+            "cwd": "multi_platform_example",
+            "program": "lib/main.dart",
+            "request": "launch",
+            "type": "dart"
         }
     ]
 }

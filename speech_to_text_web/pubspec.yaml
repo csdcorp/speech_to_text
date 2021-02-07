@@ -1,0 +1,33 @@
+name: speech_to_text_web
+description: Web platform implementation of speech to text
+homepage: https://github.com/flutter/plugins/tree/master/packages/url_launcher/url_launcher_web
+version: 0.1.0+1
+publish_to: none
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: SpeechToTextPlugin
+        fileName: speech_to_text_web.dart
+
+dependencies:
+  # speech_to_text_platform_interface: ^1.4.2
+  speech_to_text_platform_interface: 
+    path: ../speech_to_text_platform_interface
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  meta: ^1.1.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  url_launcher: ^5.2.5
+  pedantic: ^1.8.0
+  mockito: ^4.1.1
+
+environment:
+  sdk: ">=2.2.0 <3.0.0"
+  flutter: ">=1.10.0"

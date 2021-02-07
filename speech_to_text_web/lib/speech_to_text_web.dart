@@ -1,6 +1,21 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:js';
+
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
+import 'package:speech_to_text_web/speech_recognition_error.dart';
+import 'package:speech_to_text_web/speech_recognition_result.dart';
+import 'web_speech.dart' as ws;
 
 class SpeechToTextPlugin extends SpeechToTextPlatform {
+  ws.SpeechRecognition _webSpeech;
+
+  /// Registers this class as the default instance of [UrlLauncherPlatform].
+  static void registerWith(Registrar registrar) {
+    SpeechToTextPlatform.instance = SpeechToTextPlugin();
+  }
+
   /// Returns true if the user has already granted permission to access the
   /// microphone, does not prompt the user.
   ///
@@ -11,7 +26,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   /// denied them permission in the past.
   @override
   Future<bool> hasPermission() async {
-    return false;
+    return true;
   }
 
   /// Initialize speech recognition services, returns true if
@@ -28,7 +43,13 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption> options}) async {
-    return false;
+    _webSpeech = ws.SpeechRecognition();
+    _webSpeech.onerror = allowInterop(_onError);
+    _webSpeech.onstart = allowInterop(_onSpeechStart);
+    _webSpeech.onspeechstart = allowInterop(_onSpeechStart);
+    _webSpeech.onend = allowInterop(_onSpeechEnd);
+    _webSpeech.onspeechend = allowInterop(_onSpeechEnd);
+    return null != _webSpeech;
   }
 
   /// Stops the current listen for speech if active, does nothing if not.
@@ -42,7 +63,10 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   /// *Note:* Cannot be used until a successful [initialize] call. Should
   /// only be used after a successful [listen] call.
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async {
+    if (null == _webSpeech) return;
+    _webSpeech.stop();
+  }
 
   /// Cancels the current listen for speech if active, does nothing if not.
   ///
@@ -55,7 +79,10 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   /// *Note* Cannot be used until a successful [initialize] call. Should only
   /// be used after a successful [listen] call.
   @override
-  Future<void> cancel() async {}
+  Future<void> cancel() async {
+    if (null == _webSpeech) return;
+    _webSpeech.abort();
+  }
 
   /// Starts a listening session for speech and converts it to text.
   ///
@@ -87,13 +114,62 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
       onDevice = false,
       int listenMode,
       sampleRate = 0}) async {
-    return false;
+    if (null == _webSpeech) return false;
+    _webSpeech.onresult = allowInterop(_onResult);
+    _webSpeech.interimResults = partialResults;
+    _webSpeech.continuous = partialResults;
+    _webSpeech.start();
+    return true;
   }
 
   /// returns the list of speech locales available on the device.
   ///
   @override
   Future<List<dynamic>> locales() async {
-    return [];
+    List<String> availableLocales = [];
+    var lang = _webSpeech.lang;
+    if (null != lang && lang.isNotEmpty) {
+      lang = lang.replaceAll(':', '_');
+      availableLocales.add('$lang:$lang');
+    }
+    return availableLocales;
+  }
+
+  void _onError(ws.SpeechRecognitionError event) {
+    if (null != onError) {
+      SpeechRecognitionError error = SpeechRecognitionError(event.error, false);
+      onError(jsonEncode(error.toJson()));
+    }
+  }
+
+  void _onSpeechStart(ws.Event event) {
+    if (null != onStatus) {
+      onStatus('listening');
+    }
+  }
+
+  void _onSpeechEnd(ws.Event event) {
+    onStatus('not listening');
+  }
+
+  void _onResult(ws.SpeechRecognitionEvent event) {
+    bool isFinal = false;
+    List<WebSpeechRecognitionWords> recogResults = [];
+    var results = event.results;
+    if (null != results) {
+      for (int index = 0; index < results.length; ++index) {
+        var result = results.item(index);
+        for (int altIndex = 0; altIndex < result.length; ++altIndex) {
+          var alt = result.item(altIndex);
+          recogResults
+              .add(WebSpeechRecognitionWords(alt.transcript, alt.confidence));
+        }
+      }
+    }
+    WebSpeechRecognitionResult result =
+        WebSpeechRecognitionResult(recogResults, isFinal);
+    if (null != onTextRecognition) {
+      onTextRecognition(jsonEncode(result.toJson()));
+    }
   }
 }
