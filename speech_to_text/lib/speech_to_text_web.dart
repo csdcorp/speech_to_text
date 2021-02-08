@@ -43,12 +43,24 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption> options}) async {
-    _webSpeech = ws.SpeechRecognition();
-    _webSpeech.onerror = allowInterop(_onError);
-    _webSpeech.onstart = allowInterop(_onSpeechStart);
-    _webSpeech.onspeechstart = allowInterop(_onSpeechStart);
-    _webSpeech.onend = allowInterop(_onSpeechEnd);
-    _webSpeech.onspeechend = allowInterop(_onSpeechEnd);
+    try {
+      _webSpeech = ws.SpeechRecognition();
+      if (null != _webSpeech) {
+        _webSpeech.onerror = allowInterop(_onError);
+        _webSpeech.onstart = allowInterop(_onSpeechStart);
+        _webSpeech.onspeechstart = allowInterop(_onSpeechStart);
+        _webSpeech.onend = allowInterop(_onSpeechEnd);
+        _webSpeech.onspeechend = allowInterop(_onSpeechEnd);
+      }
+    } finally {
+      if (null == _webSpeech) {
+        if (null != onError) {
+          var error = SpeechRecognitionError('speech_not_supported', true);
+          onError(jsonEncode(error.toJson()));
+        }
+        return false;
+      }
+    }
     return null != _webSpeech;
   }
 
