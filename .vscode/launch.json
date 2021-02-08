@@ -25,7 +25,7 @@
         {
             "name": "web example",
             "cwd": "multi_platform_example",
-            "program": "lib/main.dart",
+            "program": "lib/speech_main.dart",
             "request": "launch",
             "type": "dart"
         }

@@ -13,9 +13,9 @@ class SpeechRecognition {
   external set lang(String isoLang);
   external set interimResults(bool interim);
   external set continuous(bool interim);
-  external start();
-  external stop();
-  external abort();
+  external void start();
+  external void stop();
+  external void abort();
   external set onresult(void Function(SpeechRecognitionEvent event) eventFunc);
   external set onspeechstart(domEventCallback eventFunc);
   external set onspeechend(domEventCallback eventFunc);

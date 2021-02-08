@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:js';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
-import 'package:speech_to_text_web/speech_recognition_error.dart';
-import 'package:speech_to_text_web/speech_recognition_result.dart';
 import 'web_speech.dart' as ws;
 
 class SpeechToTextPlugin extends SpeechToTextPlatform {
@@ -126,7 +126,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   ///
   @override
   Future<List<dynamic>> locales() async {
-    List<String> availableLocales = [];
+    var availableLocales = [];
     var lang = _webSpeech.lang;
     if (null != lang && lang.isNotEmpty) {
       lang = lang.replaceAll(':', '_');
@@ -137,7 +137,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
 
   void _onError(ws.SpeechRecognitionError event) {
     if (null != onError) {
-      SpeechRecognitionError error = SpeechRecognitionError(event.error, false);
+      var error = SpeechRecognitionError(event.error, false);
       onError(jsonEncode(error.toJson()));
     }
   }
@@ -153,21 +153,20 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   }
 
   void _onResult(ws.SpeechRecognitionEvent event) {
-    bool isFinal = false;
-    List<WebSpeechRecognitionWords> recogResults = [];
+    var isFinal = false;
+    var recogResults = <SpeechRecognitionWords>[];
     var results = event.results;
     if (null != results) {
-      for (int index = 0; index < results.length; ++index) {
+      for (var index = 0; index < results.length; ++index) {
         var result = results.item(index);
-        for (int altIndex = 0; altIndex < result.length; ++altIndex) {
+        for (var altIndex = 0; altIndex < result.length; ++altIndex) {
           var alt = result.item(altIndex);
           recogResults
-              .add(WebSpeechRecognitionWords(alt.transcript, alt.confidence));
+              .add(SpeechRecognitionWords(alt.transcript, alt.confidence));
         }
       }
     }
-    WebSpeechRecognitionResult result =
-        WebSpeechRecognitionResult(recogResults, isFinal);
+    var result = SpeechRecognitionResult(recogResults, isFinal);
     if (null != onTextRecognition) {
       onTextRecognition(jsonEncode(result.toJson()));
     }

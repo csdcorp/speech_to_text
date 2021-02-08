@@ -1,26 +1,20 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v3.1.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v3.2.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
 This plugin contains a set of classes that make it easy to use the speech recognition 
-capabilities of the mobile device in Flutter. It supports both Android and iOS. The 
+capabilities of the underlying platform in Flutter. It supports Android, iOS and web. The 
 target use cases for this library are commands and short phrases, not continuous spoken
 conversion or always on listening. 
 
 ## Recent Updates
 
+The 3.2.0 version supports the web platform. 
+
 The 3.0.0 version uses the newer style of plugin development based on a common platform interface package. 
 This will make it easier to support web and other platforms. 
-
-The 2.5.0 version adds `localeId` to  `listen` on `SpeechToTextProvider` to better support multiple languages. 
-It also addresses a bug in Android that made the `stop` method not work on Android 10(29). This 
-is a work around that is not as good as actually having a fix for the Android issue but does at least 
-mean that it stops listening when requested.
-
-The 2.3.0 version adds `SpeechToTextProvider` as a simpler way to interact with the plugin. Checkout 
-the new `provider_example.dart` for intended usage. 
 
 *Note*: Feedback from any test devices is welcome. 
 

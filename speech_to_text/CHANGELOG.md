@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.0
+### New
+* Now supports web as a platform
+
 ## 3.1.0
 
 ### New

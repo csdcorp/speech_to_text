@@ -14,8 +14,6 @@ dependencies:
   cupertino_icons: ^1.0.1
   speech_to_text:
     path: ../speech_to_text
-  speech_to_text_web:
-    path: ../speech_to_text_web
 
 dev_dependencies:
   flutter_test:
