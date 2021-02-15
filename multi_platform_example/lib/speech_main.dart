@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    FlatButton(
+                    TextButton(
                       child: Text('Initialize'),
                       onPressed: _hasSpeech ? null : initSpeechState,
                     ),
@@ -81,17 +81,17 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    FlatButton(
+                    TextButton(
                       child: Text('Start'),
                       onPressed: !_hasSpeech || speech.isListening
                           ? null
                           : startListening,
                     ),
-                    FlatButton(
+                    TextButton(
                       child: Text('Stop'),
                       onPressed: speech.isListening ? stopListening : null,
                     ),
-                    FlatButton(
+                    TextButton(
                       child: Text('Cancel'),
                       onPressed: speech.isListening ? cancelListening : null,
                     ),

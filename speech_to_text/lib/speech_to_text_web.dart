@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html' as html;
 import 'dart:js';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -8,6 +9,9 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 import 'web_speech.dart' as ws;
 
+/// Web implementation of the SpeechToText platform interface. This supports
+/// the speech to text functionality running in web browsers that have
+/// SpeechRecognition support.
 class SpeechToTextPlugin extends SpeechToTextPlatform {
   ws.SpeechRecognition _webSpeech;
 
@@ -147,30 +151,29 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     return availableLocales;
   }
 
-  void _onError(ws.SpeechRecognitionError event) {
+  void _onError(html.SpeechRecognitionError event) {
     if (null != onError) {
       var error = SpeechRecognitionError(event.error, false);
       onError(jsonEncode(error.toJson()));
     }
   }
 
-  void _onSpeechStart(ws.Event event) {
+  void _onSpeechStart(html.Event event) {
     if (null != onStatus) {
       onStatus('listening');
     }
   }
 
-  void _onSpeechEnd(ws.Event event) {
+  void _onSpeechEnd(html.Event event) {
     onStatus('not listening');
   }
 
-  void _onResult(ws.SpeechRecognitionEvent event) {
+  void _onResult(html.SpeechRecognitionEvent event) {
     var isFinal = false;
     var recogResults = <SpeechRecognitionWords>[];
     var results = event.results;
     if (null != results) {
-      for (var index = 0; index < results.length; ++index) {
-        var result = results.item(index);
+      for (var result in results) {
         for (var altIndex = 0; altIndex < result.length; ++altIndex) {
           var alt = result.item(altIndex);
           recogResults
