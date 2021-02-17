@@ -134,6 +134,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     _webSpeech.onresult = allowInterop(_onResult);
     _webSpeech.interimResults = partialResults;
     _webSpeech.continuous = partialResults;
+    _webSpeech.lang = localeId;
     _webSpeech.start();
     return true;
   }
