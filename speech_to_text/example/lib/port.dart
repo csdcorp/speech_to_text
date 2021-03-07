@@ -128,8 +128,7 @@ class _MyAppState extends State<MyApp> {
 
   Widget _buildButton({String label, VoidCallback onPressed}) => Padding(
       padding: EdgeInsets.all(12.0),
-      child: RaisedButton(
-        color: Colors.cyan.shade600,
+      child: ElevatedButton(
         onPressed: onPressed,
         child: Text(
           label,
