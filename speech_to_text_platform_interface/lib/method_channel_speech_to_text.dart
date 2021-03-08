@@ -25,9 +25,7 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   /// denied them permission in the past.
   @override
   Future<bool> hasPermission() async {
-    var result = await _channel.invokeMethod<bool>('has_permission');
-
-    return result!;
+    return await _channel.invokeMethod<bool>('has_permission') ?? false;
   }
 
   @override
@@ -159,5 +157,10 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   @visibleForTesting
   Future processMethodCall(MethodCall call) async {
     return await _handleCallbacks(call);
+  }
+
+  @visibleForTesting
+  void setMockHandler(Future? Function(MethodCall call) handler) {
+    _channel.setMockMethodCallHandler(handler);
   }
 }
