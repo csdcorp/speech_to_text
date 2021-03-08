@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 /// Holds a set of responses and acts as a mock for the platform specific
 /// implementations allowing test cases to determine what the result of
@@ -12,7 +13,8 @@ class TestSpeechChannelHandler {
 
   TestSpeechChannelHandler();
 
-  bool initResult = true;
+  bool? initResult = true;
+  bool? listenResult = true;
   bool initInvoked = false;
   bool listenInvoked = false;
   bool cancelInvoked = false;
@@ -20,14 +22,23 @@ class TestSpeechChannelHandler {
   bool localesInvoked = false;
   bool? hasPermissionResult = true;
   String listeningStatusResponse = 'listening';
-  String listenLocale = 'en_US';
-  List<String> locales = [];
+  String? listenLocale = 'en_US';
+  List<String>? locales = [];
+
+  bool? onDevice = false;
+  bool? partialResults = false;
+  bool? debugLogging;
+  int? listenMode = 0;
+  int? sampleRate = 0;
+  dynamic? initOption;
   static const String localeId1 = 'en_US';
   static const String localeId2 = 'fr_CA';
   static const String name1 = 'English US';
   static const String name2 = 'French Canada';
   static const String locale1 = '$localeId1:$name1';
   static const String locale2 = '$localeId2:$name2';
+  static final SpeechConfigOption androidAlwaysUseStop =
+      SpeechConfigOption('android', 'alwaysUseStop', true);
   static const String firstRecognizedWords = 'hello';
   static const String secondRecognizedWords = 'hello there';
   static const double firstConfidence = 0.85;
@@ -61,19 +72,17 @@ class TestSpeechChannelHandler {
     switch (methodCall.method) {
       case 'has_permission':
         return hasPermissionResult;
-        break;
       case 'initialize':
         initInvoked = true;
+        initOption = methodCall.arguments[androidAlwaysUseStop.name];
+        debugLogging = methodCall.arguments['debugLogging'];
         return initResult;
-        break;
       case 'cancel':
         cancelInvoked = true;
         return true;
-        break;
       case 'stop':
         stopInvoked = true;
         return true;
-        break;
       case 'listen':
         listenInvoked = true;
         if (listenException) {
@@ -83,14 +92,16 @@ class TestSpeechChannelHandler {
               details: listenExceptionDetails);
         }
         listenLocale = methodCall.arguments['localeId'];
+        onDevice = methodCall.arguments['onDevice'];
+        partialResults = methodCall.arguments['partialResults'];
+        listenMode = methodCall.arguments['listenMode'];
+        sampleRate = methodCall.arguments['sampleRate'];
         // await _speech.processMethodCall(MethodCall(
         //     SpeechToText.notifyStatusMethod, listeningStatusResponse));
-        return initResult;
-        break;
+        return listenResult;
       case 'locales':
         localesInvoked = true;
         return locales;
-        break;
       default:
     }
     return initResult;
@@ -122,9 +133,30 @@ class TestSpeechChannelHandler {
     //     MethodCall(SpeechToText.soundLevelChangeMethod, level2));
   }
 
+  void reset() {
+    initResult = true;
+    listenResult = true;
+    initInvoked = false;
+    listenInvoked = false;
+    cancelInvoked = false;
+    stopInvoked = false;
+    localesInvoked = false;
+    hasPermissionResult = true;
+    listeningStatusResponse = 'listening';
+    listenLocale = 'en_US';
+    locales = [];
+
+    onDevice = false;
+    partialResults = false;
+    listenMode = 0;
+    sampleRate = 0;
+    initOption = null;
+    debugLogging = null;
+  }
+
   void setupLocales() {
-    locales.clear();
-    locales.add(locale1);
-    locales.add(locale2);
+    locales?.clear();
+    locales?.add(locale1);
+    locales?.add(locale2);
   }
 }

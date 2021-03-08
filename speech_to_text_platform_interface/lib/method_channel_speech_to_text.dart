@@ -36,12 +36,11 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
       'debugLogging': debugLogging,
     };
     options?.forEach((option) => params[option.name] = option.value);
-    var result = await _channel.invokeMethod<bool>(
-      'initialize',
-      params,
-    );
-
-    return result!;
+    return await _channel.invokeMethod<bool>(
+          'initialize',
+          params,
+        ) ??
+        false;
   }
 
   /// Stops the current listen for speech if active, does nothing if not.
@@ -113,18 +112,14 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     if (null != localeId) {
       listenParams["localeId"] = localeId;
     }
-    var result = await _channel.invokeMethod<bool>('listen', listenParams);
-
-    return result!;
+    return await _channel.invokeMethod<bool>('listen', listenParams) ?? false;
   }
 
   /// returns the list of speech locales available on the device.
   ///
   @override
   Future<List<dynamic>> locales() async {
-    var result = await _channel.invokeMethod<List<dynamic>>('locales');
-
-    return result!;
+    return await _channel.invokeMethod<List<dynamic>>('locales') ?? [];
   }
 
   Future _handleCallbacks(MethodCall call) async {
