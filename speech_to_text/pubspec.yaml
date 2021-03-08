@@ -10,7 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  speech_to_text_platform_interface: ^1.4.3
+  speech_to_text_platform_interface:
+    path: ../speech_to_text_platform_interface/
   json_annotation: ^4.0.0
   clock: ^1.0.1
   pedantic: ^1.9.2
