@@ -51,10 +51,10 @@ abstract class SpeechToTextPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  void Function(String results) onTextRecognition;
-  void Function(String error) onError;
-  void Function(String status) onStatus;
-  void Function(double level) onSoundLevel;
+  void Function(String results)? onTextRecognition;
+  void Function(String error)? onError;
+  void Function(String status)? onStatus;
+  void Function(double level)? onSoundLevel;
 
   /// Returns true if the user has already granted permission to access the
   /// microphone, does not prompt the user.
@@ -83,7 +83,7 @@ abstract class SpeechToTextPlatform extends PlatformInterface {
   /// plugins. It is off by default, usually only useful for troubleshooting issues
   /// with a paritcular OS version or device, fairly verbose
   Future<bool> initialize(
-      {debugLogging = false, List<SpeechConfigOption> options}) {
+      {debugLogging = false, List<SpeechConfigOption>? options}) {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 
@@ -139,10 +139,10 @@ abstract class SpeechToTextPlatform extends PlatformInterface {
   /// crashes
   ///
   Future<bool> listen(
-      {String localeId,
+      {String? localeId,
       partialResults = true,
       onDevice = false,
-      int listenMode,
+      int listenMode = 0,
       sampleRate = 0}) {
     throw UnimplementedError('listen() has not been implemented.');
   }
