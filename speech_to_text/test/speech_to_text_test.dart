@@ -12,9 +12,9 @@ import 'test_speech_to_text_platform.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  TestSpeechToTextPlatform testPlatform;
-  TestSpeechListener listener;
-  SpeechToText speech;
+  late TestSpeechToTextPlatform testPlatform;
+  late TestSpeechListener listener;
+  late SpeechToText speech;
 
   setUp(() {
     listener = TestSpeechListener();
@@ -90,7 +90,7 @@ void main() {
         speech.initialize();
         fa.flushMicrotasks();
         speech.listen(listenFor: Duration(seconds: 2));
-        testPlatform.onStatus(SpeechToText.listeningStatus);
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
         fa.flushMicrotasks();
         expect(speech.isListening, isTrue);
         fa.elapse(Duration(seconds: 2));
@@ -103,9 +103,9 @@ void main() {
         speech.initialize();
         fa.flushMicrotasks();
         speech.listen(listenFor: Duration(seconds: 1));
-        testPlatform.onStatus(SpeechToText.listeningStatus);
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
         testPlatform
-            .onTextRecognition(TestSpeechChannelHandler.firstRecognizedJson);
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
         fa.flushMicrotasks();
         expect(speech.isListening, isTrue);
         fa.elapse(Duration(seconds: 1));
@@ -117,7 +117,7 @@ void main() {
         speech.initialize();
         fa.flushMicrotasks();
         speech.listen(pauseFor: Duration(seconds: 2));
-        testPlatform.onStatus(SpeechToText.listeningStatus);
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
         fa.flushMicrotasks();
         expect(speech.isListening, isTrue);
         fa.elapse(Duration(seconds: 2));
@@ -131,7 +131,7 @@ void main() {
         fa.flushMicrotasks();
         speech.listen(
             pauseFor: Duration(seconds: 1), listenFor: Duration(seconds: 5));
-        testPlatform.onStatus(SpeechToText.listeningStatus);
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
         fa.flushMicrotasks();
         expect(speech.isListening, isTrue);
         fa.elapse(Duration(seconds: 1));
@@ -145,7 +145,7 @@ void main() {
         fa.flushMicrotasks();
         speech.listen(
             listenFor: Duration(seconds: 1), pauseFor: Duration(seconds: 5));
-        testPlatform.onStatus(SpeechToText.listeningStatus);
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
         fa.flushMicrotasks();
         expect(speech.isListening, isTrue);
         fa.elapse(Duration(seconds: 1));
@@ -157,11 +157,11 @@ void main() {
         speech.initialize();
         fa.flushMicrotasks();
         speech.listen(pauseFor: Duration(seconds: 2));
-        testPlatform.onStatus(SpeechToText.listeningStatus);
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
         fa.flushMicrotasks();
         fa.elapse(Duration(seconds: 1));
         testPlatform
-            .onTextRecognition(TestSpeechChannelHandler.firstRecognizedJson);
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
         fa.flushMicrotasks();
         fa.elapse(Duration(seconds: 1));
         expect(speech.isListening, isTrue);
@@ -175,7 +175,7 @@ void main() {
             pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
         fa.flushMicrotasks();
         testPlatform
-            .onTextRecognition(TestSpeechChannelHandler.firstRecognizedJson);
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
         fa.flushMicrotasks();
         // 2200 because it is the 2 second duration of the pauseFor then
         // 200 milliseconds to create the synthetic result
@@ -191,7 +191,7 @@ void main() {
             pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
         fa.flushMicrotasks();
         testPlatform
-            .onTextRecognition(TestSpeechChannelHandler.finalRecognizedJson);
+            .onTextRecognition!(TestSpeechChannelHandler.finalRecognizedJson);
         fa.flushMicrotasks();
         // 2200 because it is the 2 second duration of the pauseFor then
         // 200 milliseconds to create the synthetic result
@@ -210,7 +210,7 @@ void main() {
       await speech.initialize();
       await speech.listen(onResult: listener.onSpeechResult);
       testPlatform
-          .onTextRecognition(TestSpeechChannelHandler.firstRecognizedJson);
+          .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
       expect(listener.speechResults, 1);
       expect(
           listener.results, [TestSpeechChannelHandler.firstRecognizedResult]);
@@ -221,9 +221,9 @@ void main() {
       await speech.initialize();
       await speech.listen(onResult: listener.onSpeechResult);
       testPlatform
-          .onTextRecognition(TestSpeechChannelHandler.firstRecognizedJson);
+          .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
       testPlatform
-          .onTextRecognition(TestSpeechChannelHandler.secondRecognizedJson);
+          .onTextRecognition!(TestSpeechChannelHandler.secondRecognizedJson);
       expect(listener.speechResults, 2);
       expect(listener.results, [
         TestSpeechChannelHandler.firstRecognizedResult,
@@ -238,7 +238,7 @@ void main() {
     test('invoked on listen', () async {
       await speech.initialize(
           onError: listener.onSpeechError, onStatus: listener.onSpeechStatus);
-      testPlatform.onStatus(SpeechToText.listeningStatus);
+      testPlatform.onStatus!(SpeechToText.listeningStatus);
       expect(listener.speechStatus, 1);
       expect(listener.statuses.contains(SpeechToText.listeningStatus), true);
     });
@@ -248,16 +248,16 @@ void main() {
     test('invoked on listen', () async {
       await speech.initialize();
       await speech.listen(onSoundLevelChange: listener.onSoundLevel);
-      testPlatform.onStatus(SpeechToText.listeningStatus);
-      testPlatform.onSoundLevel(TestSpeechToTextPlatform.level1);
+      testPlatform.onStatus!(SpeechToText.listeningStatus);
+      testPlatform.onSoundLevel!(TestSpeechToTextPlatform.level1);
       expect(listener.soundLevel, 1);
       expect(listener.soundLevels, contains(TestSpeechChannelHandler.level1));
     });
     test('sets lastLevel', () async {
       await speech.initialize();
       await speech.listen(onSoundLevelChange: listener.onSoundLevel);
-      testPlatform.onStatus(SpeechToText.listeningStatus);
-      testPlatform.onSoundLevel(TestSpeechToTextPlatform.level1);
+      testPlatform.onStatus!(SpeechToText.listeningStatus);
+      testPlatform.onSoundLevel!(TestSpeechToTextPlatform.level1);
       expect(speech.lastSoundLevel, TestSpeechChannelHandler.level1);
     });
   });
@@ -292,53 +292,53 @@ void main() {
     test('notifies handler with transient', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      testPlatform.onError(TestSpeechChannelHandler.transientErrorJson);
+      testPlatform.onError!(TestSpeechChannelHandler.transientErrorJson);
       expect(listener.speechErrors, 1);
       expect(listener.errors.first.permanent, isFalse);
     });
     test('notifies handler with permanent', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      testPlatform.onError(TestSpeechChannelHandler.permanentErrorJson);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(listener.speechErrors, 1);
       expect(listener.errors.first.permanent, isTrue);
     });
     test('continues listening on transient', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      testPlatform.onStatus(SpeechToText.listeningStatus);
-      testPlatform.onError(TestSpeechChannelHandler.transientErrorJson);
+      testPlatform.onStatus!(SpeechToText.listeningStatus);
+      testPlatform.onError!(TestSpeechChannelHandler.transientErrorJson);
       expect(speech.isListening, isTrue);
     });
     test('continues listening on permanent if cancel not explicitly requested',
         () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
-      testPlatform.onStatus(SpeechToText.listeningStatus);
-      testPlatform.onError(TestSpeechChannelHandler.permanentErrorJson);
+      testPlatform.onStatus!(SpeechToText.listeningStatus);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isTrue);
     });
     test('stops listening on permanent if cancel explicitly requested',
         () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen(cancelOnError: true);
-      testPlatform.onStatus(SpeechToText.listeningStatus);
-      testPlatform.onError(TestSpeechChannelHandler.permanentErrorJson);
+      testPlatform.onStatus!(SpeechToText.listeningStatus);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
     });
     test('Error not sent after cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen();
       await speech.cancel();
-      testPlatform.onError(TestSpeechChannelHandler.permanentErrorJson);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 0);
     });
     test('Error still sent after implicit cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
       await speech.listen(cancelOnError: true);
-      testPlatform.onError(TestSpeechChannelHandler.permanentErrorJson);
-      testPlatform.onError(TestSpeechChannelHandler.permanentErrorJson);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 2);
     });
@@ -354,7 +354,7 @@ void main() {
       }
     });
     test('system locale null if not initialized', () async {
-      LocaleName current;
+      LocaleName? current;
       try {
         current = await speech.systemLocale();
         fail('Expected an exception.');
@@ -395,7 +395,7 @@ void main() {
       testPlatform.localesResult.addAll(
           [TestSpeechChannelHandler.locale1, TestSpeechChannelHandler.locale2]);
       var current = await speech.systemLocale();
-      expect(current.localeId, TestSpeechChannelHandler.localeId1);
+      expect(current?.localeId, TestSpeechChannelHandler.localeId1);
     });
   });
 

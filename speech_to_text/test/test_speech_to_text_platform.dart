@@ -18,7 +18,7 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
   bool hasPermissionResult = true;
   bool listenException = false;
   String listeningStatusResponse = SpeechToText.listeningStatus;
-  String listenLocale;
+  String? listenLocale;
   List<String> localesResult = [];
   static const String localeId1 = 'en_US';
   static const String localeId2 = 'fr_CA';
@@ -62,7 +62,7 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
 
   @override
   Future<bool> initialize(
-      {debugLogging = false, List<SpeechConfigOption> options}) async {
+      {debugLogging = false, List<SpeechConfigOption>? options}) async {
     initInvoked = true;
     return initResult;
   }
@@ -79,10 +79,10 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
 
   @override
   Future<bool> listen(
-      {String localeId,
+      {String? localeId,
       partialResults = true,
       onDevice = false,
-      int listenMode,
+      int listenMode = 0,
       sampleRate = 0}) async {
     listenInvoked = true;
     listenLocale = localeId;
@@ -102,27 +102,27 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
   }
 
   void notifyListening() {
-    onStatus(SpeechToText.listeningStatus);
+    onStatus!(SpeechToText.listeningStatus);
   }
 
   void notifyFinalWords() {
-    onTextRecognition(finalRecognizedJson);
+    onTextRecognition!(finalRecognizedJson);
   }
 
   void notifyPartialWords() {
-    onTextRecognition(firstRecognizedJson);
+    onTextRecognition!(firstRecognizedJson);
   }
 
   void notifyPermanentError() {
-    onError(permanentErrorJson);
+    onError!(permanentErrorJson);
   }
 
   void notifyTransientError() {
-    onError(transientErrorJson);
+    onError!(transientErrorJson);
   }
 
   void notifySoundLevel() {
-    onSoundLevel(level2);
+    onSoundLevel!(level2);
   }
 
   void setupLocales() {
