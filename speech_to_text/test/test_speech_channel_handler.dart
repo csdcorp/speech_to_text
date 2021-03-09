@@ -7,6 +7,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 /// implementations allowing test cases to determine what the result of
 /// a call should be.
 class TestSpeechChannelHandler {
+  // ignore: unused_field
   final SpeechToText _speech;
 
   bool listenException = false;
@@ -25,7 +26,7 @@ class TestSpeechChannelHandler {
   bool localesInvoked = false;
   bool hasPermissionResult = true;
   String listeningStatusResponse = SpeechToText.listeningStatus;
-  String listenLocale;
+  String? listenLocale;
   List<String> locales = [];
   static const String localeId1 = 'en_US';
   static const String localeId2 = 'fr_CA';
@@ -66,19 +67,15 @@ class TestSpeechChannelHandler {
     switch (methodCall.method) {
       case 'has_permission':
         return hasPermissionResult;
-        break;
       case 'initialize':
         initInvoked = true;
         return initResult;
-        break;
       case 'cancel':
         cancelInvoked = true;
         return true;
-        break;
       case 'stop':
         stopInvoked = true;
         return true;
-        break;
       case SpeechToText.listenMethod:
         listenInvoked = true;
         if (listenException) {
@@ -91,11 +88,9 @@ class TestSpeechChannelHandler {
         // await _speech.processMethodCall(MethodCall(
         //     SpeechToText.notifyStatusMethod, listeningStatusResponse));
         return initResult;
-        break;
       case 'locales':
         localesInvoked = true;
         return locales;
-        break;
       default:
     }
     return initResult;
@@ -112,7 +107,6 @@ class TestSpeechChannelHandler {
   }
 
   void notifyPermanentError() {
-    if (null != _speech) {}
     // _speech.processMethodCall(
     //     MethodCall(SpeechToText.notifyErrorMethod, permanentErrorJson));
   }

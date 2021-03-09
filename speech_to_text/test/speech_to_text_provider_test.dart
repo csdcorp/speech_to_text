@@ -9,10 +9,10 @@ import 'test_speech_listener.dart';
 import 'test_speech_to_text_platform.dart';
 
 void main() {
-  SpeechToTextProvider provider;
-  SpeechToText speechToText;
-  TestSpeechToTextPlatform testPlatform;
-  TestSpeechListener speechListener;
+  late SpeechToTextProvider provider;
+  late SpeechToText speechToText;
+  late TestSpeechToTextPlatform testPlatform;
+  late TestSpeechListener speechListener;
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -71,9 +71,9 @@ void main() {
         expect(speechListener.notified, isTrue);
         expect(provider.hasResults, isTrue);
         var result = speechListener.recognitionResult;
-        expect(result.recognizedWords,
+        expect(result?.recognizedWords,
             TestSpeechChannelHandler.secondRecognizedWords);
-        expect(result.finalResult, isTrue);
+        expect(result?.finalResult, isTrue);
       });
     });
     test('hasResult false after listening before new results', () async {
@@ -95,9 +95,9 @@ void main() {
         expect(speechListener.notified, isTrue);
         expect(provider.hasResults, isTrue);
         var result = speechListener.recognitionResult;
-        expect(result.recognizedWords,
+        expect(result?.recognizedWords,
             TestSpeechChannelHandler.firstRecognizedWords);
-        expect(result.finalResult, isFalse);
+        expect(result?.finalResult, isFalse);
       });
     });
   });
@@ -176,8 +176,8 @@ void main() {
         testPlatform.setupLocales();
         provider.initialize();
         fa.flushMicrotasks();
-        expect(
-            provider.systemLocale.localeId, TestSpeechChannelHandler.localeId1);
+        expect(provider.systemLocale?.localeId,
+            TestSpeechChannelHandler.localeId1);
         expect(provider.locales, hasLength(testPlatform.localesResult.length));
       });
     });
