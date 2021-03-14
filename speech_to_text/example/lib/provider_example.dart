@@ -14,7 +14,7 @@ class ProviderDemoApp extends StatefulWidget {
 
 class _ProviderDemoAppState extends State<ProviderDemoApp> {
   final SpeechToText speech = SpeechToText();
-  SpeechToTextProvider speechProvider;
+  late SpeechToTextProvider speechProvider;
 
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _SpeechProviderExampleWidgetState
 
   void _setCurrentLocale(SpeechToTextProvider speechProvider) {
     if (speechProvider.isAvailable && _currentLocaleId.isEmpty) {
-      _currentLocaleId = speechProvider.systemLocale.localeId;
+      _currentLocaleId = speechProvider.systemLocale?.localeId ?? '';
     }
   }
 
@@ -82,25 +82,25 @@ class _SpeechProviderExampleWidgetState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                FlatButton(
-                  child: Text('Start'),
+                TextButton(
                   onPressed:
                       !speechProvider.isAvailable || speechProvider.isListening
                           ? null
                           : () => speechProvider.listen(
                               partialResults: true, localeId: _currentLocaleId),
+                  child: Text('Start'),
                 ),
-                FlatButton(
-                  child: Text('Stop'),
+                TextButton(
                   onPressed: speechProvider.isListening
                       ? () => speechProvider.stop()
                       : null,
+                  child: Text('Stop'),
                 ),
-                FlatButton(
-                  child: Text('Cancel'),
+                TextButton(
                   onPressed: speechProvider.isListening
                       ? () => speechProvider.cancel()
                       : null,
+                  child: Text('Cancel'),
                 ),
               ],
             ),
@@ -140,7 +140,7 @@ class _SpeechProviderExampleWidgetState
                 child: Center(
                   child: speechProvider.hasResults
                       ? Text(
-                          speechProvider.lastResult.recognizedWords,
+                          speechProvider.lastResult?.recognizedWords ?? '',
                           textAlign: TextAlign.center,
                         )
                       : Container(),
@@ -162,7 +162,7 @@ class _SpeechProviderExampleWidgetState
             ),
             Center(
               child: speechProvider.hasError
-                  ? Text(speechProvider.lastError.errorMsg)
+                  ? Text(speechProvider.lastError!.errorMsg)
                   : Container(),
             ),
           ],

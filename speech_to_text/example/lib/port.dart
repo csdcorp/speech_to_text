@@ -29,7 +29,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  SpeechToText _speech;
+  var _speech = SpeechToText();
 
   bool _speechRecognitionAvailable = false;
   bool _isListening = false;
@@ -126,7 +126,7 @@ class _MyAppState extends State<MyApp> {
     setState(() => selectedLang = lang);
   }
 
-  Widget _buildButton({String label, VoidCallback onPressed}) => Padding(
+  Widget _buildButton({String label = '', VoidCallback? onPressed}) => Padding(
       padding: EdgeInsets.all(12.0),
       child: ElevatedButton(
         onPressed: onPressed,

@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
       _localeNames = await speech.locales();
 
       var systemLocale = await speech.systemLocale();
-      _currentLocaleId = systemLocale.localeId;
+      _currentLocaleId = systemLocale?.localeId ?? '';
     }
 
     if (!mounted) return;
@@ -67,12 +67,12 @@ class _MyAppState extends State<MyApp> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     TextButton(
-                      child: Text('Initialize'),
                       onPressed: _hasSpeech ? null : initSpeechState,
+                      child: Text('Initialize'),
                     ),
                     TextButton(
-                      child: Text('Stress Test'),
                       onPressed: stressTest,
+                      child: Text('Stress Test'),
                     ),
                   ],
                 ),
@@ -80,18 +80,18 @@ class _MyAppState extends State<MyApp> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     TextButton(
-                      child: Text('Start'),
                       onPressed: !_hasSpeech || speech.isListening
                           ? null
                           : startListening,
+                      child: Text('Start'),
                     ),
                     TextButton(
-                      child: Text('Stop'),
                       onPressed: speech.isListening ? stopListening : null,
+                      child: Text('Stop'),
                     ),
                     TextButton(
-                      child: Text('Cancel'),
                       onPressed: speech.isListening ? cancelListening : null,
+                      child: Text('Cancel'),
                     ),
                   ],
                 ),
