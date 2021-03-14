@@ -316,7 +316,7 @@ packages:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0-nullsafety.2"
+    version: "2.0.0"
   pool:
     dependency: transitive
     description:
@@ -377,7 +377,7 @@ packages:
       name: speech_to_text_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.2"
+    version: "2.0.0-nullsafety"
   stack_trace:
     dependency: transitive
     description:
