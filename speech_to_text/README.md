@@ -11,6 +11,8 @@ conversion or always on listening.
 
 ## Recent Updates
 
+The 4.0.0 version adds null safety support.
+
 The 3.2.0 version supports the web platform. 
 
 The 3.0.0 version uses the newer style of plugin development based on a common platform interface package. 
