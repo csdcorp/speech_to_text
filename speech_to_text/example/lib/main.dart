@@ -208,9 +208,9 @@ class _MyAppState extends State<MyApp> {
     lastError = '';
     speech.listen(
         onResult: resultListener,
-        listenFor: Duration(seconds: 5),
+        listenFor: Duration(seconds: 30),
         pauseFor: Duration(seconds: 5),
-        partialResults: false,
+        partialResults: true,
         localeId: _currentLocaleId,
         onSoundLevelChange: soundLevelListener,
         cancelOnError: true,
