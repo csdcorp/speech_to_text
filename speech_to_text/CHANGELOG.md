@@ -1,8 +1,12 @@
 # Changelog
 
+## 4.0.0-nullsafety
+### New
+  * Now supports Flutter 2.0 / Dart 2.12 null safety features.
+
 ## 3.2.0
 ### New
-* Now supports web as a platform
+  * Now supports web as a platform
 
 ## 3.1.0
 
