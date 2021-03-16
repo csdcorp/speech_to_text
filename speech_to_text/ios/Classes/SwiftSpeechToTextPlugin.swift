@@ -298,8 +298,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     }
     
     private func stopCurrentListen( ) {
-        stopAllPlayers()
         self.currentRequest?.endAudio()
+        stopAllPlayers()
         invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
 
         do {
