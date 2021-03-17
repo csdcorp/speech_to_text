@@ -33,7 +33,10 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initSpeechState() async {
     var hasSpeech = await speech.initialize(
-        onError: errorListener, onStatus: statusListener, debugLogging: true);
+        onError: errorListener,
+        onStatus: statusListener,
+        debugLogging: true,
+        finalTimeout: Duration(milliseconds: 0));
     if (hasSpeech) {
       _localeNames = await speech.locales();
 
