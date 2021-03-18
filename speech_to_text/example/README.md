@@ -62,15 +62,15 @@ class _MyAppState extends State<MyApp> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      FlatButton(
+                      TextButton(
                         child: Text('Start'),
                         onPressed: startListening,
                       ),
-                      FlatButton(
+                      TextButton(
                         child: Text('Stop'),
                         onPressed: stopListening,
                       ),
-                      FlatButton(
+                      TextButton(
                         child: Text('Cancel'),
                         onPressed:cancelListening,
                       ),
