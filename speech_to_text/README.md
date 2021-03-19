@@ -11,7 +11,9 @@ conversion or always on listening.
 
 ## Recent Updates
 
-The 3.2.0 version supports the web platform. 
+The 3.2.0 version adds the `finalTimeout` parameter to the `initialize` method. The plugin used to wait 
+a maximum of 100 ms for a final value from the device speech recognition service. This parameter controls
+that wait, it defaults to 2 seconds which is a breaking change from previous behavour. 
 
 The 3.0.0 version uses the newer style of plugin development based on a common platform interface package. 
 This will make it easier to support web and other platforms. 

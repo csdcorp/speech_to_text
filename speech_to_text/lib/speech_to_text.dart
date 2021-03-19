@@ -80,7 +80,7 @@ class SpeechToText {
   static const String soundLevelChangeMethod = 'soundLevelChange';
   static const String notListeningStatus = 'notListening';
   static const String listeningStatus = 'listening';
-  static const _defaultFinalTimeout = Duration(milliseconds: 100);
+  static const _defaultFinalTimeout = Duration(milliseconds: 2000);
   static const _minFinalTimeout = Duration(milliseconds: 50);
 
   static final SpeechConfigOption androidAlwaysUseStop =
@@ -190,7 +190,11 @@ class SpeechToText {
   /// [debugLogging] controls whether there is detailed logging from the underlying
   /// plugins. It is off by default, usually only useful for troubleshooting issues
   /// with a paritcular OS version or device, fairly verbose
-  ///
+  /// [finalTimeout] a duration to wait for a final result from the device
+  /// speech recognition service. If no final result is received within this 
+  /// time the last partial result is returned as final. This defaults to 
+  /// two seconds. A duration of fifty milliseconds or less disables the 
+  /// check and final results will only be returned from the device. 
   /// [options] pass platform specific configuration options to the
   /// platform specific implementation.
   Future<bool> initialize(

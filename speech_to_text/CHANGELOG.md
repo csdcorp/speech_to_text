@@ -2,7 +2,9 @@
 
 ## 3.2.0
 ### New
-* Now supports web as a platform
+* New property `finalTimeout` on the `initialize` method to set how long the plugin will wait for a final result 
+from the device before manuafacturing one. This used to be a pre-defined value of 100 ms in earlier releases. The
+default is now 2 seconds.
 
 ## 3.1.0
 
