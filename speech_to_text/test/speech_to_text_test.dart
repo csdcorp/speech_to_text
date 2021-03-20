@@ -152,6 +152,26 @@ void main() {
         expect(speech.isListening, isFalse);
       });
     });
+    test('stops listen with one result when pauseFor == listenFor', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        var resultCount = 0;
+        speech.listen(
+          listenFor: Duration(seconds: 5),
+          pauseFor: Duration(seconds: 5),
+          onResult: (result) => ++resultCount,
+        );
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        testPlatform
+            .onTextRecognition!(TestSpeechChannelHandler.finalRecognizedJson);
+        fa.elapse(Duration(seconds: 7));
+        expect(speech.isListening, isFalse);
+        expect(resultCount, 1);
+      });
+    });
     test('keeps listening after pauseFor with speech event', () async {
       fakeAsync((fa) {
         speech.initialize();
@@ -169,7 +189,23 @@ void main() {
     });
     test('creates finalResult true if none provided', () async {
       fakeAsync((fa) {
-        speech.initialize();
+        speech.initialize(finalTimeout: Duration(milliseconds: 100));
+        fa.flushMicrotasks();
+        speech.listen(
+            pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
+        fa.flushMicrotasks();
+        testPlatform
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
+        fa.flushMicrotasks();
+        // 2200 because it is the 2 second duration of the pauseFor then
+        // 100 milliseconds to create the synthetic result
+        fa.elapse(Duration(milliseconds: 2100));
+        expect(listener.results.last.finalResult, isTrue);
+      });
+    });
+    test('respects finalTimeout', () async {
+      fakeAsync((fa) {
+        speech.initialize(finalTimeout: Duration(seconds: 0));
         fa.flushMicrotasks();
         speech.listen(
             pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
@@ -180,12 +216,12 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 200 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2200));
-        expect(listener.results.last.finalResult, isTrue);
+        expect(listener.results.last.finalResult, isFalse);
       });
     });
     test('returns only one finalResult true if provided', () async {
       fakeAsync((fa) {
-        speech.initialize();
+        speech.initialize(finalTimeout: Duration(milliseconds: 100));
         fa.flushMicrotasks();
         speech.listen(
             pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
@@ -194,10 +230,30 @@ void main() {
             .onTextRecognition!(TestSpeechChannelHandler.finalRecognizedJson);
         fa.flushMicrotasks();
         // 2200 because it is the 2 second duration of the pauseFor then
-        // 200 milliseconds to create the synthetic result
-        fa.elapse(Duration(milliseconds: 2200));
+        // 100 milliseconds to create the synthetic result
+        fa.elapse(Duration(milliseconds: 2100));
         expect(listener.results.last.finalResult, isTrue);
         expect(listener.results, hasLength(1));
+      });
+    });
+    test('returns only one finalResult true if provided after finalTimeout',
+        () async {
+      fakeAsync((fa) {
+        speech.initialize(finalTimeout: Duration(milliseconds: 100));
+        fa.flushMicrotasks();
+        speech.listen(
+            pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
+        testPlatform
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
+        fa.flushMicrotasks();
+        // 2200 because it is the 2 second duration of the pauseFor then
+        // 100 milliseconds to create the synthetic result
+        fa.elapse(Duration(milliseconds: 2100));
+        expect(listener.results.last.finalResult, isTrue);
+        testPlatform
+            .onTextRecognition!(TestSpeechChannelHandler.finalRecognizedJson);
+        fa.flushMicrotasks();
+        expect(listener.results, hasLength(2));
       });
     });
     test('uses localeId if provided', () async {

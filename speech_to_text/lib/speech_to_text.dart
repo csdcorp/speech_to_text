@@ -80,7 +80,7 @@ class SpeechToText {
   static const String soundLevelChangeMethod = 'soundLevelChange';
   static const String notListeningStatus = 'notListening';
   static const String listeningStatus = 'listening';
-  static const _defaultFinalTimeout = Duration(milliseconds: 100);
+  static const _defaultFinalTimeout = Duration(milliseconds: 2000);
   static const _minFinalTimeout = Duration(milliseconds: 50);
 
   static final SpeechConfigOption androidAlwaysUseStop =
@@ -108,6 +108,7 @@ class SpeechToText {
   String _lastStatus = '';
   double _lastSoundLevel = 0;
   Timer? _listenTimer;
+  Timer? _notifyFinalTimer;
   LocaleName? _systemLocale;
   SpeechRecognitionError? _lastError;
   SpeechRecognitionResult? _lastSpeechResult;
@@ -237,7 +238,7 @@ class SpeechToText {
     _shutdownListener();
     await SpeechToTextPlatform.instance.stop();
     if (_finalTimeout > _minFinalTimeout) {
-      Timer(_finalTimeout, _notifyFinalResults);
+      _notifyFinalTimer = Timer(_finalTimeout, _onFinalTimeout);
     }
   }
 
@@ -333,6 +334,8 @@ class SpeechToText {
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
     _partialResults = partialResults;
+    _notifyFinalTimer?.cancel();
+    _notifyFinalTimer = null;
     try {
       var started = await SpeechToTextPlatform.instance.listen(
           partialResults: partialResults || null != pauseFor,
@@ -437,8 +440,23 @@ class SpeechToText {
   }
 
   void _onTextRecognition(String resultJson) {
+    // print('onTextRecognition');
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     var speechResult = SpeechRecognitionResult.fromJson(resultMap);
+    _notifyResults(speechResult);
+  }
+
+  void _onFinalTimeout() {
+    // print('onFinalTimeout $_finalTimeout');
+    if (_notifiedFinal) return;
+    if (_lastSpeechResult != null && null != _resultListener) {
+      var finalResult = _lastSpeechResult!.toFinal();
+      _notifyResults(finalResult);
+    }
+  }
+
+  void _notifyResults(SpeechRecognitionResult speechResult) {
+    if (_notifiedFinal) return;
     if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
       _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
     }
@@ -451,21 +469,13 @@ class SpeechToText {
 
     _lastRecognized = speechResult.recognizedWords;
     if (speechResult.finalResult) {
+      _notifyFinalTimer?.cancel();
+      _notifyFinalTimer = null;
+      // This ensures we only notify with one final result
       _notifiedFinal = true;
     }
     if (null != _resultListener) {
       _resultListener!(speechResult);
-    }
-  }
-
-  void _notifyFinalResults() {
-    if (_notifiedFinal) return;
-    if (_lastSpeechResult != null && null != _resultListener) {
-      var finalResult = _lastSpeechResult!.toFinal();
-      // print("Notifying final");
-      if (null != _resultListener) {
-        _resultListener!(finalResult);
-      }
     }
   }
 
@@ -507,6 +517,9 @@ class SpeechToText {
     _listening = false;
     _recognized = false;
     _listenTimer?.cancel();
+    _listenTimer = null;
+    _notifyFinalTimer?.cancel();
+    _notifyFinalTimer = null;
     _listenTimer = null;
   }
 }
