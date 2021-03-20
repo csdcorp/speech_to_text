@@ -80,6 +80,8 @@ class SpeechToText {
   static const String soundLevelChangeMethod = 'soundLevelChange';
   static const String notListeningStatus = 'notListening';
   static const String listeningStatus = 'listening';
+  static const _defaultFinalTimeout = Duration(milliseconds: 100);
+  static const _minFinalTimeout = Duration(milliseconds: 50);
 
   static final SpeechConfigOption androidAlwaysUseStop =
       SpeechConfigOption('android', 'alwaysUseStop', true);
@@ -97,6 +99,7 @@ class SpeechToText {
   int _lastSpeechEventAt = 0;
   Duration? _pauseFor;
   Duration? _listenFor;
+  Duration _finalTimeout = _defaultFinalTimeout;
 
   /// True if not listening or the user called cancel / stop, false
   /// if cancel/stop were invoked by timeout or error condition.
@@ -194,10 +197,13 @@ class SpeechToText {
       {SpeechErrorListener? onError,
       SpeechStatusListener? onStatus,
       debugLogging = false,
+      Duration finalTimeout = _defaultFinalTimeout,
       List<SpeechConfigOption>? options}) async {
     if (_initWorked) {
       return Future.value(_initWorked);
     }
+    _finalTimeout = finalTimeout;
+    if (finalTimeout <= _minFinalTimeout) {}
     errorListener = onError;
     statusListener = onStatus;
     SpeechToTextPlatform.instance.onTextRecognition = _onTextRecognition;
@@ -230,7 +236,9 @@ class SpeechToText {
     }
     _shutdownListener();
     await SpeechToTextPlatform.instance.stop();
-    Timer(Duration(milliseconds: 100), _notifyFinalResults);
+    if (_finalTimeout > _minFinalTimeout) {
+      Timer(_finalTimeout, _notifyFinalResults);
+    }
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.

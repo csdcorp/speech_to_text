@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.0-nullsafety
+### New
+* New property `finalTimeout` on the `initialize` method to set how long the plugin will wait for a final result 
+from the device before manuafacturing one. This used to be a pre-defined value of 100 ms in earlier releases. The
+default is now 2 seconds.
+
 ## 4.0.0-nullsafety
 ### New
   * Now supports Flutter 2.0 / Dart 2.12 null safety features.

@@ -36,12 +36,14 @@ class _MyAppState extends State<MyApp> {
         onError: errorListener, onStatus: statusListener, debugLogging: true);
     if (hasSpeech) {
       _localeNames = await speech.locales();
+      _localeNames.add(LocaleName('en_US', 'English'));
+      _localeNames.add(LocaleName('fr_FR', 'French'));
 
       var systemLocale = await speech.systemLocale();
       if (null != systemLocale) {
         _currentLocaleId = systemLocale.localeId;
       } else {
-        _currentLocaleId = 'en_US';
+        _currentLocaleId = 'fr_FR';
       }
     }
 
