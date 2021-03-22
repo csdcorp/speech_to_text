@@ -235,6 +235,7 @@ class SpeechToText {
     if (!_initWorked) {
       return;
     }
+    // print('Stop triggered');
     _shutdownListener();
     await SpeechToTextPlatform.instance.stop();
     if (_finalTimeout > _minFinalTimeout) {
@@ -345,6 +346,7 @@ class SpeechToText {
           localeId: localeId);
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
+        _lastSpeechEventAt = _listenStartedAt;
         _setupListenAndPause(pauseFor, listenFor);
       }
     } on PlatformException catch (e) {
@@ -352,11 +354,22 @@ class SpeechToText {
     }
   }
 
-  void _setupListenAndPause(Duration? pauseFor, Duration? listenFor) {
+  void _setupListenAndPause(
+      Duration? initialPauseFor, Duration? initialListenFor) {
     _pauseFor = null;
     _listenFor = null;
-    if (null == pauseFor && null == listenFor) {
+    if (null == initialPauseFor && null == initialListenFor) {
       return;
+    }
+    var pauseFor = initialPauseFor;
+    var listenFor = initialListenFor;
+    if (null != pauseFor) {
+      var remainingMillis = pauseFor.inMilliseconds - _elapsedSinceSpeechEvent;
+      pauseFor = Duration(milliseconds: max(remainingMillis, 0));
+    }
+    if (null != listenFor) {
+      var remainingMillis = listenFor.inMilliseconds - _elapsedListenMillis;
+      listenFor = Duration(milliseconds: max(remainingMillis, 0));
     }
     Duration minDuration;
     if (null == pauseFor) {
@@ -372,7 +385,7 @@ class SpeechToText {
           pauseFor.inMilliseconds);
       minDuration = Duration(milliseconds: minMillis);
     }
-    // print("Waiting for ${minDuration.inMilliseconds}");
+    // print('Waiting for ${minDuration.inMilliseconds}');
     _listenTimer = Timer(minDuration, _stopOnPauseOrListen);
   }
 
@@ -382,7 +395,7 @@ class SpeechToText {
       clock.now().millisecondsSinceEpoch - _lastSpeechEventAt;
 
   void _stopOnPauseOrListen() {
-    // print("Stop? $_elapsedListenMillis / $_elapsedSinceSpeechEvent");
+    // print('Stop? $_elapsedListenMillis / $_elapsedSinceSpeechEvent');
     var listenFor = _listenFor;
     var pauseFor = _pauseFor;
     if (null != listenFor && _elapsedListenMillis >= listenFor.inMilliseconds) {
@@ -495,6 +508,7 @@ class SpeechToText {
   }
 
   void _onNotifyStatus(String status) {
+    // print('status $status');
     _lastStatus = status;
     _listening = status == listeningStatus;
     // print(status);
