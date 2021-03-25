@@ -47,6 +47,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption>? options}) async {
+    var initialized = false;
     try {
       _webSpeech = ws.SpeechRecognition();
       if (null != _webSpeech) {
@@ -55,6 +56,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
         _webSpeech!.onspeechstart = allowInterop(_onSpeechStart);
         _webSpeech!.onend = allowInterop(_onSpeechEnd);
         _webSpeech!.onspeechend = allowInterop(_onSpeechEnd);
+        initialized = true;
       }
     } finally {
       if (null == _webSpeech) {
@@ -62,10 +64,9 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
           var error = SpeechRecognitionError('speech_not_supported', true);
           onError!(jsonEncode(error.toJson()));
         }
-        return false;
       }
     }
-    return null != _webSpeech;
+    return initialized;
   }
 
   /// Stops the current listen for speech if active, does nothing if not.
