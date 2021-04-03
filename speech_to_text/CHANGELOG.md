@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1.1-nullsafety
+### Fix
+* Web support has changed to use the Flutter definitions and now works in release mode
 ## 4.1.0-nullsafety
 ### New
 * New property `finalTimeout` on the `initialize` method to set how long the plugin will wait for a final result 

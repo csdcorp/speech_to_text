@@ -153,7 +153,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "4.1.0-nullsafety"
+    version: "4.1.1-nullsafety"
   speech_to_text_platform_interface:
     dependency: transitive
     description:
