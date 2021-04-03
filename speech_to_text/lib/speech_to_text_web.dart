@@ -7,13 +7,12 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
-import 'web_speech.dart' as ws;
 
 /// Web implementation of the SpeechToText platform interface. This supports
 /// the speech to text functionality running in web browsers that have
 /// SpeechRecognition support.
 class SpeechToTextPlugin extends SpeechToTextPlatform {
-  ws.SpeechRecognition? _webSpeech;
+  html.SpeechRecognition? _webSpeech;
 
   /// Registers this class as the default instance of [UrlLauncherPlatform].
   static void registerWith(Registrar registrar) {
@@ -49,14 +48,14 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
       {debugLogging = false, List<SpeechConfigOption>? options}) async {
     var initialized = false;
     try {
-      _webSpeech = ws.SpeechRecognition();
+      _webSpeech = html.SpeechRecognition();
       if (null != _webSpeech) {
-        _webSpeech!.onerror = allowInterop(_onError);
-        _webSpeech!.onstart = allowInterop(_onSpeechStart);
-        _webSpeech!.onspeechstart = allowInterop(_onSpeechStart);
-        _webSpeech!.onend = allowInterop(_onSpeechEnd);
-        _webSpeech!.onspeechend = allowInterop(_onSpeechEnd);
-        initialized = true;
+        _webSpeech!.onError.listen((error) => _onError(error));
+        _webSpeech!.onStart.listen((startEvent) => _onSpeechStart(startEvent));
+        _webSpeech!.onSpeechStart
+            .listen((startEvent) => _onSpeechStart(startEvent));
+        _webSpeech!.onEnd.listen((endEvent) => _onSpeechEnd(endEvent));
+        _webSpeech!.onSpeechEnd.listen((endEvent) => _onSpeechEnd(endEvent));
       }
     } finally {
       if (null == _webSpeech) {
@@ -132,7 +131,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
       int listenMode = 0,
       sampleRate = 0}) async {
     if (null == _webSpeech) return false;
-    _webSpeech!.onresult = allowInterop(_onResult);
+    _webSpeech!.onResult.listen((speechEvent) => _onResult(speechEvent));
     _webSpeech!.interimResults = partialResults;
     _webSpeech!.continuous = partialResults;
     if (null != localeId) {
