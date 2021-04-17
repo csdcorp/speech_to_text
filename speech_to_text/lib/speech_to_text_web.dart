@@ -56,6 +56,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
             .listen((startEvent) => _onSpeechStart(startEvent));
         _webSpeech!.onEnd.listen((endEvent) => _onSpeechEnd(endEvent));
         _webSpeech!.onSpeechEnd.listen((endEvent) => _onSpeechEnd(endEvent));
+        initialized = true;
       }
     } finally {
       if (null == _webSpeech) {
