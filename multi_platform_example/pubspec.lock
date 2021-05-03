@@ -170,7 +170,7 @@ packages:
       name: process
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "4.2.1"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -189,7 +189,7 @@ packages:
       path: "../speech_to_text"
       relative: true
     source: path
-    version: "4.1.0-nullsafety"
+    version: "4.1.1-nullsafety"
   speech_to_text_platform_interface:
     dependency: transitive
     description:
@@ -238,7 +238,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.19"
+    version: "0.3.0"
   typed_data:
     dependency: transitive
     description:
@@ -259,7 +259,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.1-nullsafety.1"
+    version: "6.1.0+1"
   webdriver:
     dependency: transitive
     description:
