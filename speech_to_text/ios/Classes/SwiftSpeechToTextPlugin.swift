@@ -415,6 +415,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             
             self.currentTask = self.recognizer?.recognitionTask(with: currentRequest, delegate: self )
             let recordingFormat = inputNode?.outputFormat(forBus: self.busForNodeTap)
+            let theSampleRate = audioSession.sampleRate
             let fmt = AVAudioFormat(commonFormat: recordingFormat!.commonFormat, sampleRate: theSampleRate, channels: recordingFormat!.channelCount, interleaved: recordingFormat!.isInterleaved)
             try trap {
                 self.inputNode?.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: fmt) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
