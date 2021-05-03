@@ -81,6 +81,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var listening = false
     private let audioSession = AVAudioSession.sharedInstance()
     private let audioEngine = AVAudioEngine()
+    private var inputNode: AVAudioInputNode?
     private let jsonEncoder = JSONEncoder()
     private let busForNodeTap = 0
     private let speechBufferSize: AVAudioFrameCount = 1024
@@ -226,6 +227,12 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             onDeviceStatus = localRecognizer.supportsOnDeviceRecognition
         }
         recognizer?.delegate = self
+        inputNode = audioEngine.inputNode
+        guard inputNode != nil else {
+            os_log("Error no input node", log: pluginLog, type: .error)
+            sendBoolResult( false, result );
+            return
+        }
         setupListeningSound()
         
         sendBoolResult( true, result );
@@ -312,8 +319,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         }
         do {
             try trap {
-                let inputNode = self.audioEngine.inputNode
-                inputNode.removeTap(onBus: self.busForNodeTap);
+                self.inputNode?.removeTap(onBus: self.busForNodeTap);
             }
         }
         catch {
@@ -380,9 +386,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
                 sound.play()
             }
-             self.audioEngine.reset();
-            let inputNode = self.audioEngine.inputNode
-            if(inputNode.inputFormat(forBus: 0).channelCount == 0){
+            self.audioEngine.reset();
+            if(inputNode?.inputFormat(forBus: 0).channelCount == 0){
                 throw SpeechToTextError.runtimeError("Not enough available inputs.")
             }
             self.currentRequest = SFSpeechAudioBufferRecognitionRequest()
@@ -408,9 +413,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 break
             }
             self.currentTask = self.recognizer?.recognitionTask(with: currentRequest, delegate: self )
-            let recordingFormat = inputNode.outputFormat(forBus: self.busForNodeTap)
+            let recordingFormat = inputNode?.outputFormat(forBus: self.busForNodeTap)
             try trap {
-                inputNode.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
+                self.inputNode?.installTap(onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
                     currentRequest.append(buffer)
                     self.updateSoundLevel( buffer: buffer )
                 }
