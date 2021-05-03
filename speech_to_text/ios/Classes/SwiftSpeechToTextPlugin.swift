@@ -462,12 +462,15 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private func locales( _ result: @escaping FlutterResult ) {
         var localeNames = [String]();
         let locales = SFSpeechRecognizer.supportedLocales();
-        let currentLocale = Locale.current
-        if let idName = buildIdNameForLocale(forIdentifier: currentLocale.identifier ) {
+        var currentLocaleId = Locale.current.identifier
+        if Locale.preferredLanguages.count > 0 {
+            currentLocaleId = Locale.preferredLanguages[0]
+        }
+        if let idName = buildIdNameForLocale(forIdentifier: currentLocaleId ) {
             localeNames.append(idName)
         }
         for locale in locales {
-            if ( locale.identifier == currentLocale.identifier) {
+            if ( locale.identifier == currentLocaleId) {
                 continue
             }
             if let idName = buildIdNameForLocale(forIdentifier: locale.identifier ) {
