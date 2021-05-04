@@ -1,4 +1,7 @@
 ## 2.0.0-nullsafety
+- null safety / flutter 2.0 compatability is now the main release
+
+## 2.0.0-nullsafety
 - prerelease for null safety / flutter 2.0 compatability
 
 ## 1.4.2
