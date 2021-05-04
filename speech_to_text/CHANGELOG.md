@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.2.0
+### New
+  * Flutter 2.0 / Dart 2.12 null safety features are now the main release
+
+### Fix
+  * iOS is now faster starting to listen #207
+  * fix for sample rate issue on iOS #109
+  * `systemLocale` now reports the device locale rather than the app locale. Previously it was constrained to
+  only be one of the localized languages of the application. #200
+
 ## 4.1.1-nullsafety
 ### Fix
 * Web support has changed to use the Flutter class definitions and now works in release mode
