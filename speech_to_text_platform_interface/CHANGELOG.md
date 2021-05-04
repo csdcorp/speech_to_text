@@ -1,3 +1,6 @@
+## 2.0.0-nullsafety
+- prerelease for null safety / flutter 2.0 compatability
+
 ## 1.4.2
 - bug fix for null options
 

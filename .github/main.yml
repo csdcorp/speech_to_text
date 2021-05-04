@@ -1,0 +1,19 @@
+name: build
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  test:
+    name: Test on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v1.4.0
+        with:
+          flutter-version: '2.12.0'
+          channel: 'stable'
+      - run: flutter pub get
+      - run: flutter test

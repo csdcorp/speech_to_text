@@ -24,22 +24,23 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   /// Note that applications cannot ask for permission again if the user has
   /// denied them permission in the past.
   @override
-  Future<bool> hasPermission() {
-    return _channel.invokeMethod<bool>('has_permission');
+  Future<bool> hasPermission() async {
+    return await _channel.invokeMethod<bool>('has_permission') ?? false;
   }
 
   @override
   Future<bool> initialize(
-      {debugLogging = false, List<SpeechConfigOption> options}) {
+      {debugLogging = false, List<SpeechConfigOption>? options}) async {
     _channel.setMethodCallHandler(_handleCallbacks);
     var params = <String, Object>{
       'debugLogging': debugLogging,
     };
     options?.forEach((option) => params[option.name] = option.value);
-    return _channel.invokeMethod<bool>(
-      'initialize',
-      params,
-    );
+    return await _channel.invokeMethod<bool>(
+          'initialize',
+          params,
+        ) ??
+        false;
   }
 
   /// Stops the current listen for speech if active, does nothing if not.
@@ -97,11 +98,11 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   ///
   @override
   Future<bool> listen(
-      {String localeId,
+      {String? localeId,
       partialResults = true,
       onDevice = false,
       int listenMode = 0,
-      sampleRate = 0}) {
+      sampleRate = 0}) async {
     Map<String, dynamic> listenParams = {
       "partialResults": partialResults,
       "onDevice": onDevice,
@@ -111,14 +112,14 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     if (null != localeId) {
       listenParams["localeId"] = localeId;
     }
-    return _channel.invokeMethod('listen', listenParams);
+    return await _channel.invokeMethod<bool>('listen', listenParams) ?? false;
   }
 
   /// returns the list of speech locales available on the device.
   ///
   @override
-  Future<List<dynamic>> locales() {
-    return _channel.invokeMethod('locales');
+  Future<List<dynamic>> locales() async {
+    return await _channel.invokeMethod<List<dynamic>>('locales') ?? [];
   }
 
   Future _handleCallbacks(MethodCall call) async {
@@ -126,22 +127,22 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     switch (call.method) {
       case textRecognitionMethod:
         if (call.arguments is String && null != onTextRecognition) {
-          onTextRecognition(call.arguments);
+          onTextRecognition!(call.arguments);
         }
         break;
       case notifyErrorMethod:
         if (call.arguments is String && null != onError) {
-          onError(call.arguments);
+          onError!(call.arguments);
         }
         break;
       case notifyStatusMethod:
         if (call.arguments is String && null != onStatus) {
-          onStatus(call.arguments);
+          onStatus!(call.arguments);
         }
         break;
       case soundLevelChangeMethod:
         if (call.arguments is double && null != onSoundLevel) {
-          onSoundLevel(call.arguments);
+          onSoundLevel!(call.arguments);
         }
         break;
       default:
@@ -151,5 +152,10 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   @visibleForTesting
   Future processMethodCall(MethodCall call) async {
     return await _handleCallbacks(call);
+  }
+
+  @visibleForTesting
+  void setMockHandler(Future? Function(MethodCall call) handler) {
+    _channel.setMockMethodCallHandler(handler);
   }
 }

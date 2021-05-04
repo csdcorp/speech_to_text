@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:json_annotation/json_annotation.dart';
 
 part 'speech_recognition_result.g.dart';
@@ -13,7 +11,7 @@ part 'speech_recognition_result.g.dart';
 /// result is considered final by the platform.
 @JsonSerializable(explicitToJson: true)
 class SpeechRecognitionResult {
-  List<SpeechRecognitionWords> _alternates;
+  List<SpeechRecognitionWords> alternates;
 
   /// Returns a list of possible transcriptions of the speech.
   ///
@@ -23,15 +21,16 @@ class SpeechRecognitionResult {
   /// do a good job with confidence, there are convenience methods
   /// on [SpeechRecogntionWords] to work with possibly missing
   /// confidence values.
-  List<SpeechRecognitionWords> get alternates =>
-      UnmodifiableListView(_alternates);
+  // TODO: Fix up the interface.
+  // List<SpeechRecognitionWords> get alternates =>
+  //    UnmodifiableListView(alternates);
 
   /// The sequence of words that is the best transcription of
   /// what was said.
   ///
   /// This is the same as the first value of [alternates].
   String get recognizedWords =>
-      _alternates.isNotEmpty ? _alternates.first.recognizedWords : '';
+      alternates.isNotEmpty ? alternates.first.recognizedWords : '';
 
   /// False means the words are an interim result, true means
   /// they are the final recognition.
@@ -42,7 +41,7 @@ class SpeechRecognitionResult {
   /// Confidence is expressed as a value between 0 and 1. -1
   /// means that the confidence value was not available.
   double get confidence =>
-      _alternates.isNotEmpty ? _alternates.first.confidence : 0;
+      alternates.isNotEmpty ? alternates.first.confidence : 0;
 
   /// true if there is confidence in this recognition, false otherwise.
   ///
@@ -52,20 +51,20 @@ class SpeechRecognitionResult {
   /// [threshold]. If [threshold] is not provided it defaults to 0.8.
   bool isConfident(
           {double threshold = SpeechRecognitionWords.confidenceThreshold}) =>
-      _alternates.isNotEmpty
-          ? _alternates.first.isConfident(threshold: threshold)
+      alternates.isNotEmpty
+          ? alternates.first.isConfident(threshold: threshold)
           : false;
 
   /// true if [confidence] is not the [missingConfidence] value, false
   /// otherwise.
   bool get hasConfidenceRating =>
-      _alternates.isNotEmpty ? _alternates.first.hasConfidenceRating : false;
+      alternates.isNotEmpty ? alternates.first.hasConfidenceRating : false;
 
-  SpeechRecognitionResult(this._alternates, this.finalResult);
+  SpeechRecognitionResult(this.alternates, this.finalResult);
 
   @override
   String toString() {
-    return 'SpeechRecognitionResult words: $_alternates, final: $finalResult';
+    return 'SpeechRecognitionResult words: $alternates, final: $finalResult';
   }
 
   @override
@@ -84,7 +83,7 @@ class SpeechRecognitionResult {
   Map<String, dynamic> toJson() => _$SpeechRecognitionResultToJson(this);
 
   SpeechRecognitionResult toFinal() {
-    return SpeechRecognitionResult(_alternates, true);
+    return SpeechRecognitionResult(alternates, true);
   }
 }
 

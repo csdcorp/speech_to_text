@@ -15,16 +15,16 @@ enum SpeechRecognitionEventType {
 /// use the other properties to get information about it.
 class SpeechRecognitionEvent {
   final SpeechRecognitionEventType eventType;
-  final SpeechRecognitionError _error;
-  final SpeechRecognitionResult _result;
-  final bool _listening;
-  final double _level;
+  final SpeechRecognitionError? _error;
+  final SpeechRecognitionResult? _result;
+  final bool? _listening;
+  final double? _level;
 
   SpeechRecognitionEvent(
       this.eventType, this._result, this._error, this._listening, this._level);
 
-  bool get isListening => _listening;
-  double get level => _level;
-  SpeechRecognitionResult get recognitionResult => _result;
-  SpeechRecognitionError get error => _error;
+  bool? get isListening => _listening;
+  double? get level => _level;
+  SpeechRecognitionResult? get recognitionResult => _result;
+  SpeechRecognitionError? get error => _error;
 }

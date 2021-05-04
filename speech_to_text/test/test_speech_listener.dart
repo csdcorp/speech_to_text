@@ -11,9 +11,9 @@ class TestSpeechListener {
   bool isAvailable = false;
   bool notified = false;
   bool hasError = false;
-  SpeechRecognitionResult recognitionResult;
-  SpeechRecognitionError lastError;
-  double soundLevel;
+  SpeechRecognitionResult? recognitionResult;
+  SpeechRecognitionError? lastError;
+  double soundLevel = 0.0;
 
   TestSpeechListener(this._speechProvider);
 

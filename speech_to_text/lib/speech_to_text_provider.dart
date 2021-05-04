@@ -26,10 +26,10 @@ class SpeechToTextProvider extends ChangeNotifier {
   final StreamController<SpeechRecognitionEvent> _recognitionController =
       StreamController.broadcast();
   final SpeechToText _speechToText;
-  SpeechRecognitionResult _lastResult;
+  SpeechRecognitionResult? _lastResult;
   double _lastLevel = 0;
   List<LocaleName> _locales = [];
-  LocaleName _systemLocale;
+  LocaleName? _systemLocale;
 
   /// Only construct one instance in an application.
   ///
@@ -39,11 +39,11 @@ class SpeechToTextProvider extends ChangeNotifier {
 
   Stream<SpeechRecognitionEvent> get stream => _recognitionController.stream;
 
-  /// Returns the last result received, may be null.
-  SpeechRecognitionResult get lastResult => _lastResult;
+  /// Returns the last result received.
+  SpeechRecognitionResult? get lastResult => _lastResult;
 
-  /// Returns the last error received, may be null.
-  SpeechRecognitionError get lastError => _speechToText.lastError;
+  /// Returns the last error received.
+  SpeechRecognitionError? get lastError => _speechToText.lastError;
 
   /// Returns the last sound level received.
   ///
@@ -96,7 +96,7 @@ class SpeechToTextProvider extends ChangeNotifier {
   List<LocaleName> get locales => _locales;
 
   /// Returns the locale that is currently set as active on the device.
-  LocaleName get systemLocale => _systemLocale;
+  LocaleName? get systemLocale => _systemLocale;
 
   /// Start listening for new events, set [partialResults] to true to receive interim
   /// recognition results.
@@ -126,9 +126,9 @@ class SpeechToTextProvider extends ChangeNotifier {
       {bool partialResults = true,
       onDevice = false,
       bool soundLevel = false,
-      Duration listenFor,
-      Duration pauseFor,
-      String localeId}) {
+      Duration? listenFor,
+      Duration? pauseFor,
+      String? localeId}) {
     _lastLevel = 0;
     _lastResult = null;
     if (soundLevel) {

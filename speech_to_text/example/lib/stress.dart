@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
       _localeNames = await speech.locales();
 
       var systemLocale = await speech.systemLocale();
-      _currentLocaleId = systemLocale.localeId;
+      _currentLocaleId = systemLocale?.localeId ?? '';
     }
 
     if (!mounted) return;
@@ -66,32 +66,32 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    FlatButton(
-                      child: Text('Initialize'),
+                    TextButton(
                       onPressed: _hasSpeech ? null : initSpeechState,
+                      child: Text('Initialize'),
                     ),
-                    FlatButton(
-                      child: Text('Stress Test'),
+                    TextButton(
                       onPressed: stressTest,
+                      child: Text('Stress Test'),
                     ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    FlatButton(
-                      child: Text('Start'),
+                    TextButton(
                       onPressed: !_hasSpeech || speech.isListening
                           ? null
                           : startListening,
+                      child: Text('Start'),
                     ),
-                    FlatButton(
-                      child: Text('Stop'),
+                    TextButton(
                       onPressed: speech.isListening ? stopListening : null,
+                      child: Text('Stop'),
                     ),
-                    FlatButton(
-                      child: Text('Cancel'),
+                    TextButton(
                       onPressed: speech.isListening ? cancelListening : null,
+                      child: Text('Cancel'),
                     ),
                   ],
                 ),

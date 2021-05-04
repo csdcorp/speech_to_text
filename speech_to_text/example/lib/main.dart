@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
       _localeNames = await speech.locales();
 
       var systemLocale = await speech.systemLocale();
-      _currentLocaleId = systemLocale.localeId;
+      _currentLocaleId = systemLocale?.localeId ?? '';
     }
 
     if (!mounted) return;
@@ -71,28 +71,28 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    FlatButton(
-                      child: Text('Initialize'),
+                    TextButton(
                       onPressed: _hasSpeech ? null : initSpeechState,
+                      child: Text('Initialize'),
                     ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    FlatButton(
-                      child: Text('Start'),
+                    TextButton(
                       onPressed: !_hasSpeech || speech.isListening
                           ? null
                           : startListening,
+                      child: Text('Start'),
                     ),
-                    FlatButton(
-                      child: Text('Stop'),
+                    TextButton(
                       onPressed: speech.isListening ? stopListening : null,
+                      child: Text('Stop'),
                     ),
-                    FlatButton(
-                      child: Text('Cancel'),
+                    TextButton(
                       onPressed: speech.isListening ? cancelListening : null,
+                      child: Text('Cancel'),
                     ),
                   ],
                 ),
@@ -211,9 +211,9 @@ class _MyAppState extends State<MyApp> {
     lastError = '';
     speech.listen(
         onResult: resultListener,
-        listenFor: Duration(seconds: 5),
+        listenFor: Duration(seconds: 30),
         pauseFor: Duration(seconds: 5),
-        partialResults: false,
+        partialResults: true,
         localeId: _currentLocaleId,
         onSoundLevelChange: soundLevelListener,
         cancelOnError: true,

@@ -97,9 +97,9 @@ class SpeechToText {
   bool _notifiedFinal = false;
   int _listenStartedAt = 0;
   int _lastSpeechEventAt = 0;
+  Duration? _pauseFor;
+  Duration? _listenFor;
   Duration _finalTimeout = _defaultFinalTimeout;
-  Duration _pauseFor;
-  Duration _listenFor;
 
   /// True if not listening or the user called cancel / stop, false
   /// if cancel/stop were invoked by timeout or error condition.
@@ -107,14 +107,15 @@ class SpeechToText {
   String _lastRecognized = '';
   String _lastStatus = '';
   double _lastSoundLevel = 0;
-  Timer _listenTimer;
-  LocaleName _systemLocale;
-  SpeechRecognitionError _lastError;
-  SpeechRecognitionResult _lastSpeechResult;
-  SpeechResultListener _resultListener;
-  SpeechErrorListener errorListener;
-  SpeechStatusListener statusListener;
-  SpeechSoundLevelChange _soundLevelChange;
+  Timer? _listenTimer;
+  Timer? _notifyFinalTimer;
+  LocaleName? _systemLocale;
+  SpeechRecognitionError? _lastError;
+  SpeechRecognitionResult? _lastSpeechResult;
+  SpeechResultListener? _resultListener;
+  SpeechErrorListener? errorListener;
+  SpeechStatusListener? statusListener;
+  SpeechSoundLevelChange? _soundLevelChange;
 
   factory SpeechToText() => _instance;
 
@@ -155,7 +156,7 @@ class SpeechToText {
 
   /// The last error received or null if none, see [initialize] to
   /// register an optional listener to be notified of errors.
-  SpeechRecognitionError get lastError => _lastError;
+  SpeechRecognitionError? get lastError => _lastError;
 
   /// True if an error has been received, see [lastError] for details
   bool get hasError => null != lastError;
@@ -198,11 +199,11 @@ class SpeechToText {
   /// [options] pass platform specific configuration options to the
   /// platform specific implementation.
   Future<bool> initialize(
-      {SpeechErrorListener onError,
-      SpeechStatusListener onStatus,
-      bool debugLogging = false,
+      {SpeechErrorListener? onError,
+      SpeechStatusListener? onStatus,
+      debugLogging = false,
       Duration finalTimeout = _defaultFinalTimeout,
-      List<SpeechConfigOption> options}) async {
+      List<SpeechConfigOption>? options}) async {
     if (_initWorked) {
       return Future.value(_initWorked);
     }
@@ -238,10 +239,11 @@ class SpeechToText {
     if (!_initWorked) {
       return;
     }
+    // print('Stop triggered');
     _shutdownListener();
     await SpeechToTextPlatform.instance.stop();
     if (_finalTimeout > _minFinalTimeout) {
-      Timer(_finalTimeout, _notifyFinalResults);
+      _notifyFinalTimer = Timer(_finalTimeout, _onFinalTimeout);
     }
   }
 
@@ -316,11 +318,11 @@ class SpeechToText {
   /// crashes
   ///
   Future listen(
-      {SpeechResultListener onResult,
-      Duration listenFor,
-      Duration pauseFor,
-      String localeId,
-      SpeechSoundLevelChange onSoundLevelChange,
+      {SpeechResultListener? onResult,
+      Duration? listenFor,
+      Duration? pauseFor,
+      String? localeId,
+      SpeechSoundLevelChange? onSoundLevelChange,
       cancelOnError = false,
       partialResults = true,
       onDevice = false,
@@ -337,6 +339,8 @@ class SpeechToText {
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
     _partialResults = partialResults;
+    _notifyFinalTimer?.cancel();
+    _notifyFinalTimer = null;
     try {
       var started = await SpeechToTextPlatform.instance.listen(
           partialResults: partialResults || null != pauseFor,
@@ -346,6 +350,7 @@ class SpeechToText {
           localeId: localeId);
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
+        _lastSpeechEventAt = _listenStartedAt;
         _setupListenAndPause(pauseFor, listenFor);
       }
     } on PlatformException catch (e) {
@@ -353,15 +358,26 @@ class SpeechToText {
     }
   }
 
-  void _setupListenAndPause(Duration pauseFor, Duration listenFor) {
+  void _setupListenAndPause(
+      Duration? initialPauseFor, Duration? initialListenFor) {
     _pauseFor = null;
     _listenFor = null;
-    if (null == pauseFor && null == listenFor) {
+    if (null == initialPauseFor && null == initialListenFor) {
       return;
+    }
+    var pauseFor = initialPauseFor;
+    var listenFor = initialListenFor;
+    if (null != pauseFor) {
+      var remainingMillis = pauseFor.inMilliseconds - _elapsedSinceSpeechEvent;
+      pauseFor = Duration(milliseconds: max(remainingMillis, 0));
+    }
+    if (null != listenFor) {
+      var remainingMillis = listenFor.inMilliseconds - _elapsedListenMillis;
+      listenFor = Duration(milliseconds: max(remainingMillis, 0));
     }
     Duration minDuration;
     if (null == pauseFor) {
-      _listenFor = Duration(milliseconds: listenFor.inMilliseconds);
+      _listenFor = Duration(milliseconds: listenFor!.inMilliseconds);
       minDuration = listenFor;
     } else if (null == listenFor) {
       _pauseFor = Duration(milliseconds: pauseFor.inMilliseconds);
@@ -373,7 +389,7 @@ class SpeechToText {
           pauseFor.inMilliseconds);
       minDuration = Duration(milliseconds: minMillis);
     }
-    // print("Waiting for ${minDuration.inMilliseconds}");
+    // print('Waiting for ${minDuration.inMilliseconds}');
     _listenTimer = Timer(minDuration, _stopOnPauseOrListen);
   }
 
@@ -383,12 +399,13 @@ class SpeechToText {
       clock.now().millisecondsSinceEpoch - _lastSpeechEventAt;
 
   void _stopOnPauseOrListen() {
-    // print("Stop? $_elapsedListenMillis / $_elapsedSinceSpeechEvent");
-    if (null != _listenFor &&
-        _elapsedListenMillis >= _listenFor.inMilliseconds) {
+    // print('Stop? $_elapsedListenMillis / $_elapsedSinceSpeechEvent');
+    var listenFor = _listenFor;
+    var pauseFor = _pauseFor;
+    if (null != listenFor && _elapsedListenMillis >= listenFor.inMilliseconds) {
       _stop();
-    } else if (null != _pauseFor &&
-        _elapsedSinceSpeechEvent >= _pauseFor.inMilliseconds) {
+    } else if (null != pauseFor &&
+        _elapsedSinceSpeechEvent >= pauseFor.inMilliseconds) {
       _stop();
     } else {
       _setupListenAndPause(_pauseFor, _listenFor);
@@ -419,7 +436,8 @@ class SpeechToText {
           return LocaleName(components[0], components[1]);
         })
         .where((item) => item != null)
-        .toList();
+        .toList()
+        .cast<LocaleName>();
     if (filteredLocales.isNotEmpty) {
       _systemLocale = filteredLocales.first;
     } else {
@@ -431,7 +449,7 @@ class SpeechToText {
 
   /// returns the locale that will be used if no localeId is passed
   /// to the [listen] method.
-  Future<LocaleName> systemLocale() async {
+  Future<LocaleName?> systemLocale() async {
     if (null == _systemLocale) {
       await locales();
     }
@@ -439,8 +457,23 @@ class SpeechToText {
   }
 
   void _onTextRecognition(String resultJson) {
+    // print('onTextRecognition');
     Map<String, dynamic> resultMap = jsonDecode(resultJson);
     var speechResult = SpeechRecognitionResult.fromJson(resultMap);
+    _notifyResults(speechResult);
+  }
+
+  void _onFinalTimeout() {
+    // print('onFinalTimeout $_finalTimeout');
+    if (_notifiedFinal) return;
+    if (_lastSpeechResult != null && null != _resultListener) {
+      var finalResult = _lastSpeechResult!.toFinal();
+      _notifyResults(finalResult);
+    }
+  }
+
+  void _notifyResults(SpeechRecognitionResult speechResult) {
+    if (_notifiedFinal) return;
     if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
       _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
     }
@@ -453,19 +486,13 @@ class SpeechToText {
 
     _lastRecognized = speechResult.recognizedWords;
     if (speechResult.finalResult) {
+      _notifyFinalTimer?.cancel();
+      _notifyFinalTimer = null;
+      // This ensures we only notify with one final result
       _notifiedFinal = true;
     }
     if (null != _resultListener) {
-      _resultListener(speechResult);
-    }
-  }
-
-  void _notifyFinalResults() {
-    if (_notifiedFinal) return;
-    if (_lastSpeechResult != null && null != _resultListener) {
-      var finalResult = _lastSpeechResult.toFinal();
-      // print("Notifying final");
-      _resultListener(finalResult);
+      _resultListener!(speechResult);
     }
   }
 
@@ -477,7 +504,7 @@ class SpeechToText {
     var speechError = SpeechRecognitionError.fromJson(errorMap);
     _lastError = speechError;
     if (null != errorListener) {
-      errorListener(speechError);
+      errorListener!(speechError);
     }
     if (_cancelOnError && speechError.permanent) {
       await _cancel();
@@ -485,11 +512,12 @@ class SpeechToText {
   }
 
   void _onNotifyStatus(String status) {
+    // print('status $status');
     _lastStatus = status;
     _listening = status == listeningStatus;
     // print(status);
     if (null != statusListener) {
-      statusListener(status);
+      statusListener!(status);
     }
   }
 
@@ -499,7 +527,7 @@ class SpeechToText {
     }
     _lastSoundLevel = level;
     if (null != _soundLevelChange) {
-      _soundLevelChange(level);
+      _soundLevelChange!(level);
     }
   }
 
@@ -507,6 +535,9 @@ class SpeechToText {
     _listening = false;
     _recognized = false;
     _listenTimer?.cancel();
+    _listenTimer = null;
+    _notifyFinalTimer?.cancel();
+    _notifyFinalTimer = null;
     _listenTimer = null;
   }
 }
