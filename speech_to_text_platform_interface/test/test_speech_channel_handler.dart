@@ -30,7 +30,7 @@ class TestSpeechChannelHandler {
   bool? debugLogging;
   int? listenMode = 0;
   int? sampleRate = 0;
-  dynamic? initOption;
+  dynamic initOption;
   static const String localeId1 = 'en_US';
   static const String localeId2 = 'fr_CA';
   static const String name1 = 'English US';
