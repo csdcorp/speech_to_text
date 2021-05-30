@@ -14,7 +14,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.0"
+    version: "2.6.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -56,7 +56,7 @@ packages:
       name: crypto
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -189,7 +189,7 @@ packages:
       path: "../speech_to_text"
       relative: true
     source: path
-    version: "4.1.1-nullsafety"
+    version: "4.2.0"
   speech_to_text_platform_interface:
     dependency: transitive
     description:
@@ -259,7 +259,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.0+1"
+    version: "6.2.0"
   webdriver:
     dependency: transitive
     description:
