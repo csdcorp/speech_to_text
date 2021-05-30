@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.1
+### Fix
+  * minor code format issue that lost me 10 points, this shall not stand!
+
 ## 4.2.0
 ### New
   * Flutter 2.0 / Dart 2.12 null safety features are now the main release
