@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:js';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
