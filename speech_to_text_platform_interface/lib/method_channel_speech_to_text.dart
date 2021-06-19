@@ -155,7 +155,5 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   }
 
   @visibleForTesting
-  void setMockHandler(Future? Function(MethodCall call) handler) {
-    _channel.setMockMethodCallHandler(handler);
-  }
+  MethodChannel get channel => _channel;
 }

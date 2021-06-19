@@ -10,7 +10,8 @@ void main() {
 
   setUp(() {
     speechToText = MethodChannelSpeechToText();
-    speechToText?.setMockHandler(channelHandler.methodCallHandler);
+    speechToText?.channel
+        .setMockMethodCallHandler(channelHandler.methodCallHandler);
     channelHandler.reset();
   });
 
