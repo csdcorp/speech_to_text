@@ -3,7 +3,7 @@ description: A common platform interface for the speech_to_text plugin.
 homepage: https://github.com/csdcorp/speech_to_text/speech_to_text_platform_interface
 # NOTE: We strongly prefer non-breaking changes, even at the expense of a
 # less-clean API. See https://flutter.dev/go/platform-interface-breaking-changes
-version: 2.0.0
+version: 2.0.1
 
 dependencies:
   flutter:

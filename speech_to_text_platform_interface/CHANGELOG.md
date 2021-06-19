@@ -1,3 +1,6 @@
+## 2.0.1
+- fix test method deprecation
+
 ## 2.0.0
 - null safety / flutter 2.0 compatability is now the main release
 
