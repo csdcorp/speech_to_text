@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.2
+### Fix
+  * handle deprecation of `setMockMethodHandler` #229
+
 ## 4.2.1
 ### Fix
   * minor code format issue that lost me 10 points, this shall not stand!
