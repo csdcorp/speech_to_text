@@ -138,6 +138,14 @@ Voice assistant style interaction is possibly better handled by integrating with
 the device rather than building out a separate capability. Text dictation is available through the keyboard for standard
 text input controls though there are other uses of dictation that are not currently well supported. 
 
+### Browser support for speech recognition 
+Web browsers vary in their level of support for speech recognition. This 
+[issue](https://github.com/csdcorp/speech_to_text/issues/239) has some details. 
+The best lists I've seen are https://caniuse.com/speech-recognition and 
+https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition. In particular 
+in issue #239 it was reported that Brave Browser and Firefox for Linux do not 
+support speech recognition. 
+
 ### Speech recognition from recorded audio 
 There have been a number of questions about whether speech can be recognized from recorded audio. The short answer is 
 that this may be possible on iOS but doesn't appear to be on Android. There is an open issue on this here #205. 
