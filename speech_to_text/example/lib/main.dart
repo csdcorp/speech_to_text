@@ -15,6 +15,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _hasSpeech = false;
+  bool _logEvents = false;
   double level = 0.0;
   double minSoundLevel = 50000;
   double maxSoundLevel = -50000;
@@ -22,7 +23,6 @@ class _MyAppState extends State<MyApp> {
   String lastError = '';
   String lastStatus = '';
   String _currentLocaleId = '';
-  int resultListened = 0;
   List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
 
@@ -32,6 +32,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initSpeechState() async {
+    _logEvent('Initialize');
     var hasSpeech = await speech.initialize(
         onError: errorListener,
         onStatus: statusListener,
@@ -93,24 +94,39 @@ class _MyAppState extends State<MyApp> {
                     TextButton(
                       onPressed: speech.isListening ? cancelListening : null,
                       child: Text('Cancel'),
-                    ),
+                    )
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    DropdownButton(
-                      onChanged: (selectedVal) => _switchLang(selectedVal),
-                      value: _currentLocaleId,
-                      items: _localeNames
-                          .map(
-                            (localeName) => DropdownMenuItem(
-                              value: localeName.localeId,
-                              child: Text(localeName.name),
-                            ),
-                          )
-                          .toList(),
+                    Row(
+                      children: [
+                        Text('Language: '),
+                        DropdownButton(
+                          onChanged: (selectedVal) => _switchLang(selectedVal),
+                          value: _currentLocaleId,
+                          items: _localeNames
+                              .map(
+                                (localeName) => DropdownMenuItem(
+                                  value: localeName.localeId,
+                                  child: Text(localeName.name),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
                     ),
+                    Row(
+                      children: [
+                        Text('Log events: '),
+                        Checkbox(
+                            value: _logEvents,
+                            onChanged: (val) => setState(() {
+                                  _logEvents = val ?? false;
+                                })),
+                      ],
+                    )
                   ],
                 )
               ],
@@ -207,6 +223,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void startListening() {
+    _logEvent('start listening');
     lastWords = '';
     lastError = '';
     speech.listen(
@@ -222,6 +239,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void stopListening() {
+    _logEvent('stop');
     speech.stop();
     setState(() {
       level = 0.0;
@@ -229,6 +247,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void cancelListening() {
+    _logEvent('cancel');
     speech.cancel();
     setState(() {
       level = 0.0;
@@ -236,8 +255,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void resultListener(SpeechRecognitionResult result) {
-    ++resultListened;
-    print('Result listener $resultListened');
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
     setState(() {
       lastWords = '${result.recognizedWords} - ${result.finalResult}';
     });
@@ -246,22 +265,23 @@ class _MyAppState extends State<MyApp> {
   void soundLevelListener(double level) {
     minSoundLevel = min(minSoundLevel, level);
     maxSoundLevel = max(maxSoundLevel, level);
-    // print("sound level $level: $minSoundLevel - $maxSoundLevel ");
+    // _logEvent('sound level $level: $minSoundLevel - $maxSoundLevel ');
     setState(() {
       this.level = level;
     });
   }
 
   void errorListener(SpeechRecognitionError error) {
-    // print("Received error status: $error, listening: ${speech.isListening}");
+    _logEvent(
+        'Received error status: $error, listening: ${speech.isListening}');
     setState(() {
       lastError = '${error.errorMsg} - ${error.permanent}';
     });
   }
 
   void statusListener(String status) {
-    // print(
-    // 'Received listener status: $status, listening: ${speech.isListening}');
+    _logEvent(
+        'Received listener status: $status, listening: ${speech.isListening}');
     setState(() {
       lastStatus = '$status';
     });
@@ -272,5 +292,12 @@ class _MyAppState extends State<MyApp> {
       _currentLocaleId = selectedVal;
     });
     print(selectedVal);
+  }
+
+  void _logEvent(String eventDescription) {
+    if (_logEvents) {
+      var eventTime = DateTime.now().toIso8601String();
+      print('$eventTime $eventDescription');
+    }
   }
 }
