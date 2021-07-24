@@ -81,6 +81,13 @@ class SpeechToText {
   static const String listeningStatus = 'listening';
   static const String notListeningStatus = 'notListening';
   static const String doneStatus = 'done';
+
+  /// This one is kind of a faux status, it's used internally
+  /// to tell the status notifier that the final result has been seen
+  /// since the status notifier wants to tell the world that it is 'done'
+  /// only when both the final result and the done from the underlying platform
+  /// has been seen.
+  static const String _finalStatus = 'final';
   static const _defaultFinalTimeout = Duration(milliseconds: 2000);
   static const _minFinalTimeout = Duration(milliseconds: 50);
 
@@ -96,6 +103,7 @@ class SpeechToText {
   bool _cancelOnError = false;
   bool _partialResults = false;
   bool _notifiedFinal = false;
+  bool _notifiedDone = false;
   int _listenStartedAt = 0;
   int _lastSpeechEventAt = 0;
   Duration? _pauseFor;
@@ -343,6 +351,7 @@ class SpeechToText {
     _cancelOnError = cancelOnError;
     _recognized = false;
     _notifiedFinal = false;
+    _notifiedDone = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
     _partialResults = partialResults;
@@ -502,7 +511,7 @@ class SpeechToText {
       _resultListener!(speechResult);
     }
     if (_notifiedFinal) {
-      _onNotifyStatus(doneStatus);
+      _onNotifyStatus(_finalStatus);
     }
   }
 
@@ -522,7 +531,18 @@ class SpeechToText {
   }
 
   void _onNotifyStatus(String status) {
-    // print('status $status');
+    print('status $status');
+    if (doneStatus == status) {
+      _notifiedDone = true;
+      if (!_notifiedFinal) return;
+    }
+    if (_finalStatus == status) {
+      if (!_notifiedDone) return;
+
+      /// the [_finalStatus] is just to indicate that it can send the
+      /// [doneStatus] if [_notifiedDone] has already happened.
+      status = doneStatus;
+    }
     _lastStatus = status;
     _listening = status == listeningStatus;
     // print(status);

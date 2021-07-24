@@ -26,6 +26,7 @@ public enum SpeechToTextStatus: String {
     case notListening
     case unavailable
     case available
+    case done
 }
 
 public enum SpeechToTextErrors: String {
@@ -335,6 +336,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         catch {
             os_log("Error deactivation: %{PUBLIC}@", log: pluginLog, type: .info, error.localizedDescription)
         }
+        self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.done.rawValue )
+
         currentRequest = nil
         currentTask = nil
         onPlayEnd = nil
@@ -433,10 +436,10 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         catch {
             failedListen = true
             os_log("Error starting listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
+            self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
             stopCurrentListen()
             sendBoolResult( false, result );
             // ensure the not listening signal is sent in the error case
-            self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
             let speechError = SpeechRecognitionError(errorMsg: "error_listen_failed", permanent: true )
             do {
                 let errorResult = try jsonEncoder.encode(speechError)

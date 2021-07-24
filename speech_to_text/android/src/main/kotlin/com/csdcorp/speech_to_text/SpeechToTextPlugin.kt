@@ -59,6 +59,7 @@ enum class SpeechToTextStatus {
     notListening,
     unavailable,
     available,
+    done,
 }
 
 enum class ListenMode {
@@ -303,6 +304,7 @@ public class SpeechToTextPlugin :
         }
         notifyListening(isRecording = false)
         result.success(true)
+        channel?.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name, SpeechToTextStatus.done.name)
         debugLog("Stop listening done")
     }
 
@@ -322,6 +324,7 @@ public class SpeechToTextPlugin :
         }
         notifyListening(isRecording = false)
         result.success(true)
+        channel?.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name, SpeechToTextStatus.done.name)
         debugLog("Cancel listening done")
     }
 
