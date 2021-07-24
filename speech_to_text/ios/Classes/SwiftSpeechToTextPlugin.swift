@@ -148,7 +148,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     private func hasPermission( _ result: @escaping FlutterResult) {
         let has = SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.authorized &&
-            AVAudioSession.sharedInstance().recordPermission == AVAudioSession.RecordPermission.granted
+            self.audioSession.recordPermission == AVAudioSession.RecordPermission.granted
         DispatchQueue.main.async {
             result( has )
         }
@@ -162,7 +162,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             SFSpeechRecognizer.requestAuthorization({(status)->Void in
                 success = status == SFSpeechRecognizerAuthorizationStatus.authorized
                 if ( success ) {
-                    AVAudioSession.sharedInstance().requestRecordPermission({(granted: Bool)-> Void in
+                    self.audioSession.requestRecordPermission({(granted: Bool)-> Void in
                         if granted {
                             self.setupSpeechRecognition(result)
                         } else{
@@ -260,9 +260,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             return
         }
         stopAllPlayers()
+        self.currentTask?.finish()
         if let sound = successSound {
             onPlayEnd = {() -> Void in
-                self.currentTask?.finish()
                 self.stopCurrentListen( )
                 self.sendBoolResult( true, result )
                 return
@@ -270,7 +270,6 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             sound.play()
         }
         else {
-            self.currentTask?.finish()
             stopCurrentListen( )
             sendBoolResult( true, result );
         }
@@ -282,9 +281,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             return
         }
         stopAllPlayers()
+        self.currentTask?.cancel()
         if let sound = cancelSound {
             onPlayEnd = {() -> Void in
-                self.currentTask?.cancel()
                 self.stopCurrentListen( )
                 self.sendBoolResult( true, result )
                 return
@@ -292,7 +291,6 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             sound.play()
         }
         else {
-            self.currentTask?.cancel()
             stopCurrentListen( )
             sendBoolResult( true, result );
         }
@@ -307,8 +305,6 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private func stopCurrentListen( ) {
         self.currentRequest?.endAudio()
         stopAllPlayers()
-        invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
-
         do {
             try trap {
                 self.audioEngine.stop()
@@ -439,6 +435,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             os_log("Error starting listen: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
             stopCurrentListen()
             sendBoolResult( false, result );
+            // ensure the not listening signal is sent in the error case
+            self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.notListening.rawValue )
             let speechError = SpeechRecognitionError(errorMsg: "error_listen_failed", permanent: true )
             do {
                 let errorResult = try jsonEncoder.encode(speechError)
