@@ -182,12 +182,17 @@ class SpeechToTextProvider extends ChangeNotifier {
   }
 
   void _onStatus(String status) {
-    _recognitionController.add(SpeechRecognitionEvent(
-        SpeechRecognitionEventType.statusChangeEvent,
-        null,
-        null,
-        isListening,
-        null));
+    if (status == SpeechToText.doneStatus) {
+      _recognitionController.add(SpeechRecognitionEvent(
+          SpeechRecognitionEventType.doneEvent, null, null, isListening, null));
+    } else {
+      _recognitionController.add(SpeechRecognitionEvent(
+          SpeechRecognitionEventType.statusChangeEvent,
+          null,
+          null,
+          isListening,
+          null));
+    }
     notifyListeners();
   }
 
