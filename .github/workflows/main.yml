@@ -36,9 +36,9 @@ jobs:
         working-directory: speech_to_text_platform_interface
 
       - name: Get plugin dependencies
-        run: speech_to_text/flutter pub get
+        run: flutter pub get
         working-directory: speech_to_text
 
       - name: Run plugin tests
-        run: speech_to_text/flutter test
+        run: flutter test
         working-directory: speech_to_text
