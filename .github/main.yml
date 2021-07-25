@@ -1,4 +1,4 @@
-name: build
+name: Test
 
 on:
   push:
@@ -10,10 +10,25 @@ jobs:
     name: Test on Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v1.4.0
+      - uses: actions/checkout@v2
+
+      - name: Cache Flutter
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-flutter
         with:
-          flutter-version: '2.12.0'
+          # Flutter cache files are stored in `~/.flutter` on Linux/macOS
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+
+      - name: Install flutter
+        uses: subosito/flutter-action@v1.5.0
+        with:
+          flutter-version: '2.2.0'
           channel: 'stable'
-      - run: flutter pub get
-      - run: flutter test
+
+      - name: Get dependencies
+        run: speech_to_text/flutter pub get
+
+      - name: Run tests
+        run: speech_to_text/flutter test
