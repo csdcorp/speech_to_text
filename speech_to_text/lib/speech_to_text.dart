@@ -531,7 +531,7 @@ class SpeechToText {
   }
 
   void _onNotifyStatus(String status) {
-    print('status $status');
+    // print('status $status');
     if (doneStatus == status) {
       _notifiedDone = true;
       if (!_notifiedFinal) return;
