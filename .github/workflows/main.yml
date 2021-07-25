@@ -27,8 +27,14 @@ jobs:
           flutter-version: '2.2.0'
           channel: 'stable'
 
-      - name: Get dependencies
+      - name: Get platform interface dependencies
+        run: speech_to_text_platform_interface/flutter pub get
+
+      - name: Run platform interface tests
+        run: speech_to_text_platform_interface/flutter test
+
+      - name: Get plugin dependencies
         run: speech_to_text/flutter pub get
 
-      - name: Run tests
+      - name: Run plugin tests
         run: speech_to_text/flutter test
