@@ -160,22 +160,19 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   }
 
   void _onError(html.SpeechRecognitionError event) {
-    if (null != onError && null != event.error) {
+    if (null != event.error) {
       var error = SpeechRecognitionError(event.error!, false);
-      onError!(jsonEncode(error.toJson()));
+      onError?.call(jsonEncode(error.toJson()));
     }
   }
 
   void _onSpeechStart(html.Event event) {
-    if (null != onStatus) {
-      onStatus!('listening');
-    }
+    onStatus?.call('listening');
   }
 
   void _onSpeechEnd(html.Event event) {
-    if (null != onStatus) {
-      onStatus!('not listening');
-    }
+    onStatus?.call('notListening');
+    onStatus?.call('done');
   }
 
   void _onResult(html.SpeechRecognitionEvent event) {
