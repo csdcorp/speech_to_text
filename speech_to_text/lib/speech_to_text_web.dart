@@ -45,6 +45,11 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption>? options}) async {
+    if (!html.SpeechRecognition.supported) {
+      var error = SpeechRecognitionError('not supported', true);
+      onError?.call(jsonEncode(error.toJson()));
+      return false;
+    }
     var initialized = false;
     try {
       _webSpeech = html.SpeechRecognition();
@@ -177,21 +182,20 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     var isFinal = false;
     var recogResults = <SpeechRecognitionWords>[];
     var results = event.results;
-    if (null != results) {
-      for (var result in results) {
-        if (null == result.length) continue;
-        for (var altIndex = 0; altIndex < result.length!; ++altIndex) {
-          var alt = result.item(altIndex);
-          if (null != alt.transcript && null != alt.confidence) {
-            recogResults.add(SpeechRecognitionWords(
-                alt.transcript!, alt.confidence!.toDouble()));
-          }
+    if (null == results) return;
+    for (var recognitionResult in results) {
+      if (null == recognitionResult.length || recognitionResult.length == 0) {
+        continue;
+      }
+      for (var altIndex = 0; altIndex < recognitionResult.length!; ++altIndex) {
+        var alt = recognitionResult.item(altIndex);
+        if (null != alt.transcript && null != alt.confidence) {
+          recogResults.add(SpeechRecognitionWords(
+              alt.transcript!, alt.confidence!.toDouble()));
         }
       }
     }
     var result = SpeechRecognitionResult(recogResults, isFinal);
-    if (null != onTextRecognition) {
-      onTextRecognition!(jsonEncode(result.toJson()));
-    }
+    onTextRecognition?.call(jsonEncode(result.toJson()));
   }
 }
