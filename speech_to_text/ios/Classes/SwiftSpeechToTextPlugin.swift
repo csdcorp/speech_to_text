@@ -74,6 +74,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var successSound: AVAudioPlayer?
     private var cancelSound: AVAudioPlayer?
     private var rememberedAudioCategory: AVAudioSession.Category?
+    private var rememberedAudioCategoryOptions: AVAudioSession.CategoryOptions?
     private var previousLocale: Locale?
     private var onPlayEnd: (() -> Void)?
     private var returnPartialResults: Bool = true
@@ -323,8 +324,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             os_log("Error removing trap: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
         }
         do {
-            if let rememberedAudioCategory = rememberedAudioCategory {
-                try self.audioSession.setCategory(rememberedAudioCategory)
+            if let rememberedAudioCategory = rememberedAudioCategory, let rememberedAudioCategoryOptions = rememberedAudioCategoryOptions {
+                try self.audioSession.setCategory(rememberedAudioCategory,options: rememberedAudioCategoryOptions)
             }
         }
         catch {
@@ -368,6 +369,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
             }
             rememberedAudioCategory = self.audioSession.category
+            rememberedAudioCategoryOptions = self.audioSession.categoryOptions
             try self.audioSession.setCategory(AVAudioSession.Category.playAndRecord, options: .defaultToSpeaker)
             //            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
             if ( sampleRate > 0 ) {
