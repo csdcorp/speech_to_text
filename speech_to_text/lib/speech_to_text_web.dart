@@ -12,6 +12,9 @@ import 'package:speech_to_text_platform_interface/speech_to_text_platform_interf
 /// SpeechRecognition support.
 class SpeechToTextPlugin extends SpeechToTextPlatform {
   html.SpeechRecognition? _webSpeech;
+  static const _doneNoResult = 'doneNoResult';
+  bool _resultSent = false;
+  bool _doneSent = false;
 
   /// Registers this class as the default instance of [UrlLauncherPlatform].
   static void registerWith(Registrar registrar) {
@@ -28,7 +31,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   /// denied them permission in the past.
   @override
   Future<bool> hasPermission() async {
-    return true;
+    return html.SpeechRecognition.supported;
   }
 
   /// Initialize speech recognition services, returns true if
@@ -59,7 +62,9 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
         _webSpeech!.onSpeechStart
             .listen((startEvent) => _onSpeechStart(startEvent));
         _webSpeech!.onEnd.listen((endEvent) => _onSpeechEnd(endEvent));
-        _webSpeech!.onSpeechEnd.listen((endEvent) => _onSpeechEnd(endEvent));
+        // _webSpeech!.onSpeechEnd.listen((endEvent) => _onSpeechEnd(endEvent));
+        _webSpeech!.onNoMatch
+            .listen((noMatchEvent) => _onNoMatch(noMatchEvent));
         initialized = true;
       }
     } finally {
@@ -142,6 +147,8 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     if (null != localeId) {
       _webSpeech!.lang = localeId;
     }
+    _doneSent = false;
+    _resultSent = false;
     _webSpeech!.start();
     return true;
   }
@@ -163,6 +170,8 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     if (null != event.error) {
       var error = SpeechRecognitionError(event.error!, false);
       onError?.call(jsonEncode(error.toJson()));
+      onStatus?.call(_doneNoResult);
+      _doneSent = true;
     }
   }
 
@@ -172,7 +181,12 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
 
   void _onSpeechEnd(html.Event event) {
     onStatus?.call('notListening');
-    onStatus?.call('done');
+    onStatus?.call(_resultSent ? 'done' : _doneNoResult);
+  }
+
+  void _onNoMatch(html.Event event) {
+    onStatus?.call(_doneNoResult);
+    _doneSent = true;
   }
 
   void _onResult(html.SpeechRecognitionEvent event) {
@@ -194,5 +208,6 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     }
     var result = SpeechRecognitionResult(recogResults, isFinal);
     onTextRecognition?.call(jsonEncode(result.toJson()));
+    _resultSent = true;
   }
 }

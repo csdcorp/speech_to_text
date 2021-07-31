@@ -321,6 +321,12 @@ void main() {
       testPlatform.notifyFinalWords();
       expect(listener.statuses.contains(SpeechToText.doneStatus), isTrue);
     });
+    test('done sent with no results on doneNoResult', () async {
+      await speech.initialize(onStatus: listener.onSpeechStatus);
+      await speech.listen();
+      testPlatform.onStatus!('doneNoResult');
+      expect(listener.statuses.contains(SpeechToText.doneStatus), isTrue);
+    });
   });
 
   group('soundLevel callback', () {

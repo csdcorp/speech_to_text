@@ -88,6 +88,11 @@ class SpeechToText {
   /// only when both the final result and the done from the underlying platform
   /// has been seen.
   static const String _finalStatus = 'final';
+
+  /// Sent when speech recognition completes with no results having been seen
+  /// This allows the done status to be sent from the plugin to clients
+  /// even without a final speech result.
+  static const String _doneNoResultStatus = 'doneNoResult';
   static const _defaultFinalTimeout = Duration(milliseconds: 2000);
   static const _minFinalTimeout = Duration(milliseconds: 50);
 
@@ -528,20 +533,27 @@ class SpeechToText {
     if (_cancelOnError && speechError.permanent) {
       await _cancel();
     }
+    _onNotifyStatus(_doneNoResultStatus);
   }
 
   void _onNotifyStatus(String status) {
     // print('status $status');
-    if (doneStatus == status) {
-      _notifiedDone = true;
-      if (!_notifiedFinal) return;
-    }
-    if (_finalStatus == status) {
-      if (!_notifiedDone) return;
+    switch (status) {
+      case doneStatus:
+        _notifiedDone = true;
+        if (!_notifiedFinal) return;
+        break;
+      case _finalStatus:
+        if (!_notifiedDone) return;
 
-      /// the [_finalStatus] is just to indicate that it can send the
-      /// [doneStatus] if [_notifiedDone] has already happened.
-      status = doneStatus;
+        /// the [_finalStatus] is just to indicate that it can send the
+        /// [doneStatus] if [_notifiedDone] has already happened.
+        status = doneStatus;
+        break;
+      case _doneNoResultStatus:
+        _notifiedDone = true;
+        status = doneStatus;
+        break;
     }
     _lastStatus = status;
     _listening = status == listeningStatus;

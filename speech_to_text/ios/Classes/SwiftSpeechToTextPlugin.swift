@@ -27,6 +27,7 @@ public enum SpeechToTextStatus: String {
     case unavailable
     case available
     case done
+    case doneNoResult
 }
 
 public enum SpeechToTextErrors: String {
@@ -575,6 +576,9 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishSuccessfully successfully: Bool) {
         reportError(source: "FinishSuccessfully", error: task.error)
         os_log("FinishSuccessfully", log: pluginLog, type: .debug )
+        if ( !successfully) {
+            invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.doneNoResult.rawValue )
+        }
         stopCurrentListen( )
     }
     
