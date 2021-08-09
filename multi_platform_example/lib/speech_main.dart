@@ -61,150 +61,153 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Speech to Text Example'),
         ),
-        body: Column(children: [
-          Center(
-            child: Text(
-              'Speech recognition available',
-              style: TextStyle(fontSize: 22.0),
+        body: Column(
+          children: [
+            Center(
+              child: Text(
+                'Speech recognition available',
+                style: TextStyle(fontSize: 22.0),
+              ),
             ),
-          ),
-          Container(
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    TextButton(
-                      child: Text('Initialize'),
-                      onPressed: _hasSpeech ? null : initSpeechState,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    TextButton(
-                      child: Text('Start'),
-                      onPressed: !_hasSpeech || speech.isListening
-                          ? null
-                          : startListening,
-                    ),
-                    TextButton(
-                      child: Text('Stop'),
-                      onPressed: speech.isListening ? stopListening : null,
-                    ),
-                    TextButton(
-                      child: Text('Cancel'),
-                      onPressed: speech.isListening ? cancelListening : null,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    DropdownButton(
-                      onChanged: (selectedVal) => _switchLang(selectedVal),
-                      value: _currentLocaleId,
-                      items: _localeNames
-                          .map(
-                            (localeName) => DropdownMenuItem(
-                              value: localeName.localeId,
-                              child: Text(localeName.name),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child: Text(
-                    'Recognized Words',
-                    style: TextStyle(fontSize: 22.0),
-                  ),
-                ),
-                Expanded(
-                  child: Stack(
+            Container(
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      Container(
-                        color: Theme.of(context).selectedRowColor,
-                        child: Center(
-                          child: Text(
-                            lastWords,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      Positioned.fill(
-                        bottom: 10,
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: .26,
-                                    spreadRadius: level * 1.5,
-                                    color: Colors.black.withOpacity(.05))
-                              ],
-                              color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.mic),
-                              onPressed: () => null,
-                            ),
-                          ),
-                        ),
+                      TextButton(
+                        child: Text('Initialize'),
+                        onPressed: _hasSpeech ? null : initSpeechState,
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child: Text(
-                    'Error Status',
-                    style: TextStyle(fontSize: 22.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      TextButton(
+                        child: Text('Start'),
+                        onPressed: !_hasSpeech || speech.isListening
+                            ? null
+                            : startListening,
+                      ),
+                      TextButton(
+                        child: Text('Stop'),
+                        onPressed: speech.isListening ? stopListening : null,
+                      ),
+                      TextButton(
+                        child: Text('Cancel'),
+                        onPressed: speech.isListening ? cancelListening : null,
+                      ),
+                    ],
                   ),
-                ),
-                Center(
-                  child: Text(lastError),
-                ),
-              ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      DropdownButton(
+                        onChanged: (selectedVal) => _switchLang(selectedVal),
+                        value: _currentLocaleId,
+                        items: _localeNames
+                            .map(
+                              (localeName) => DropdownMenuItem(
+                                value: localeName.localeId,
+                                child: Text(localeName.name),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 20),
-            color: Theme.of(context).backgroundColor,
-            child: Center(
-              child: speech.isListening
-                  ? Text(
-                      "I'm listening...",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  : Text(
-                      'Not listening',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+            Expanded(
+              flex: 4,
+              child: Column(
+                children: <Widget>[
+                  Center(
+                    child: Text(
+                      'Recognized Words',
+                      style: TextStyle(fontSize: 22.0),
                     ),
+                  ),
+                  Expanded(
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
+                          color: Theme.of(context).selectedRowColor,
+                          child: Center(
+                            child: Text(
+                              lastWords,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        Positioned.fill(
+                          bottom: 10,
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                      blurRadius: .26,
+                                      spreadRadius: level * 1.5,
+                                      color: Colors.black.withOpacity(.05))
+                                ],
+                                color: Colors.white,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.mic),
+                                onPressed: () => null,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ]),
+            Expanded(
+              flex: 1,
+              child: Column(
+                children: <Widget>[
+                  Center(
+                    child: Text(
+                      'Error Status',
+                      style: TextStyle(fontSize: 22.0),
+                    ),
+                  ),
+                  Center(
+                    child: Text(lastError),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              color: Theme.of(context).backgroundColor,
+              child: Center(
+                child: speech.isListening
+                    ? Text(
+                        "I'm listening...",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    : Text(
+                        'Not listening',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+              ),
+            ),
+            Text('Status: $lastStatus'),
+          ],
+        ),
       ),
     );
   }
