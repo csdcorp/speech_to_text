@@ -1,5 +1,17 @@
 # Changelog
 
+## 5.0.0
+### New
+  * Bluetooth headsets now supported on iOS
+  * `onStatus` now receives the new `done` status after all listening is complete. This is a potentially 
+  breaking change as it adds a new status to handle. 
+  * `initialize` and `hasPermission` now checks if speech is supported on web
+
+### Fix
+  * removed duplicate `not listening` status sent on iOS
+  * iOS now restores all audio options after listening
+  * iOS returns speech results faster when also playing a stop sound
+
 ## 4.2.2
 ### Fix
   * handle deprecation of `setMockMethodHandler` #229
