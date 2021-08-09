@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v4.2.2-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v5.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -11,12 +11,13 @@ conversion or always on listening.
 
 ## Recent Updates
 
+5.0.0 improves audio handling on iOS thanks to work by @deJong-IT. It also adds a new `done` status sent after
+the listening session is complete and the plugin has finished with the audio subsystem on the device. This 
+should help coordinate multiple audio plugins.
+
 The 4.2.0 version is significantly faster starting to listen on iOS (~500 ms) and makes null safety the default release. 
 
 The 4.0.0 version adds null safety support thanks to the fabulous work of @kaladron. Support for web is also included though it is not yet well tested. 
-
-The 3.0.0 version uses the newer style of plugin development based on a common platform interface package. 
-This will make it easier to support web and other platforms. 
 
 *Note*: Feedback from any test devices is welcome. 
 
