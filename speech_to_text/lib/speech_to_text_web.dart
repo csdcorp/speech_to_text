@@ -170,8 +170,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     if (null != event.error) {
       var error = SpeechRecognitionError(event.error!, false);
       onError?.call(jsonEncode(error.toJson()));
-      onStatus?.call(_doneNoResult);
-      _doneSent = true;
+      _sendDone(_doneNoResult);
     }
   }
 
@@ -181,11 +180,16 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
 
   void _onSpeechEnd(html.Event event) {
     onStatus?.call('notListening');
-    onStatus?.call(_resultSent ? 'done' : _doneNoResult);
+    _sendDone(_resultSent ? 'done' : _doneNoResult);
   }
 
   void _onNoMatch(html.Event event) {
-    onStatus?.call(_doneNoResult);
+    _sendDone(_doneNoResult);
+  }
+
+  void _sendDone(String status) {
+    if (_doneSent) return;
+    onStatus?.call(status);
     _doneSent = true;
   }
 
