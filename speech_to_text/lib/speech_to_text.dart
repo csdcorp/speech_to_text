@@ -533,7 +533,6 @@ class SpeechToText {
     if (_cancelOnError && speechError.permanent) {
       await _cancel();
     }
-    _onNotifyStatus(_doneNoResultStatus);
   }
 
   void _onNotifyStatus(String status) {

@@ -447,6 +447,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             do {
                 let errorResult = try jsonEncoder.encode(speechError)
                 invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyError, arguments: String( data:errorResult, encoding: .utf8) )
+                invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.doneNoResult.rawValue )
             } catch {
                 os_log("Could not encode JSON", log: pluginLog, type: .error)
             }

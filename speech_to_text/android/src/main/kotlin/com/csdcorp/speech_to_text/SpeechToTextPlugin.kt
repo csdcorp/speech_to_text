@@ -343,7 +343,8 @@ public class SpeechToTextPlugin :
                 null, Activity.RESULT_OK, null, null)
     }
 
-    private fun notifyListening(isRecording: Boolean) {
+    private fun notifyListening(isRecording: Boolean ) {
+        if ( listening == isRecording ) return;
         listening = isRecording
         val status = when (isRecording) {
             true -> SpeechToTextStatus.listening.name
@@ -353,8 +354,8 @@ public class SpeechToTextPlugin :
         channel?.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name, status)
         if ( !isRecording ) {
             val doneStatus = when( resultSent) {
-                true -> SpeechToTextStatus.done.name
                 false -> SpeechToTextStatus.doneNoResult.name
+                else -> SpeechToTextStatus.done.name
             }
             debugLog("Notify status:" + doneStatus )
             channel?.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name,
@@ -574,6 +575,9 @@ public class SpeechToTextPlugin :
             else -> "error_unknown"
         }
         sendError(errorMsg)
+        if ( isListening()) {
+            notifyListening(false)
+        }
     }
 
     private fun debugLog( msg: String ) {
