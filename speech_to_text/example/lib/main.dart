@@ -6,14 +6,14 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(SpeechSampleApp());
 
-class MyApp extends StatefulWidget {
+class SpeechSampleApp extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _SpeechSampleAppState createState() => _SpeechSampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _SpeechSampleAppState extends State<SpeechSampleApp> {
   bool _hasSpeech = false;
   bool _logEvents = false;
   double level = 0.0;
