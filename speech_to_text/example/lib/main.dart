@@ -34,6 +34,10 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     super.initState();
   }
 
+  /// This initializes SpeechToText. That only has to be done
+  /// once per application, though calling it again is harmless
+  /// it also does nothing. The UX of the sample app ensures that
+  /// it can only be called once.
   Future<void> initSpeechState() async {
     _logEvent('Initialize');
     var hasSpeech = await speech.initialize(
@@ -42,6 +46,8 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         debugLogging: true,
         finalTimeout: Duration(milliseconds: 0));
     if (hasSpeech) {
+      // Get the list of languages installed on the supporting platform so they
+      // can be displayed in the UI for selection by the user.
       _localeNames = await speech.locales();
 
       var systemLocale = await speech.systemLocale();
@@ -89,10 +95,16 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     );
   }
 
+  // This is called each time the users wants to start a new speech
+  // recognition session
   void startListening() {
     _logEvent('start listening');
     lastWords = '';
     lastError = '';
+    // Note that `listenFor` is the maximum, not the minimun, on some
+    // recognition will be stopped before this value is reached.
+    // Similarly `pauseFor` is a maximum not a minimum and may be ignored
+    // on some devices.
     speech.listen(
         onResult: resultListener,
         listenFor: Duration(seconds: 30),
@@ -121,6 +133,8 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     });
   }
 
+  /// This callback is invoked each time new recognition results are
+  /// available after `listen` is called.
   void resultListener(SpeechRecognitionResult result) {
     _logEvent(
         'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
