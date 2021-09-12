@@ -337,6 +337,7 @@ public class SpeechToTextPlugin :
         var detailsIntent = RecognizerIntent.getVoiceDetailsIntent(pluginContext)
         if (null == detailsIntent) {
             detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
+            detailsIntent.setPackage("com.google.android.googlequicksearchbox")
         }
         pluginContext?.sendOrderedBroadcast(
                 detailsIntent, null, LanguageDetailsChecker(result, debugLogging),
