@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
+import 'package:speech_to_text_example/recognition_results_widget.dart';
 
 void main() => runApp(ProviderDemoApp());
 
@@ -126,29 +127,7 @@ class _SpeechProviderExampleWidgetState
       ),
       Expanded(
         flex: 4,
-        child: Column(
-          children: <Widget>[
-            Center(
-              child: Text(
-                'Recognized Words',
-                style: TextStyle(fontSize: 22.0),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).selectedRowColor,
-                child: Center(
-                  child: speechProvider.hasResults
-                      ? Text(
-                          speechProvider.lastResult?.recognizedWords ?? '',
-                          textAlign: TextAlign.center,
-                        )
-                      : Container(),
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: RecognitionResultsWidget(),
       ),
       Expanded(
         flex: 1,
