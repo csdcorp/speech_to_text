@@ -202,21 +202,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
               ],
             ),
           ),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 20),
-            color: Theme.of(context).backgroundColor,
-            child: Center(
-              child: speech.isListening
-                  ? Text(
-                      "I'm listening...",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  : Text(
-                      'Not listening',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-            ),
-          ),
+          SpeechStatusWidget(speech: speech),
         ]),
       ),
     );
@@ -299,5 +285,34 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
       var eventTime = DateTime.now().toIso8601String();
       print('$eventTime $eventDescription');
     }
+  }
+}
+
+/// Display the current status of the listener
+class SpeechStatusWidget extends StatelessWidget {
+  const SpeechStatusWidget({
+    Key? key,
+    required this.speech,
+  }) : super(key: key);
+
+  final SpeechToText speech;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 20),
+      color: Theme.of(context).backgroundColor,
+      child: Center(
+        child: speech.isListening
+            ? Text(
+                "I'm listening...",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            : Text(
+                'Not listening',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+      ),
+    );
   }
 }
