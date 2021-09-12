@@ -13,6 +13,9 @@ class SpeechSampleApp extends StatefulWidget {
   _SpeechSampleAppState createState() => _SpeechSampleAppState();
 }
 
+/// An example that demonstrates the basic functionality of the
+/// SpeechToText plugin for using the speech recognition capability
+/// of the underlying platform.
 class _SpeechSampleAppState extends State<SpeechSampleApp> {
   bool _hasSpeech = false;
   bool _logEvents = false;
@@ -60,147 +63,25 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
           title: const Text('Speech to Text Example'),
         ),
         body: Column(children: [
-          Center(
-            child: Text(
-              'Speech recognition available',
-              style: TextStyle(fontSize: 22.0),
-            ),
-          ),
+          HeaderWidget(),
           Container(
             child: Column(
               children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    TextButton(
-                      onPressed: _hasSpeech ? null : initSpeechState,
-                      child: Text('Initialize'),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    TextButton(
-                      onPressed: !_hasSpeech || speech.isListening
-                          ? null
-                          : startListening,
-                      child: Text('Start'),
-                    ),
-                    TextButton(
-                      onPressed: speech.isListening ? stopListening : null,
-                      child: Text('Stop'),
-                    ),
-                    TextButton(
-                      onPressed: speech.isListening ? cancelListening : null,
-                      child: Text('Cancel'),
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    Row(
-                      children: [
-                        Text('Language: '),
-                        DropdownButton(
-                          onChanged: (selectedVal) => _switchLang(selectedVal),
-                          value: _currentLocaleId,
-                          items: _localeNames
-                              .map(
-                                (localeName) => DropdownMenuItem(
-                                  value: localeName.localeId,
-                                  child: Text(localeName.name),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text('Log events: '),
-                        Checkbox(
-                            value: _logEvents,
-                            onChanged: (val) => setState(() {
-                                  _logEvents = val ?? false;
-                                })),
-                      ],
-                    )
-                  ],
-                )
+                InitSpeechWidget(_hasSpeech, initSpeechState),
+                SpeechControlWidget(_hasSpeech, speech.isListening,
+                    startListening, stopListening, cancelListening),
+                SessionOptionsWidget(_currentLocaleId, _switchLang,
+                    _localeNames, _logEvents, _switchLogging),
               ],
             ),
           ),
           Expanded(
             flex: 4,
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child: Text(
-                    'Recognized Words',
-                    style: TextStyle(fontSize: 22.0),
-                  ),
-                ),
-                Expanded(
-                  child: Stack(
-                    children: <Widget>[
-                      Container(
-                        color: Theme.of(context).selectedRowColor,
-                        child: Center(
-                          child: Text(
-                            lastWords,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      Positioned.fill(
-                        bottom: 10,
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: .26,
-                                    spreadRadius: level * 1.5,
-                                    color: Colors.black.withOpacity(.05))
-                              ],
-                              color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.mic),
-                              onPressed: () => null,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            child: RecognitionResultsWidget(lastWords: lastWords, level: level),
           ),
           Expanded(
             flex: 1,
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child: Text(
-                    'Error Status',
-                    style: TextStyle(fontSize: 22.0),
-                  ),
-                ),
-                Center(
-                  child: Text(lastError),
-                ),
-              ],
-            ),
+            child: ErrorWidget(lastError: lastError),
           ),
           SpeechStatusWidget(speech: speech),
         ]),
@@ -285,6 +166,226 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
       var eventTime = DateTime.now().toIso8601String();
       print('$eventTime $eventDescription');
     }
+  }
+
+  void _switchLogging(bool? val) {
+    setState(() {
+      _logEvents = val ?? false;
+    });
+  }
+}
+
+/// Displays the most recently recognized words and the sound level.
+class RecognitionResultsWidget extends StatelessWidget {
+  const RecognitionResultsWidget({
+    Key? key,
+    required this.lastWords,
+    required this.level,
+  }) : super(key: key);
+
+  final String lastWords;
+  final double level;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Center(
+          child: Text(
+            'Recognized Words',
+            style: TextStyle(fontSize: 22.0),
+          ),
+        ),
+        Expanded(
+          child: Stack(
+            children: <Widget>[
+              Container(
+                color: Theme.of(context).selectedRowColor,
+                child: Center(
+                  child: Text(
+                    lastWords,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                bottom: 10,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            blurRadius: .26,
+                            spreadRadius: level * 1.5,
+                            color: Colors.black.withOpacity(.05))
+                      ],
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.mic),
+                      onPressed: () => null,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class HeaderWidget extends StatelessWidget {
+  const HeaderWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Speech recognition available',
+        style: TextStyle(fontSize: 22.0),
+      ),
+    );
+  }
+}
+
+/// Display the current error status from the speech
+/// recognizer
+class ErrorWidget extends StatelessWidget {
+  const ErrorWidget({
+    Key? key,
+    required this.lastError,
+  }) : super(key: key);
+
+  final String lastError;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Center(
+          child: Text(
+            'Error Status',
+            style: TextStyle(fontSize: 22.0),
+          ),
+        ),
+        Center(
+          child: Text(lastError),
+        ),
+      ],
+    );
+  }
+}
+
+/// Controls to start and stop speech recognition
+class SpeechControlWidget extends StatelessWidget {
+  const SpeechControlWidget(this.hasSpeech, this.isListening,
+      this.startListening, this.stopListening, this.cancelListening,
+      {Key? key})
+      : super(key: key);
+
+  final bool hasSpeech;
+  final bool isListening;
+  final void Function() startListening;
+  final void Function() stopListening;
+  final void Function() cancelListening;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        TextButton(
+          onPressed: !hasSpeech || isListening ? null : startListening,
+          child: Text('Start'),
+        ),
+        TextButton(
+          onPressed: isListening ? stopListening : null,
+          child: Text('Stop'),
+        ),
+        TextButton(
+          onPressed: isListening ? cancelListening : null,
+          child: Text('Cancel'),
+        )
+      ],
+    );
+  }
+}
+
+class SessionOptionsWidget extends StatelessWidget {
+  const SessionOptionsWidget(this.currentLocaleId, this.switchLang,
+      this.localeNames, this.logEvents, this.switchLogging,
+      {Key? key})
+      : super(key: key);
+
+  final String currentLocaleId;
+  final void Function(String?) switchLang;
+  final void Function(bool?) switchLogging;
+  final List<LocaleName> localeNames;
+  final bool logEvents;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        Row(
+          children: [
+            Text('Language: '),
+            DropdownButton<String>(
+              onChanged: (selectedVal) => switchLang(selectedVal),
+              value: currentLocaleId,
+              items: localeNames
+                  .map(
+                    (localeName) => DropdownMenuItem(
+                      value: localeName.localeId,
+                      child: Text(localeName.name),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text('Log events: '),
+            Checkbox(
+              value: logEvents,
+              onChanged: switchLogging,
+            ),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class InitSpeechWidget extends StatelessWidget {
+  const InitSpeechWidget(this.hasSpeech, this.initSpeechState, {Key? key})
+      : super(key: key);
+
+  final bool hasSpeech;
+  final Future<void> Function() initSpeechState;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        TextButton(
+          onPressed: hasSpeech ? null : initSpeechState,
+          child: Text('Initialize'),
+        ),
+      ],
+    );
   }
 }
 
