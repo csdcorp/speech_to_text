@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v5.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v5.1.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 

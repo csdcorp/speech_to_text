@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.1.0
+
+### New
+  * The example app now supports Web as a run target
+
+### Fix
+  * Attempted fix for listing available Locales on some Android devices
 ## 5.0.0
 ### New
   * Bluetooth headsets now supported on iOS
