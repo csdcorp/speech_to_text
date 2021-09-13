@@ -7,6 +7,7 @@
   * Improved the example app and its documentation
   * Improved the provider example app
   * Android now handles the `done` condition better, especially in case of error
+  * Updated the minimal example in the README file
 
 ### Fix
   * Fix for listing available Locales on some Android devices
