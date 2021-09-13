@@ -4,9 +4,12 @@
 
 ### New
   * The example app now supports Web as a run target
+  * Improved the example app and its documentation
+  * Improved the provider example app
+  * Android now handles the `done` condition better, especially in case of error
 
 ### Fix
-  * Attempted fix for listing available Locales on some Android devices
+  * Fix for listing available Locales on some Android devices
 ## 5.0.0
 ### New
   * Bluetooth headsets now supported on iOS
