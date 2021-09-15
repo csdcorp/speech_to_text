@@ -436,15 +436,18 @@ public class SpeechToTextPlugin :
         debugLog("completeInitialize")
         if (permissionToRecordAudio) {
             debugLog("Testing recognition availability")
-            if (!SpeechRecognizer.isRecognitionAvailable(pluginContext)) {
-                Log.e(logTag, "Speech recognition not available on this device")
-                activeResult?.error(SpeechToTextErrors.recognizerNotAvailable.name,
-                        "Speech recognition not available on this device", "")
-                activeResult = null
-                return
-            }
+            val localContext = pluginContext
+            if (localContext != null) {
+                if (!SpeechRecognizer.isRecognitionAvailable(localContext)) {
+                    Log.e(logTag, "Speech recognition not available on this device")
+                    activeResult?.error(SpeechToTextErrors.recognizerNotAvailable.name,
+                            "Speech recognition not available on this device", "")
+                    activeResult = null
+                    return
+                }
 
-            createRecognizer()
+                createRecognizer()
+            }
         }
 
         initializedSuccessfully = permissionToRecordAudio
