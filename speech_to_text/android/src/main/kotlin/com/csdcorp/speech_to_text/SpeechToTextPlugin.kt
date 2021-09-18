@@ -44,6 +44,7 @@ enum class SpeechToTextErrors {
     noLanguageIntent,
     recognizerNotAvailable,
     missingOrInvalidArg,
+    missingContext,
     unknown
 }
 
@@ -447,6 +448,14 @@ public class SpeechToTextPlugin :
                 }
 
                 createRecognizer()
+            } else {
+                debugLog("null context during initialization")
+                activeResult?.success(false)
+                activeResult?.error(
+                        SpeechToTextErrors.missingContext.name,
+                        "context unexpectedly null, initialization failed", "")
+                activeResult = null
+                return
             }
         }
 
