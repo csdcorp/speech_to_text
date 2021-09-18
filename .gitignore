@@ -3,6 +3,7 @@
 
 **/.packages
 **/.pub/
+**/log/
 
 **/build/
 **/coverage/
