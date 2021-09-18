@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.1.1
+
+### Fix
+  * Fix for Android compile issue on latest SDK #259
+
 ## 5.1.0
 
 ### New
