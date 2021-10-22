@@ -579,6 +579,23 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
         os_log("FinishSuccessfully", log: pluginLog, type: .debug )
         if ( !successfully) {
             invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.doneNoResult.rawValue )
+            if let err = task.error as NSError? {
+                var errorMsg = "error_finished_unsuccessfully"
+                if err.code == 201 {
+                    errorMsg = "error_siri_and_dictation_disabled"
+                } else if err.code == 203 {
+                    errorMsg = "error_retry"
+                }  else if err.code == 1110 {
+                    errorMsg = "error_no_speech_detected"
+                }
+                let speechError = SpeechRecognitionError(errorMsg: errorMsg, permanent: true )
+                do {
+                    let errorResult = try jsonEncoder.encode(speechError)
+                    invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyError, arguments: String(data:errorResult, encoding: .utf8) )
+                } catch {
+                    os_log("Could not encode JSON", log: pluginLog, type: .error)
+                }
+            }
         }
         stopCurrentListen( )
     }
