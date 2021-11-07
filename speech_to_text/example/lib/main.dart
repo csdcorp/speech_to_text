@@ -41,10 +41,10 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
   Future<void> initSpeechState() async {
     _logEvent('Initialize');
     var hasSpeech = await speech.initialize(
-        onError: errorListener,
-        onStatus: statusListener,
-        debugLogging: true,
-        finalTimeout: Duration(milliseconds: 0));
+      onError: errorListener,
+      onStatus: statusListener,
+      debugLogging: true,
+    );
     if (hasSpeech) {
       // Get the list of languages installed on the supporting platform so they
       // can be displayed in the UI for selection by the user.
