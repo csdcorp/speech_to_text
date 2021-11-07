@@ -475,27 +475,33 @@ public class SpeechToTextPlugin :
         if ( null != speechRecognizer ) {
             return
         }
-        debugLog("Creating recognizer")
-        if ( intentLookup ) {
-            speechRecognizer = createSpeechRecognizer(pluginContext,pluginContext?.findComponentName()).apply {
-                debugLog("Setting listener")
-                setRecognitionListener(this@SpeechToTextPlugin)
+        handler.post {
+            run {
+                debugLog("Creating recognizer")
+                if (intentLookup) {
+                    speechRecognizer = createSpeechRecognizer(
+                        pluginContext,
+                        pluginContext?.findComponentName()
+                    ).apply {
+                        debugLog("Setting listener")
+                        setRecognitionListener(this@SpeechToTextPlugin)
+                    }
+                } else {
+                    speechRecognizer = createSpeechRecognizer(pluginContext).apply {
+                        debugLog("Setting listener")
+                        setRecognitionListener(this@SpeechToTextPlugin)
+                    }
+                }
+                if (null == speechRecognizer) {
+                    Log.e(logTag, "Speech recognizer null")
+                    activeResult?.error(
+                        SpeechToTextErrors.recognizerNotAvailable.name,
+                        "Speech recognizer null", ""
+                    )
+                    activeResult = null
+                }
             }
         }
-        else {
-            speechRecognizer = createSpeechRecognizer(pluginContext).apply {
-                debugLog("Setting listener")
-                setRecognitionListener(this@SpeechToTextPlugin)
-            }
-        }
-        if (null == speechRecognizer) {
-            Log.e(logTag, "Speech recognizer null")
-            activeResult?.error(
-                    SpeechToTextErrors.recognizerNotAvailable.name,
-                    "Speech recognizer null", "")
-            activeResult = null
-        }
-
         debugLog("before setup intent")
         setupRecognizerIntent(defaultLanguageTag, true, ListenMode.deviceDefault, false )
         debugLog("after setup intent")
