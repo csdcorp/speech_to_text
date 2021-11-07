@@ -1,5 +1,20 @@
 # Changelog
 
+## 5.2.1
+
+### New
+  * Changed the `error_unknown` return to `error_unknown ({error_code})` so that the 
+  native Android error code is visible. This is a potentially breaking change if you 
+  behaviour for the `error_unkown` value. 
+  * Added new SDK 31 error messages for Android 
+    * `error_language_not_supported`
+    * `error_language_unavailable`
+    * `error_server_disconnected`
+    * `error_too_many_requests`
+
+### Fix
+  * Fix for Android to handle list end on unrecognized content properly #253
+
 ## 5.1.1
 
 ### Fix
