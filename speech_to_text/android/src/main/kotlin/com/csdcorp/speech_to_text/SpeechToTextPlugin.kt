@@ -585,8 +585,13 @@ public class SpeechToTextPlugin :
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "error_busy"
             SpeechRecognizer.ERROR_SERVER -> "error_server"
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "error_speech_timeout"
-            else -> "error_unknown"
+            SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED -> "error_language_not_supported"
+            SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "error_language_unavailable"
+            SpeechRecognizer.ERROR_SERVER_DISCONNECTED -> "error_server_disconnected"
+            SpeechRecognizer.ERROR_TOO_MANY_REQUESTS -> "error_too_many_requests"
+            else -> "error_unknown ($errorCode)"
         }
+
         sendError(errorMsg)
         if ( isListening()) {
             notifyListening(false)
