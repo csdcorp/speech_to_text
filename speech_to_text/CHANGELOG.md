@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.2.1
+## 5.2.0
 
 ### New
   * Changed the `error_unknown` return to `error_unknown ({error_code})` so that the 
