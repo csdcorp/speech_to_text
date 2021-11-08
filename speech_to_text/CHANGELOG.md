@@ -3,6 +3,7 @@
 ## 5.2.0
 
 ### New
+  * Requires `compileSdkVersion 31` to build, check your `build.gradle`
   * Changed the `error_unknown` return to `error_unknown ({error_code})` so that the 
   native Android error code is visible. This is a potentially breaking change if you 
   behaviour for the `error_unkown` value. 
