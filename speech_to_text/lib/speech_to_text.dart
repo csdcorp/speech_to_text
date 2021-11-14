@@ -333,6 +333,12 @@ class SpeechToText {
   /// leaving the device. If it cannot do this the listen attempt will fail. This is
   /// usually only needed for sensitive content where privacy or security is a concern.
   ///
+  /// [listenMode] tunes the speech recognition engine to expect certain
+  /// types of spoken content. It defaults to [ListenMode.confirmation] which
+  /// is the most common use case, words or short phrases to confirm a command.
+  /// [ListenMode.dictation] is for longer spoken content, sentences or
+  /// paragraphs, while [ListenMode.search] expects a sequence of search terms.
+  ///
   /// [sampleRate] optional for compatibility with certain iOS devices, some devices
   /// crash with `sampleRate != device's supported sampleRate`, try 44100 if seeing
   /// crashes
