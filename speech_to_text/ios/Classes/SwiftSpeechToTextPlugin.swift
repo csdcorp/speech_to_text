@@ -580,13 +580,16 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
         if ( !successfully) {
             invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.doneNoResult.rawValue )
             if let err = task.error as NSError? {
-                var errorMsg = "error_finished_unsuccessfully"
-                if err.code == 201 {
-                    errorMsg = "error_siri_and_dictation_disabled"
-                } else if err.code == 203 {
+                var errorMsg: String
+                switch err.code {
+                case 201:
+                    errorMsg = "error_speech_recognizer_disabled"
+                case 203:
                     errorMsg = "error_retry"
-                }  else if err.code == 1110 {
-                    errorMsg = "error_no_speech_detected"
+                case 1110:
+                    errorMsg = "error_no_match"
+                default:                    
+                    errorMsg = "error_unknown (\(err.code))"
                 }
                 let speechError = SpeechRecognitionError(errorMsg: errorMsg, permanent: true )
                 do {
