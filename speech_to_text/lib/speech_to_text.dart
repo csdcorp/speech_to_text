@@ -265,6 +265,7 @@ class SpeechToText {
     if (_finalTimeout > _minFinalTimeout) {
       _notifyFinalTimer = Timer(_finalTimeout, _onFinalTimeout);
     }
+    _lastRecognized = '';
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
@@ -288,6 +289,7 @@ class SpeechToText {
     }
     _shutdownListener();
     await SpeechToTextPlatform.instance.cancel();
+    _lastRecognized = '';
   }
 
   /// Starts a listening session for speech and converts it to text,
@@ -381,7 +383,7 @@ class SpeechToText {
         _setupListenAndPause(pauseFor, listenFor);
       }
     } on PlatformException catch (e) {
-      throw ListenFailedException(e.details);
+      throw ListenFailedException(e.message, e.details, e.stacktrace);
     }
   }
 
@@ -556,6 +558,7 @@ class SpeechToText {
         status = doneStatus;
         break;
       case _doneNoResultStatus:
+        _lastRecognized = '';
         _notifiedDone = true;
         status = doneStatus;
         break;
@@ -596,6 +599,8 @@ class SpeechToTextNotInitializedException implements Exception {}
 /// Thrown when listen fails to properly start a speech listening session
 /// on the device
 class ListenFailedException implements Exception {
-  final String details;
-  ListenFailedException(this.details);
+  final String? message;
+  final String? details;
+  final String? stackTrace;
+  ListenFailedException(this.message, [this.details, this.stackTrace]);
 }
