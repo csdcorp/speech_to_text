@@ -81,6 +81,7 @@ class SpeechToText {
   static const String listeningStatus = 'listening';
   static const String notListeningStatus = 'notListening';
   static const String doneStatus = 'done';
+  static const String noResultStatus = 'noResult';
 
   /// This one is kind of a faux status, it's used internally
   /// to tell the status notifier that the final result has been seen
@@ -265,7 +266,6 @@ class SpeechToText {
     if (_finalTimeout > _minFinalTimeout) {
       _notifyFinalTimer = Timer(_finalTimeout, _onFinalTimeout);
     }
-    _lastRecognized = '';
   }
 
   /// Cancels the current listen for speech if active, does nothing if not.
@@ -289,7 +289,6 @@ class SpeechToText {
     }
     _shutdownListener();
     await SpeechToTextPlatform.instance.cancel();
-    _lastRecognized = '';
   }
 
   /// Starts a listening session for speech and converts it to text,
@@ -359,6 +358,7 @@ class SpeechToText {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
+    _lastRecognized = '';
     _userEnded = false;
     _lastSpeechResult = null;
     _cancelOnError = cancelOnError;
@@ -558,9 +558,8 @@ class SpeechToText {
         status = doneStatus;
         break;
       case _doneNoResultStatus:
-        _lastRecognized = '';
         _notifiedDone = true;
-        status = doneStatus;
+        status = noResultStatus;
         break;
     }
     _lastStatus = status;
