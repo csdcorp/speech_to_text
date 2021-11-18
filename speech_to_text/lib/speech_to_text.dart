@@ -81,7 +81,6 @@ class SpeechToText {
   static const String listeningStatus = 'listening';
   static const String notListeningStatus = 'notListening';
   static const String doneStatus = 'done';
-  static const String noResultStatus = 'noResult';
 
   /// This one is kind of a faux status, it's used internally
   /// to tell the status notifier that the final result has been seen
@@ -559,7 +558,7 @@ class SpeechToText {
         break;
       case _doneNoResultStatus:
         _notifiedDone = true;
-        status = noResultStatus;
+        status = doneStatus;
         break;
     }
     _lastStatus = status;
