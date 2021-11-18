@@ -577,7 +577,7 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didFinishSuccessfully successfully: Bool) {
         reportError(source: "FinishSuccessfully", error: task.error)
         os_log("FinishSuccessfully", log: pluginLog, type: .debug )
-        if ( !successfully || nil != task.error) {
+        if ( !successfully ) {
             invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.doneNoResult.rawValue )
             if let err = task.error as NSError? {
                 var errorMsg: String
