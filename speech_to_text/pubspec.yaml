@@ -1,6 +1,6 @@
 name: speech_to_text
 description: A Flutter plugin that exposes device specific speech to text recognition capability. 
-version: 5.2.0
+version: 5.3.0
 homepage: https://github.com/csdcorp/speech_to_text
 
 environment:

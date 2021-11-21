@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.3.0
+
+### New
+  * Documentation improvements for `listen` parameters
+  * iOS error handling improvements
+  
+### Fix
+  * lastRecognizedWords now cleared before each `listen` call 
+
 ## 5.2.0
 
 ### New
