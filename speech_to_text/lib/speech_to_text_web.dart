@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -203,10 +204,13 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
         continue;
       }
       for (var altIndex = 0; altIndex < recognitionResult.length!; ++altIndex) {
-        var alt = recognitionResult.item(altIndex);
-        if (null != alt.transcript && null != alt.confidence) {
-          recogResults.add(SpeechRecognitionWords(
-              alt.transcript!, alt.confidence!.toDouble()));
+        var alt = js_util.callMethod(recognitionResult, 'item', [altIndex]);
+        if (null == alt) continue;
+        String? transcript = js_util.getProperty(alt, 'transcript');
+        num? confidence = js_util.getProperty(alt, 'confidence');
+        if (null != transcript && null != confidence) {
+          recogResults
+              .add(SpeechRecognitionWords(transcript, confidence.toDouble()));
         }
       }
     }
