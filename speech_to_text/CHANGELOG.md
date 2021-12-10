@@ -8,6 +8,7 @@
   
 ### Fix
   * lastRecognizedWords now cleared before each `listen` call 
+  * web issue resolve #242
 
 ## 5.2.0
 
