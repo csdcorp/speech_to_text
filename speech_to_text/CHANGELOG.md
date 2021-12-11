@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.4.0
+
+### New
+  * Support for bluetooth headsets in Android
+
 ## 5.3.0
 
 ### New

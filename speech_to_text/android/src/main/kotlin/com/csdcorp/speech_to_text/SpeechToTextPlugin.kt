@@ -5,6 +5,9 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import android.Manifest
 import android.annotation.TargetApi
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothHeadset
+import android.bluetooth.BluetoothProfile
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -99,6 +102,10 @@ public class SpeechToTextPlugin :
     private var resultSent: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
+    private var bluetoothAdapter: android.bluetooth.BluetoothAdapter? = null
+    private var pairedDevices: Set<android.bluetooth.BluetoothDevice>? = null
+    private var activeBluetooth: android.bluetooth.BluetoothDevice? = null
+    private var bluetoothHeadset: BluetoothHeadset? = null
     private var previousRecognizerLang: String? = null
     private var previousPartialResults: Boolean = true
     private var previousListenMode: ListenMode = ListenMode.deviceDefault
@@ -280,6 +287,7 @@ public class SpeechToTextPlugin :
         if ( listenModeIndex == ListenMode.dictation.ordinal) {
             listenMode = ListenMode.dictation
         }
+        optionallyStartBluetooth()
         setupRecognizerIntent(languageTag, partialResults, listenMode, onDevice )
         handler.post {
             run {
@@ -292,12 +300,37 @@ public class SpeechToTextPlugin :
         debugLog("Start listening done")
     }
 
+    private fun optionallyStartBluetooth() {
+        val lbt = bluetoothAdapter
+        val lpaired = pairedDevices
+        val lhead = bluetoothHeadset
+        if (null != lbt && null!= lhead && null != lpaired && lbt.isEnabled()) {
+            for (tryDevice in lpaired) {
+                //This loop tries to start VoiceRecognition mode on every paired device until it finds one that works(which will be the currently in use bluetooth headset)
+                if (lhead.startVoiceRecognition(tryDevice)) {
+                    activeBluetooth = tryDevice;
+                    break
+                }
+            }
+        }
+    }
+
+    private fun optionallyStopBluetooth() {
+        val lactive = activeBluetooth
+        val lbt = bluetoothHeadset
+        if (null != lactive && null != lbt ) {
+            lbt.stopVoiceRecognition(lactive)
+            activeBluetooth = null
+        }
+    }
+
     private fun stopListening(result: Result) {
         if (sdkVersionTooLow() || isNotInitialized() || isNotListening()) {
             result.success(false)
             return
         }
         debugLog("Stop listening")
+        optionallyStopBluetooth()
         handler.post {
             run {
                 speechRecognizer?.stopListening()
@@ -446,7 +479,7 @@ public class SpeechToTextPlugin :
                     activeResult = null
                     return
                 }
-
+                setupBluetooth()
                 createRecognizer()
             } else {
                 debugLog("null context during initialization")
@@ -464,6 +497,26 @@ public class SpeechToTextPlugin :
         activeResult?.success(permissionToRecordAudio)
         debugLog("leaving complete")
         activeResult = null
+    }
+
+    private fun setupBluetooth() {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        pairedDevices = bluetoothAdapter?.getBondedDevices()
+
+        val mProfileListener: BluetoothProfile.ServiceListener = object : BluetoothProfile.ServiceListener {
+            override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                if (profile == BluetoothProfile.HEADSET) {
+                    bluetoothHeadset = proxy as BluetoothHeadset
+                }
+            }
+
+            override fun onServiceDisconnected(profile: Int) {
+                if (profile == BluetoothProfile.HEADSET) {
+                    bluetoothHeadset = null
+                }
+            }
+        }
+        bluetoothAdapter?.getProfileProxy(pluginContext, mProfileListener, BluetoothProfile.HEADSET)
     }
 
     private fun Context.findComponentName(): ComponentName? {

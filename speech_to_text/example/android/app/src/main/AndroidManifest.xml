@@ -2,6 +2,7 @@
     package="com.csdcorp.speech_to_text_example">
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
     <queries>
         <intent>
             <action android:name="android.speech.RecognitionService" />

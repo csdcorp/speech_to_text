@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onResult(html.SpeechRecognitionEvent event) {
     var results = event.results;
     if (null == results) return;
-    for (html.SpeechRecognitionResult recognitionResult in results) {
+    for (var recognitionResult in results) {
       if (null == recognitionResult.length || recognitionResult.length == 0) {
         continue;
       }
