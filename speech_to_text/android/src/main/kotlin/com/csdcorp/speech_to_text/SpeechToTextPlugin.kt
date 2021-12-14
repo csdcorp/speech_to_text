@@ -308,19 +308,11 @@ public class SpeechToTextPlugin :
             for (tryDevice in lpaired) {
                 //This loop tries to start VoiceRecognition mode on every paired device until it finds one that works(which will be the currently in use bluetooth headset)
                 if (lhead.startVoiceRecognition(tryDevice)) {
+                    debugLog("Starting bluetooth voice recognition")
                     activeBluetooth = tryDevice;
                     break
                 }
             }
-        }
-    }
-
-    private fun optionallyStopBluetooth() {
-        val lactive = activeBluetooth
-        val lbt = bluetoothHeadset
-        if (null != lactive && null != lbt ) {
-            lbt.stopVoiceRecognition(lactive)
-            activeBluetooth = null
         }
     }
 
@@ -330,7 +322,6 @@ public class SpeechToTextPlugin :
             return
         }
         debugLog("Stop listening")
-        optionallyStopBluetooth()
         handler.post {
             run {
                 speechRecognizer?.stopListening()
@@ -393,11 +384,22 @@ public class SpeechToTextPlugin :
                 else -> SpeechToTextStatus.done.name
             }
             debugLog("Notify status:" + doneStatus )
+            optionallyStopBluetooth();
             channel?.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name,
                 doneStatus )
         }
     }
 
+    private fun optionallyStopBluetooth() {
+        val lactive = activeBluetooth
+        val lbt = bluetoothHeadset
+        if (null != lactive && null != lbt ) {
+            debugLog("Stopping bluetooth voice recognition")
+            lbt.stopVoiceRecognition(lactive)
+            activeBluetooth = null
+        }
+    }
+    
     private fun updateResults(speechBundle: Bundle?, isFinal: Boolean) {
         if (isDuplicateFinal( isFinal )) {
             debugLog("Discarding duplicate final")
@@ -507,11 +509,13 @@ public class SpeechToTextPlugin :
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 if (profile == BluetoothProfile.HEADSET) {
                     bluetoothHeadset = proxy as BluetoothHeadset
+                    debugLog("Found a headset: " + bluetoothHeadset.toString())
                 }
             }
 
             override fun onServiceDisconnected(profile: Int) {
                 if (profile == BluetoothProfile.HEADSET) {
+                    debugLog("Clearing headset: ")
                     bluetoothHeadset = null
                 }
             }
