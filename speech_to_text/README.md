@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v5.4.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v5.4.1-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -10,6 +10,8 @@ target use cases for this library are commands and short phrases, not continuous
 conversion or always on listening. 
 
 ## Recent Updates
+
+5.4.1 Supports bluetooth headsets on Android, this requires new permissions, see the permissions section below. 
 
 5.3.0 Fixes a longstanding issue with web support and improves error handling on iOS. From 5.2.0+
 `compileSdkVersion 31` must be used for Android. 
@@ -182,6 +184,17 @@ Add the record audio permission to your _AndroidManifest.xml_ file, located in `
 
 * `android.permission.RECORD_AUDIO` - this permission is required for microphone access.
 * `android.permission.INTERNET` - this permission is required because speech recognition may use remote services.
+* `android.permission.BLUETOOTH` - this permission is required because speech recognition can use bluetooth headsets when connected.
+* `android.permission.BLUETOOTH_ADMIN` - this permission is required because speech recognition can use bluetooth headsets when connected.
+* `android.permission.BLUETOOTH_ADMIN` - this permission is required because speech recognition can use bluetooth headsets when connected.
+
+```xml
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+```
 
 #### Android SDK 30 or later
 

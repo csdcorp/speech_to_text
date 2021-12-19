@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.4.1
+
+### New
+  * Android permission documentation
+
 ## 5.4.0
 
 ### New
