@@ -455,7 +455,7 @@ public class SpeechToTextPlugin :
             if (null != localActivity) {
                 debugLog("Requesting permission")
                 ActivityCompat.requestPermissions(localActivity,
-                        arrayOf(Manifest.permission.RECORD_AUDIO), speechToTextPermissionCode)
+                        arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.BLUETOOTH_CONNECT), speechToTextPermissionCode)
             } else {
                 debugLog("no permission, no activity, completing")
                 completeInitialize()
