@@ -255,6 +255,10 @@ Android speech recognition has a very short timeout when the speaker pauses. The
 and version of the Android OS. In the devices I've used none have had a pause longer than 5 seconds. Unfortunately
 there appears to be no way to change that behaviour. 
 
+### Android beeps on start/stop of speech recognition
+
+This is a feature of the Android OS and there is no supported way to disable it. 
+
 ### Continuous speech recognition
 
 There have been a number of questions about how to achieve continuous speech recognition using this plugin. Currently 
