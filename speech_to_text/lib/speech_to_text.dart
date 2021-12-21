@@ -43,6 +43,20 @@ typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
 ///   "error_busy"
 ///   "error_server"
 ///   "error_speech_timeout"
+///   "error_language_not_supported"
+///   "error_language_unavailable"
+///   "error_server_disconnected"
+///   "error_too_many_requests"
+///
+/// iOS errors are not well documented in the iOS SDK, so far these are the
+/// errors that have been observed:
+///   "error_speech_recognizer_disabled"
+///   "error_retry"
+///   "error_no_match"
+///
+/// Both platforms use this message for an unrecognized error:
+///   "error_unknown ($errorCode)" where $errorCode provides more detail
+
 /// See the [onError] argument on the [initialize] method for use.
 typedef SpeechErrorListener = void Function(
     SpeechRecognitionError errorNotification);
