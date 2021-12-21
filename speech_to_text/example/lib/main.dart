@@ -40,25 +40,31 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
   /// it can only be called once.
   Future<void> initSpeechState() async {
     _logEvent('Initialize');
-    var hasSpeech = await speech.initialize(
-      onError: errorListener,
-      onStatus: statusListener,
-      debugLogging: true,
-    );
-    if (hasSpeech) {
-      // Get the list of languages installed on the supporting platform so they
-      // can be displayed in the UI for selection by the user.
-      _localeNames = await speech.locales();
+    try {
+      var hasSpeech = await speech.initialize(
+        onError: errorListener,
+        onStatus: statusListener,
+        debugLogging: true,
+      );
+      if (hasSpeech) {
+        // Get the list of languages installed on the supporting platform so they
+        // can be displayed in the UI for selection by the user.
+        _localeNames = await speech.locales();
 
-      var systemLocale = await speech.systemLocale();
-      _currentLocaleId = systemLocale?.localeId ?? '';
+        var systemLocale = await speech.systemLocale();
+        _currentLocaleId = systemLocale?.localeId ?? '';
+      }
+      if (!mounted) return;
+
+      setState(() {
+        _hasSpeech = hasSpeech;
+      });
+    } catch (e) {
+      setState(() {
+        lastError = 'Speech recognition failed: ${e.toString()}';
+        _hasSpeech = false;
+      });
     }
-
-    if (!mounted) return;
-
-    setState(() {
-      _hasSpeech = hasSpeech;
-    });
   }
 
   @override
@@ -348,36 +354,39 @@ class SessionOptionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        Row(
-          children: [
-            Text('Language: '),
-            DropdownButton<String>(
-              onChanged: (selectedVal) => switchLang(selectedVal),
-              value: currentLocaleId,
-              items: localeNames
-                  .map(
-                    (localeName) => DropdownMenuItem(
-                      value: localeName.localeId,
-                      child: Text(localeName.name),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Text('Log events: '),
-            Checkbox(
-              value: logEvents,
-              onChanged: switchLogging,
-            ),
-          ],
-        )
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Row(
+            children: [
+              Text('Language: '),
+              DropdownButton<String>(
+                onChanged: (selectedVal) => switchLang(selectedVal),
+                value: currentLocaleId,
+                items: localeNames
+                    .map(
+                      (localeName) => DropdownMenuItem(
+                        value: localeName.localeId,
+                        child: Text(localeName.name),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text('Log events: '),
+              Checkbox(
+                value: logEvents,
+                onChanged: switchLogging,
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 }
