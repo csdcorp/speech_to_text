@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v5.4.1-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v5.4.2-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -11,7 +11,9 @@ conversion or always on listening.
 
 ## Recent Updates
 
-5.4.1 Supports bluetooth headsets on Android, this requires new permissions, see the permissions section below. 
+5.4.2 Supports bluetooth headsets on Android, this requires new permissions, see the permissions section below. 
+Note that bluetooth  permission is requested from the user, when upgrading users may have to manually set the permission 
+or clear their cache to force a re-request.  
 
 5.3.0 Fixes a longstanding issue with web support and improves error handling on iOS. From 5.2.0+
 `compileSdkVersion 31` must be used for Android. 

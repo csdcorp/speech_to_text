@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.4.2
+
+### New
+  * Now asks for Bluetooth permission on SDK 31 and above. When upgrading an already installed app
+  the permission will not be requested. Users will have to manually set the permission or clear 
+  their app cache to force a re-request. See this [issue](https://github.com/csdcorp/speech_to_text/issues/282)
+
 ## 5.4.1
 
 ### New
