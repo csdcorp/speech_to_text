@@ -99,6 +99,7 @@ public class SpeechToTextPlugin :
     private var debugLogging: Boolean = false
     private var alwaysUseStop: Boolean = false
     private var intentLookup: Boolean = false
+    private var noBluetooth: Boolean = false
     private var resultSent: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
@@ -187,6 +188,10 @@ public class SpeechToTextPlugin :
                     var iOpt = call.argument<Boolean>("intentLookup")
                     if (null != iOpt) {
                         intentLookup = iOpt == true
+                    }
+                    var noBtOpt = call.argument<Boolean>("noBluetooth")
+                    if (null != noBtOpt) {
+                        noBluetooth = noBtOpt == true
                     }
                     initialize(result)
                 }
@@ -301,6 +306,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun optionallyStartBluetooth() {
+        if ( noBluetooth ) return 
         val lbt = bluetoothAdapter
         val lpaired = pairedDevices
         val lhead = bluetoothHeadset
@@ -391,6 +397,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun optionallyStopBluetooth() {
+        if ( noBluetooth ) return
         val lactive = activeBluetooth
         val lbt = bluetoothHeadset
         if (null != lactive && null != lbt ) {
@@ -454,8 +461,13 @@ public class SpeechToTextPlugin :
             val localActivity = currentActivity
             if (null != localActivity) {
                 debugLog("Requesting permission")
+                var requiredPermissions = arrayOf(Manifest.permission.RECORD_AUDIO)
+                if ( !noBluetooth ) {
+                    requiredPermissions = requiredPermissions.plus(Manifest.permission.BLUETOOTH_CONNECT)
+                }
+
                 ActivityCompat.requestPermissions(localActivity,
-                        arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.BLUETOOTH_CONNECT), speechToTextPermissionCode)
+                        requiredPermissions, speechToTextPermissionCode)
             } else {
                 debugLog("no permission, no activity, completing")
                 completeInitialize()
@@ -502,6 +514,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun setupBluetooth() {
+        if ( noBluetooth ) return
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         pairedDevices = bluetoothAdapter?.getBondedDevices()
 

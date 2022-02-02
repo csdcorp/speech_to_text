@@ -114,15 +114,36 @@ class SpeechToText {
       SpeechConfigOption('android', 'alwaysUseStop', true);
   static final SpeechConfigOption androidIntentLookup =
       SpeechConfigOption('android', 'intentLookup', true);
+  static final SpeechConfigOption androidNoBluetooth =
+      SpeechConfigOption('android', 'noBluetooth', true);
+  static final SpeechConfigOption iosNoBluetooth =
+      SpeechConfigOption('ios', 'noBluetooth', true);
 
   static final SpeechToText _instance = SpeechToText.withMethodChannel();
   bool _initWorked = false;
+
+  /// True when any words have been recognized during the current listen session.
   bool _recognized = false;
+
+  /// True as soon as the platform reports it has started listening which
+  /// happens some time after the listen method is called.
   bool _listening = false;
   bool _cancelOnError = false;
+
+  /// True if the user has requested to cancel recognition when a permanent
+  /// error occurs.
   bool _partialResults = false;
+
+  /// True when the results callback has already been called with a
+  /// final result.
   bool _notifiedFinal = false;
+
+  /// True when the internal status callback has been called with the
+  /// done status. Note that this does not mean the user callback has
+  /// been called since that is only called after the final result has been
+  /// seen.
   bool _notifiedDone = false;
+
   int _listenStartedAt = 0;
   int _lastSpeechEventAt = 0;
   Duration? _pauseFor;
