@@ -362,6 +362,16 @@ Ensure the app has the required permissions. The symptom for this that you get a
  Here's the important excerpt: 
  >You should go to system setting, Apps, Google app, then enable its permission of microphone. 
 
+#### User reported steps
+From issue [#298](https://github.com/csdcorp/speech_to_text/issues/298) this is the detailed set of steps that
+resolved their issue:
+
+1. install google app
+2. Settings > Voice > Languages - select the language
+3. Settings > Voice > Languages > Offline speech recognition - install language
+4. Settings > Language and region - select the Search language and Search region
+5. Delete the build folder from the root path of the project and run again
+
 ### iOS recognition guidelines
 Apple has quite a good guide on the user experience for using speech, the original is here 
 https://developer.apple.com/documentation/speech/sfspeechrecognizer This is the section  that I think is particularly relevant:
