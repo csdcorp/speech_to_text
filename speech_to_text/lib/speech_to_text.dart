@@ -110,12 +110,27 @@ class SpeechToText {
   static const _defaultFinalTimeout = Duration(milliseconds: 2000);
   static const _minFinalTimeout = Duration(milliseconds: 50);
 
+  /// on Android SDK 29 the recognizer stop method did not work properly so the
+  /// plugin destroys the recognizer instead. If this causes problems
+  /// this option overrides that behaviour and forces the plugin to use
+  /// the stop command instead, even on SDK 29.
   static final SpeechConfigOption androidAlwaysUseStop =
       SpeechConfigOption('android', 'alwaysUseStop', true);
+
+  /// Some Android builds do not properly define the default speech
+  /// recognition intent. This option forces a workaround to lookup the
+  /// intent by querying the intent manager.
   static final SpeechConfigOption androidIntentLookup =
       SpeechConfigOption('android', 'intentLookup', true);
+
+  /// If your application does not need Bluetooth support on Android and
+  /// you'd rather not have to ask for Bluetooth permission pass this option
+  /// to disable Bluetooth support on Android.
   static final SpeechConfigOption androidNoBluetooth =
       SpeechConfigOption('android', 'noBluetooth', true);
+
+  /// This option does nothing yet, may disable Bluetooth on iOS if there is
+  /// a need.
   static final SpeechConfigOption iosNoBluetooth =
       SpeechConfigOption('ios', 'noBluetooth', true);
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.4.3
+
+### New
+  * new Android option `androidNoBluetooth` can be used in `initialize` to disable Bluetooth support 
+  on Android devices which removes the need for Bluetooth permission. 
+
 ## 5.4.2
 
 ### New
