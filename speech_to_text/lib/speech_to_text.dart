@@ -107,7 +107,7 @@ class SpeechToText {
   /// This allows the done status to be sent from the plugin to clients
   /// even without a final speech result.
   static const String _doneNoResultStatus = 'doneNoResult';
-  static const _defaultFinalTimeout = Duration(milliseconds: 2000);
+  static const defaultFinalTimeout = Duration(milliseconds: 2000);
   static const _minFinalTimeout = Duration(milliseconds: 50);
 
   /// on Android SDK 29 the recognizer stop method did not work properly so the
@@ -163,7 +163,7 @@ class SpeechToText {
   int _lastSpeechEventAt = 0;
   Duration? _pauseFor;
   Duration? _listenFor;
-  Duration _finalTimeout = _defaultFinalTimeout;
+  Duration _finalTimeout = defaultFinalTimeout;
 
   /// True if not listening or the user called cancel / stop, false
   /// if cancel/stop were invoked by timeout or error condition.
@@ -272,7 +272,7 @@ class SpeechToText {
       {SpeechErrorListener? onError,
       SpeechStatusListener? onStatus,
       debugLogging = false,
-      Duration finalTimeout = _defaultFinalTimeout,
+      Duration finalTimeout = defaultFinalTimeout,
       List<SpeechConfigOption>? options}) async {
     if (_initWorked) {
       return Future.value(_initWorked);

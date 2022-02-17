@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_event.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 /// Simplifies interaction with [SpeechToText] by handling all the callbacks and notifying
 /// listeners as events happen.
@@ -54,14 +55,21 @@ class SpeechToTextProvider extends ChangeNotifier {
   /// Initializes the provider and the contained [SpeechToText] instance.
   ///
   /// Returns true if [SpeechToText] was initialized successful and can now
-  /// be used, false otherwse.
-  Future<bool> initialize() async {
+  /// be used, false otherwise.
+  Future<bool> initialize(
+      {debugLogging = false,
+      Duration finalTimeout = SpeechToText.defaultFinalTimeout,
+      List<SpeechConfigOption>? options}) async {
     if (isAvailable) {
       return isAvailable;
     }
     var availableBefore = _speechToText.isAvailable;
-    var available =
-        await _speechToText.initialize(onStatus: _onStatus, onError: _onError);
+    var available = await _speechToText.initialize(
+        onStatus: _onStatus,
+        onError: _onError,
+        debugLogging: debugLogging,
+        finalTimeout: finalTimeout,
+        options: options);
     if (available) {
       _locales = [];
       _locales.addAll(await _speechToText.locales());
