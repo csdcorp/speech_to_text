@@ -93,10 +93,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugin.csdcorp.com/speech_to_text", binaryMessenger: registrar.messenger())
-        if #available(iOS 10.0, *) {
             let instance = SwiftSpeechToTextPlugin( channel, registrar: registrar )
             registrar.addMethodCallDelegate(instance, channel: channel )
-        }
     }
     
     init( _ channel: FlutterMethodChannel, registrar: FlutterPluginRegistrar ) {
