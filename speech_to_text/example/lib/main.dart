@@ -19,6 +19,10 @@ class SpeechSampleApp extends StatefulWidget {
 class _SpeechSampleAppState extends State<SpeechSampleApp> {
   bool _hasSpeech = false;
   bool _logEvents = false;
+  final TextEditingController _pauseForController =
+      TextEditingController(text: '0');
+  final TextEditingController _listenForController =
+      TextEditingController(text: '0');
   double level = 0.0;
   double minSoundLevel = 50000;
   double maxSoundLevel = -50000;
@@ -82,8 +86,15 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
                 InitSpeechWidget(_hasSpeech, initSpeechState),
                 SpeechControlWidget(_hasSpeech, speech.isListening,
                     startListening, stopListening, cancelListening),
-                SessionOptionsWidget(_currentLocaleId, _switchLang,
-                    _localeNames, _logEvents, _switchLogging),
+                SessionOptionsWidget(
+                  _currentLocaleId,
+                  _switchLang,
+                  _localeNames,
+                  _logEvents,
+                  _switchLogging,
+                  _pauseForController,
+                  _listenForController,
+                ),
               ],
             ),
           ),
@@ -107,14 +118,16 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     _logEvent('start listening');
     lastWords = '';
     lastError = '';
+    final pauseFor = int.tryParse(_pauseForController.text);
+    final listenFor = int.tryParse(_listenForController.text);
     // Note that `listenFor` is the maximum, not the minimun, on some
-    // recognition will be stopped before this value is reached.
+    // systems recognition will be stopped before this value is reached.
     // Similarly `pauseFor` is a maximum not a minimum and may be ignored
     // on some devices.
     speech.listen(
         onResult: resultListener,
-        listenFor: Duration(seconds: 30),
-        pauseFor: Duration(seconds: 5),
+        listenFor: Duration(seconds: listenFor ?? 30),
+        pauseFor: Duration(seconds: pauseFor ?? 3),
         partialResults: true,
         localeId: _currentLocaleId,
         onSoundLevelChange: soundLevelListener,
@@ -341,14 +354,22 @@ class SpeechControlWidget extends StatelessWidget {
 }
 
 class SessionOptionsWidget extends StatelessWidget {
-  const SessionOptionsWidget(this.currentLocaleId, this.switchLang,
-      this.localeNames, this.logEvents, this.switchLogging,
+  const SessionOptionsWidget(
+      this.currentLocaleId,
+      this.switchLang,
+      this.localeNames,
+      this.logEvents,
+      this.switchLogging,
+      this.pauseForController,
+      this.listenForController,
       {Key? key})
       : super(key: key);
 
   final String currentLocaleId;
   final void Function(String?) switchLang;
   final void Function(bool?) switchLogging;
+  final TextEditingController pauseForController;
+  final TextEditingController listenForController;
   final List<LocaleName> localeNames;
   final bool logEvents;
 
@@ -378,13 +399,33 @@ class SessionOptionsWidget extends StatelessWidget {
           ),
           Row(
             children: [
+              Text('pauseFor: '),
+              Container(
+                  padding: EdgeInsets.only(left: 8),
+                  width: 80,
+                  child: TextFormField(
+                    controller: pauseForController,
+                  )),
+              Container(
+                  padding: EdgeInsets.only(left: 16),
+                  child: Text('listenFor: ')),
+              Container(
+                  padding: EdgeInsets.only(left: 8),
+                  width: 80,
+                  child: TextFormField(
+                    controller: listenForController,
+                  )),
+            ],
+          ),
+          Row(
+            children: [
               Text('Log events: '),
               Checkbox(
                 value: logEvents,
                 onChanged: switchLogging,
               ),
             ],
-          )
+          ),
         ],
       ),
     );
