@@ -20,9 +20,10 @@ interface is implemented on that platform. See the docs
 [here](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins) for 
 a description of the approach.
 
-### [Example apps](https://github.com/csdcorp/speech_to_text/tree/main/multi_platform_example)
-The plugin has an included example app but it was built before web support. This 
-[project](https://github.com/csdcorp/speech_to_text/tree/main/multi_platform_example) has an updated 
-example that supports the web. An upcoming release will update the embedded example to support web as 
-a target and this project might go away. 
+### [Example apps](https://github.com/csdcorp/speech_to_text/tree/main/speech_to_text/example/)
+The main [example app](https://github.com/csdcorp/speech_to_text/tree/main/speech_to_text/example/lib/main.dart) included with the plugin shows basic use of the plugin. 
+
+In addition there is a [`Provider` example](https://github.com/csdcorp/speech_to_text/tree/main/speech_to_text/example/lib/provider_example.dart) that shows how to use the plugin as a [Flutter Provider](https://docs.flutter.dev/development/data-and-backend/state-mgmt/simple). 
+
+_These examples work only with the plugin source checked out because their dependency is on a relative path, not the pub.dev version._
 
