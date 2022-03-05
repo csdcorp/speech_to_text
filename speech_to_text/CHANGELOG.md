@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.4.4
+### New
+  * `initialize` method on the `SpeechToTextProvider` adds the `finalTimeout` and 
+  `options` parameters that match the same parameters on `SpeechToText`
+
 ## 5.4.3
 
 ### New
