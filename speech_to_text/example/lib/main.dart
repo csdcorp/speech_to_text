@@ -20,9 +20,9 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
   bool _hasSpeech = false;
   bool _logEvents = false;
   final TextEditingController _pauseForController =
-      TextEditingController(text: '0');
+      TextEditingController(text: '3');
   final TextEditingController _listenForController =
-      TextEditingController(text: '0');
+      TextEditingController(text: '30');
   double level = 0.0;
   double minSoundLevel = 50000;
   double maxSoundLevel = -50000;
