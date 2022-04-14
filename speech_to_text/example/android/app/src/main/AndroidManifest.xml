@@ -11,11 +11,14 @@
         </intent>
     </queries>
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="${applicationName}"
         android:label="speech_to_text_example"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+          android:name="flutterEmbedding"
+          android:value="2" />
         <activity
-            android:name=".MainActivity"
+            android:name="io.flutter.embedding.android.FlutterActivity"
             android:launchMode="singleTop"
             android:exported="true"
             android:theme="@style/LaunchTheme"
