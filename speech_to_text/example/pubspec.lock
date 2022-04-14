@@ -160,7 +160,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "5.4.4"
+    version: "5.5.0"
   speech_to_text_platform_interface:
     dependency: transitive
     description:

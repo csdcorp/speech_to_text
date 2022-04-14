@@ -1,44 +1,46 @@
 package com.csdcorp.speech_to_text
 
-import androidx.annotation.NonNull;
-import io.flutter.embedding.engine.plugins.FlutterPlugin
 import android.Manifest
+import android.R.attr.data
 import android.annotation.TargetApi
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
-import android.speech.SpeechRecognizer.createSpeechRecognizer
+import android.speech.RecognitionService
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer
+import android.speech.SpeechRecognizer.createSpeechRecognizer
+import android.util.Log
+import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.Registrar
-import org.json.JSONObject
-import android.content.Context
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.pm.ResolveInfo
-import android.os.Handler
-import android.os.Looper
-import android.speech.RecognitionService
-import android.util.Log
-import io.flutter.embedding.engine.plugins.activity.ActivityAware
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.BinaryMessenger
 import org.json.JSONArray
+import org.json.JSONObject
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 enum class SpeechToTextErrors {
@@ -86,6 +88,7 @@ public class SpeechToTextPlugin :
     private var channel: MethodChannel? = null
     private val minSdkForSpeechSupport = 21
     private val brokenStopSdk = 29
+    private val minSdkForOnDeviceSpeechSupport = 31
     private val speechToTextPermissionCode = 28521
     private val missingConfidence: Double = -1.0
     private var speechThresholdRms = 9
@@ -101,6 +104,7 @@ public class SpeechToTextPlugin :
     private var intentLookup: Boolean = false
     private var noBluetooth: Boolean = false
     private var resultSent: Boolean = false
+    private var lastOnDevice: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
     private var bluetoothAdapter: android.bluetooth.BluetoothAdapter? = null
@@ -284,7 +288,7 @@ public class SpeechToTextPlugin :
             return
         }
         resultSent = false
-        createRecognizer()
+        createRecognizer(onDevice)
         minRms = 1000.0F
         maxRms = -100.0F
         debugLog("Start listening")
@@ -494,7 +498,7 @@ public class SpeechToTextPlugin :
                     return
                 }
                 setupBluetooth()
-                createRecognizer()
+//                createRecognizer(false)
             } else {
                 debugLog("null context during initialization")
                 activeResult?.success(false)
@@ -541,10 +545,13 @@ public class SpeechToTextPlugin :
         return list.firstOrNull()?.serviceInfo?.let { ComponentName(it.packageName, it.name) }
     }
 
-    private fun createRecognizer() {
-        if ( null != speechRecognizer ) {
+    private fun createRecognizer(onDevice: Boolean) {
+        if ( null != speechRecognizer || onDevice != lastOnDevice ) {
             return
         }
+        lastOnDevice = onDevice
+        speechRecognizer?.destroy()
+        speechRecognizer = null
         handler.post {
             run {
                 debugLog("Creating recognizer")
@@ -557,9 +564,21 @@ public class SpeechToTextPlugin :
                         setRecognitionListener(this@SpeechToTextPlugin)
                     }
                 } else {
-                    speechRecognizer = createSpeechRecognizer(pluginContext).apply {
-                        debugLog("Setting listener")
-                        setRecognitionListener(this@SpeechToTextPlugin)
+                        var supportsLocal = false
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && onDevice) {
+                        supportsLocal = SpeechRecognizer.isOnDeviceRecognitionAvailable(pluginContext!!)
+                        if (supportsLocal ) {
+                            speechRecognizer = createOnDeviceSpeechRecognizer(pluginContext!!).apply {
+                                debugLog("Setting listener")
+                                setRecognitionListener(this@SpeechToTextPlugin)
+                            }
+                        }
+                    }
+                    if ( null == speechRecognizer) {
+                            speechRecognizer = createSpeechRecognizer(pluginContext).apply {
+                                debugLog("Setting listener")
+                                setRecognitionListener(this@SpeechToTextPlugin)
+                        }
                     }
                 }
                 if (null == speechRecognizer) {

@@ -1,9 +1,12 @@
 # Changelog
 
-## 5.4.4
+## 5.5.0
 ### New
   * `initialize` method on the `SpeechToTextProvider` adds the `finalTimeout` and 
   `options` parameters that match the same parameters on `SpeechToText`
+  * onDevice support added for Android
+  * example app updated for new Android build requirements
+  * example app now supports `pauseFor` and `waitFor` parameters
 
 ## 5.4.3
 
