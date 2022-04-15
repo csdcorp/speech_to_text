@@ -802,7 +802,7 @@ private class ChannelResultWrapper(result: Result) : Result {
         }
     }
 
-    override fun error(errorCode: String?, errorMessage: String?, data: Any?) {
+    override fun error(errorCode: String, errorMessage: String?, data: Any?) {
         handler.post {
             run {
                 result.error(errorCode, errorMessage, data);
