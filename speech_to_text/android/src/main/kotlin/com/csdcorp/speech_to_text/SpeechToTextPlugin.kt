@@ -314,7 +314,7 @@ public class SpeechToTextPlugin :
         val lbt = bluetoothAdapter
         val lpaired = pairedDevices
         val lhead = bluetoothHeadset
-        if (null != lbt && null!= lhead && null != lpaired && lbt.isEnabled()) {
+        if (null != lbt && null!= lhead && null != lpaired && lbt.isEnabled) {
             for (tryDevice in lpaired) {
                 //This loop tries to start VoiceRecognition mode on every paired device until it finds one that works(which will be the currently in use bluetooth headset)
                 if (lhead.startVoiceRecognition(tryDevice)) {
@@ -642,15 +642,11 @@ public class SpeechToTextPlugin :
                 }
         }, 50 )
     }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?,
-                                            grantResults: IntArray?): Boolean {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
         when (requestCode) {
             speechToTextPermissionCode -> {
-                if (null != grantResults) {
-                    permissionToRecordAudio = grantResults.isNotEmpty() &&
-                            grantResults.get(0) == PackageManager.PERMISSION_GRANTED
-                }
+                permissionToRecordAudio = grantResults.isNotEmpty() &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED
                 completeInitialize()
                 return true
             }
