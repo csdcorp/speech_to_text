@@ -311,6 +311,10 @@ public class SpeechToTextPlugin :
 
     private fun optionallyStartBluetooth() {
         if ( noBluetooth ) return 
+        val context = pluginContext
+        if (Build.VERSION.SDK_INT>=23 && context != null && context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
         val lbt = bluetoothAdapter
         val lpaired = pairedDevices
         val lhead = bluetoothHeadset
