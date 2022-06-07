@@ -546,7 +546,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun createRecognizer(onDevice: Boolean) {
-        if ( null != speechRecognizer || onDevice != lastOnDevice ) {
+        if ( null != speechRecognizer) {
             return
         }
         lastOnDevice = onDevice
