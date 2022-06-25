@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.6.0
+### New
+  * Rejecting Bluetooth permission no longer blocks subsequent recognition 
+  using non-bluetooth inputs.
+
+### Fix
+  * onDevice recognition for Android should handle switching from onDevice 
+  between recognition sessions.
+
 ## 5.5.0
 ### New
   * `initialize` method on the `SpeechToTextProvider` adds the `finalTimeout` and 
