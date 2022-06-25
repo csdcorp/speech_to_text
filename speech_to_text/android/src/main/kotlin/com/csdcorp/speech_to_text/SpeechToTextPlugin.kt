@@ -312,7 +312,7 @@ public class SpeechToTextPlugin :
     private fun optionallyStartBluetooth() {
         if ( noBluetooth ) return 
         val context = pluginContext
-        if (Build.VERSION.SDK_INT>=23 && context != null && context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT>=23 && context != null && context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             return
         }
         val lbt = bluetoothAdapter
@@ -550,7 +550,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun createRecognizer(onDevice: Boolean) {
-        if ( null != speechRecognizer) {
+        if ( null != speechRecognizer && onDevice == lastOnDevice )
             return
         }
         lastOnDevice = onDevice
