@@ -490,7 +490,13 @@ class SpeechToText {
     }
   }
 
-  /// returns the list of speech locales available on the device.
+  /// returns the list of speech locales available on the device or those
+  /// supported by the speech recognizer on the device.
+  ///
+  /// Being on this list does not guarantee that the device will be able to
+  /// recognize the locale. It is just a list of locales that the device can
+  /// recognize if the language is installed. You may have to advise users
+  /// of your application to install their desired language on their device.
   ///
   /// This method is useful to find the identifier to use
   /// for the [listen] method, it is the [localeId] member of the
