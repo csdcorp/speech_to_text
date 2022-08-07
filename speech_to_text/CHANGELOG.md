@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.6.1
+### Fix
+  * Bluetooth permission not granted no longer crashes on Android
+
 ## 5.6.0
 ### New
   * Rejecting Bluetooth permission no longer blocks subsequent recognition 
