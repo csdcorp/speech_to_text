@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.6.2
+### Fix
+  * Cleanup BT code on Android for clarity
+
 ## 5.6.1
 ### Fix
   * Bluetooth permission not granted no longer crashes on Android
