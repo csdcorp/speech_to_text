@@ -103,7 +103,7 @@ public class SpeechToTextPlugin :
     private var alwaysUseStop: Boolean = false
     private var intentLookup: Boolean = false
     private var noBluetoothOpt: Boolean = false // user-defined option
-    private var enableBluetooth = false // final bluetooth state (combines user-defined option and permissions)
+    private var bluetoothDisabled = true // final bluetooth state (combines user-defined option and permissions)
     private var resultSent: Boolean = false
     private var lastOnDevice: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
@@ -311,7 +311,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun optionallyStartBluetooth() {
-        if ( !enableBluetooth ) return
+        if ( bluetoothDisabled ) return
         val context = pluginContext
         val lbt = bluetoothAdapter
         val lpaired = pairedDevices
@@ -403,7 +403,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun optionallyStopBluetooth() {
-        if ( !enableBluetooth ) return
+        if ( bluetoothDisabled ) return
         val lactive = activeBluetooth
         val lbt = bluetoothHeadset
         if (null != lactive && null != lbt ) {
@@ -464,7 +464,7 @@ public class SpeechToTextPlugin :
                 Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         val permissionToEnableBluetooth = ContextCompat.checkSelfPermission(localContext,
                 Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
-        enableBluetooth = permissionToEnableBluetooth && !noBluetoothOpt
+        bluetoothDisabled = !permissionToEnableBluetooth || noBluetoothOpt
         debugLog("Checked permission")
         if (!permissionToRecordAudio) {
             val localActivity = currentActivity
@@ -521,7 +521,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun setupBluetooth() {
-        if ( !enableBluetooth ) return
+        if ( bluetoothDisabled ) return
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         pairedDevices = bluetoothAdapter?.getBondedDevices()
 
@@ -650,9 +650,9 @@ public class SpeechToTextPlugin :
             speechToTextPermissionCode -> {
                 permissionToRecordAudio = grantResults.isNotEmpty() &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED
-                enableBluetooth = grantResults.isNotEmpty() &&
-                        grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                        !noBluetoothOpt
+                bluetoothDisabled = (grantResults.isEmpty() ||
+                        grantResults[1] != PackageManager.PERMISSION_GRANTED) ||
+                        noBluetoothOpt
                 completeInitialize()
                 return true
             }
