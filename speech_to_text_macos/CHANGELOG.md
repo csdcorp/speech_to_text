@@ -1,4 +1,9 @@
-## 1.0.0+1
+## 1.0.1
+
+### Fix
+* Changed implement to match speech_to_text package name
+
+## 1.0.0
 
 ### New 
 * This is a no-op version that does nothing but report that 
