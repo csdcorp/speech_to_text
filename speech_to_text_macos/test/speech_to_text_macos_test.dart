@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text_macos/speech_to_text_macos.dart';
 
 void main() {
-  late SpeechToTextMacos speechToText;
+  late SpeechToTextMacOS speechToText;
 
   setUp(() {
-    speechToText = SpeechToTextMacos();
+    speechToText = SpeechToTextMacOS();
   });
 
   test('hasPermission is false before initialize', () async {

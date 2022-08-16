@@ -5,9 +5,9 @@ import 'package:speech_to_text_platform_interface/speech_to_text_platform_interf
 /// as unavailable. This allows applications which do not require speech
 /// to use the plugin in their builds and at runtime disable the speech
 /// specific functionality.
-class SpeechToTextMacos extends SpeechToTextPlatform {
+class SpeechToTextMacOS extends SpeechToTextPlatform {
   static void registerWith() {
-    SpeechToTextPlatform.instance = SpeechToTextMacos();
+    SpeechToTextPlatform.instance = SpeechToTextMacOS();
   }
 
   /// Returns true if the user has already granted permission to access the
