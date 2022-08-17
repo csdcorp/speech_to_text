@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v5.6.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v6.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -10,6 +10,11 @@ target use cases for this library are commands and short phrases, not continuous
 conversion or always on listening. 
 
 ## Recent Updates
+
+6.0.0 Provides the first minimal Mac support. The plugin will compile and run on Mac though
+it will always report speech as unavailable. This allows the plugin to be used in apps that 
+target the Mac platform and use speech as an optional part of the app. Further support for 
+Mac will be available in future versions. 
 
 5.4.2 Supports bluetooth headsets on Android, this requires new permissions, see the permissions section below. 
 Note that bluetooth  permission is requested from the user, when upgrading users may have to manually set the permission 
@@ -21,8 +26,6 @@ or clear their cache to force a re-request.
 5.0.0 improves audio handling on iOS thanks to work by @deJong-IT. It also adds a new `done` status sent after
 the listening session is complete and the plugin has finished with the audio subsystem on the device. This 
 should help coordinate multiple audio plugins.
-
-The 4.2.0 version is significantly faster starting to listen on iOS (~500 ms) and makes null safety the default release. 
 
 *Note*: Feedback from any test devices is welcome. 
 
@@ -260,6 +263,9 @@ there appears to be no way to change that behaviour.
 ### Android beeps on start/stop of speech recognition
 
 This is a feature of the Android OS and there is no supported way to disable it. 
+
+Android build
+Version 5.2.0 of the plugin and later require at least `compileSdkVersion 31` for the Android build.  This property can be set in the `build.gradle` file.
 
 ### Continuous speech recognition
 

@@ -1,6 +1,6 @@
 name: speech_to_text
 description: A Flutter plugin that exposes device specific speech to text recognition capability. 
-version: 5.6.2
+version: 6.0.0
 homepage: https://github.com/csdcorp/speech_to_text
 
 environment:
@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   speech_to_text_platform_interface: ^2.0.1
+  speech_to_text_macos: ^1.0.2
   json_annotation: ^4.0.0
   clock: ^1.0.1
   pedantic: ^1.9.2
@@ -39,3 +40,5 @@ flutter:
       web:
         pluginClass: SpeechToTextPlugin
         fileName: speech_to_text_web.dart
+      macos:
+        default_package: speech_to_text_macos

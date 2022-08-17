@@ -1,6 +1,12 @@
 # Changelog
 
-## 5.6.2
+## 6.0.0
+
+### New
+* Now has minimal support for Mac apps where it will always report speech as unavailable. 
+This allows the plugin to be used in apps where speech is an optional capability without 
+blocking the deploy to the Mac platform. 
+
 ### Fix
   * Cleanup BT code on Android for clarity
 
