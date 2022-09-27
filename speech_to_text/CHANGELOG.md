@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1.0
+
+### New
+* Updated to the latest Kotlin version to meet newer build requirements
+
 ## 6.0.0
 
 ### New
