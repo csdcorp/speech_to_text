@@ -507,9 +507,6 @@ class SpeechToText {
   /// display. The name is localized for the system locale on
   /// the device.
   Future<List<LocaleName>> locales() async {
-    if (!_initWorked) {
-      throw SpeechToTextNotInitializedException();
-    }
     final locales = await SpeechToTextPlatform.instance.locales();
     var filteredLocales = locales
         .map((locale) {
