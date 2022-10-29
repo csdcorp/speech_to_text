@@ -565,7 +565,7 @@ public class SpeechToTextPlugin :
                         pluginContext,
                         pluginContext?.findComponentName()
                     ).apply {
-                        debugLog("Setting listener")
+                        debugLog("Setting listener after intent lookup")
                         setRecognitionListener(this@SpeechToTextPlugin)
                     }
                 } else {
@@ -574,14 +574,14 @@ public class SpeechToTextPlugin :
                         supportsLocal = SpeechRecognizer.isOnDeviceRecognitionAvailable(pluginContext!!)
                         if (supportsLocal ) {
                             speechRecognizer = createOnDeviceSpeechRecognizer(pluginContext!!).apply {
-                                debugLog("Setting listener")
+                                debugLog("Setting on device listener")
                                 setRecognitionListener(this@SpeechToTextPlugin)
                             }
                         }
                     }
                     if ( null == speechRecognizer) {
                             speechRecognizer = createSpeechRecognizer(pluginContext).apply {
-                                debugLog("Setting listener")
+                                debugLog("Setting default listener")
                                 setRecognitionListener(this@SpeechToTextPlugin)
                         }
                     }
