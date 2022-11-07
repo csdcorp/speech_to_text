@@ -19,6 +19,7 @@ class SpeechSampleApp extends StatefulWidget {
 class _SpeechSampleAppState extends State<SpeechSampleApp> {
   bool _hasSpeech = false;
   bool _logEvents = false;
+  bool _onDevice = false;
   final TextEditingController _pauseForController =
       TextEditingController(text: '3');
   final TextEditingController _listenForController =
@@ -48,7 +49,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
       var hasSpeech = await speech.initialize(
         onError: errorListener,
         onStatus: statusListener,
-        debugLogging: true,
+        debugLogging: _logEvents,
       );
       if (hasSpeech) {
         // Get the list of languages installed on the supporting platform so they
@@ -94,6 +95,8 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
                   _switchLogging,
                   _pauseForController,
                   _listenForController,
+                  _onDevice,
+                  _switchOnDevice,
                 ),
               ],
             ),
@@ -125,14 +128,16 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     // Similarly `pauseFor` is a maximum not a minimum and may be ignored
     // on some devices.
     speech.listen(
-        onResult: resultListener,
-        listenFor: Duration(seconds: listenFor ?? 30),
-        pauseFor: Duration(seconds: pauseFor ?? 3),
-        partialResults: true,
-        localeId: _currentLocaleId,
-        onSoundLevelChange: soundLevelListener,
-        cancelOnError: true,
-        listenMode: ListenMode.confirmation);
+      onResult: resultListener,
+      listenFor: Duration(seconds: listenFor ?? 30),
+      pauseFor: Duration(seconds: pauseFor ?? 3),
+      partialResults: true,
+      localeId: _currentLocaleId,
+      onSoundLevelChange: soundLevelListener,
+      cancelOnError: true,
+      listenMode: ListenMode.confirmation,
+      onDevice: _onDevice,
+    );
     setState(() {});
   }
 
@@ -204,6 +209,12 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
   void _switchLogging(bool? val) {
     setState(() {
       _logEvents = val ?? false;
+    });
+  }
+
+  void _switchOnDevice(bool? val) {
+    setState(() {
+      _onDevice = val ?? false;
     });
   }
 }
@@ -362,16 +373,20 @@ class SessionOptionsWidget extends StatelessWidget {
       this.switchLogging,
       this.pauseForController,
       this.listenForController,
+      this.onDevice,
+      this.switchOnDevice,
       {Key? key})
       : super(key: key);
 
   final String currentLocaleId;
   final void Function(String?) switchLang;
   final void Function(bool?) switchLogging;
+  final void Function(bool?) switchOnDevice;
   final TextEditingController pauseForController;
   final TextEditingController listenForController;
   final List<LocaleName> localeNames;
   final bool logEvents;
+  final bool onDevice;
 
   @override
   Widget build(BuildContext context) {
@@ -419,6 +434,11 @@ class SessionOptionsWidget extends StatelessWidget {
           ),
           Row(
             children: [
+              Text('On device: '),
+              Checkbox(
+                value: onDevice,
+                onChanged: switchOnDevice,
+              ),
               Text('Log events: '),
               Checkbox(
                 value: logEvents,
