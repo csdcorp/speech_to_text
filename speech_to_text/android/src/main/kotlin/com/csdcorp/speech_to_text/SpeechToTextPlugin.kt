@@ -652,7 +652,7 @@ public class SpeechToTextPlugin :
             speechToTextPermissionCode -> {
                 permissionToRecordAudio = grantResults.isNotEmpty() &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED
-                bluetoothDisabled = (grantResults.isEmpty() ||
+                bluetoothDisabled = (grantResults.isEmpty() || grantResults.size == 1 ||
                         grantResults[1] != PackageManager.PERMISSION_GRANTED) ||
                         noBluetoothOpt
                 completeInitialize()
