@@ -5,6 +5,9 @@
 ### New
 * Updated to the latest Kotlin version to meet newer build requirements
 
+### Fix
+  * Bluetooth permission causing crash on some Android devices
+
 ## 6.0.0
 
 ### New
