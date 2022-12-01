@@ -1,12 +1,14 @@
 # Changelog
 
+## 6.1.1
+
+### Fix
+  * Bluetooth permission check no longer crashes on some Android devices
+
 ## 6.1.0
 
 ### New
 * Updated to the latest Kotlin version to meet newer build requirements
-
-### Fix
-  * Bluetooth permission causing crash on some Android devices
 
 ## 6.0.0
 
