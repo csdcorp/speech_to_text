@@ -191,7 +191,7 @@ Add the record audio permission to your _AndroidManifest.xml_ file, located in `
 * `android.permission.INTERNET` - this permission is required because speech recognition may use remote services.
 * `android.permission.BLUETOOTH` - this permission is required because speech recognition can use bluetooth headsets when connected.
 * `android.permission.BLUETOOTH_ADMIN` - this permission is required because speech recognition can use bluetooth headsets when connected.
-* `android.permission.BLUETOOTH_ADMIN` - this permission is required because speech recognition can use bluetooth headsets when connected.
+* `android.permission.BLUETOOTH_CONNECT` - this permission is required because speech recognition can use bluetooth headsets when connected.
 
 ```xml
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
