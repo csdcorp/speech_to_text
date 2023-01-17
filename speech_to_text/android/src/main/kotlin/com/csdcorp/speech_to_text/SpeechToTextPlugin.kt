@@ -493,7 +493,7 @@ public class SpeechToTextPlugin :
             debugLog("Testing recognition availability")
             val localContext = pluginContext
             if (localContext != null) {
-                if (!SpeechRecognizer.isRecognitionAvailable(localContext)) {
+                if (!SpeechRecognizer.isRecognitionAvailable(localContext) && !SpeechRecognizer.isOnDeviceRecognitionAvailable(localContext)) {
                     Log.e(logTag, "Speech recognition not available on this device")
                     activeResult?.error(SpeechToTextErrors.recognizerNotAvailable.name,
                             "Speech recognition not available on this device", "")
