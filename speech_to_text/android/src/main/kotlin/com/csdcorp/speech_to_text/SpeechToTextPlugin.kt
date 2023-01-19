@@ -293,15 +293,20 @@ public class SpeechToTextPlugin :
         minRms = 1000.0F
         maxRms = -100.0F
         debugLog("Start listening")
-        var listenMode = ListenMode.deviceDefault
         if ( listenModeIndex == ListenMode.dictation.ordinal) {
             listenMode = ListenMode.dictation
         }
         optionallyStartBluetooth()
         setupRecognizerIntent(languageTag, partialResults, listenMode, onDevice )
+        val startForResult = registerForActivityResult(StartActivityForResult()) { result: ActivityResult? ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                updateResults(intent.getExtras())
+            }
+        }
         handler.post {
             run {
-                speechRecognizer?.startListening(recognizerIntent)
+                startForResult.launch(recognizerIntent)
             }
         }
         speechStartTime = System.currentTimeMillis()
