@@ -25,6 +25,10 @@ import android.speech.SpeechRecognizer
 import android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer
 import android.speech.SpeechRecognizer.createSpeechRecognizer
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.fragment.app.FragmentActivity
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -108,6 +112,7 @@ public class SpeechToTextPlugin :
     private var lastOnDevice: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
+    private var recognizerCallback: ActivityResultLauncher<Intent>? = null
     private var bluetoothAdapter: android.bluetooth.BluetoothAdapter? = null
     private var pairedDevices: Set<android.bluetooth.BluetoothDevice>? = null
     private var activeBluetooth: android.bluetooth.BluetoothDevice? = null
@@ -293,20 +298,33 @@ public class SpeechToTextPlugin :
         minRms = 1000.0F
         maxRms = -100.0F
         debugLog("Start listening")
+        var listenMode = ListenMode.deviceDefault
         if ( listenModeIndex == ListenMode.dictation.ordinal) {
             listenMode = ListenMode.dictation
         }
         optionallyStartBluetooth()
         setupRecognizerIntent(languageTag, partialResults, listenMode, onDevice )
-        val startForResult = registerForActivityResult(StartActivityForResult()) { result: ActivityResult? ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val intent = result.data
-                updateResults(intent.getExtras())
+
+        if (currentActivity !is FragmentActivity) {
+            debugLog("Start listening failed: Activity is not FragmentActivity")
+            result.success(false);
+            return;
+        }
+
+        recognizerCallback = (currentActivity as FragmentActivity).activityResultRegistry.register("key", StartActivityForResult()) { result: ActivityResult? ->
+            if (result?.resultCode == Activity.RESULT_OK) {
+                val intent = result?.data
+                updateResults(intent?.getExtras(), true)
+            }
+            if (recognizerCallback != null) {
+                recognizerCallback?.unregister()
+                recognizerCallback = null
             }
         }
+        
         handler.post {
             run {
-                startForResult.launch(recognizerIntent)
+                recognizerCallback?.launch(recognizerIntent)
             }
         }
         speechStartTime = System.currentTimeMillis()
@@ -338,6 +356,10 @@ public class SpeechToTextPlugin :
             result.success(false)
             return
         }
+        if (recognizerCallback != null) {
+            recognizerCallback?.unregister()
+            recognizerCallback = null
+        }
         debugLog("Stop listening")
         handler.post {
             run {
@@ -358,6 +380,10 @@ public class SpeechToTextPlugin :
             return
         }
         debugLog("Cancel listening")
+        if (recognizerCallback != null) {
+            recognizerCallback?.unregister()
+            recognizerCallback = null
+        }
         handler.post {
             run {
                 speechRecognizer?.cancel()
