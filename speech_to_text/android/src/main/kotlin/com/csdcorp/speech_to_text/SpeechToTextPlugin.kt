@@ -314,7 +314,7 @@ public class SpeechToTextPlugin :
         recognizerCallback = (currentActivity as FragmentActivity).activityResultRegistry.register("key", StartActivityForResult()) { result: ActivityResult? ->
             if (result?.resultCode == Activity.RESULT_OK) {
                 val intent = result?.data
-                notifyListening(isRecording = false)
+                // notifyListening(isRecording = false)
                 updateResults(intent?.getExtras(), true)
             }
             if (recognizerCallback != null) {
@@ -450,7 +450,7 @@ public class SpeechToTextPlugin :
             debugLog("Discarding duplicate final")
             return
         }
-        val userSaid = speechBundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+        val userSaid = speechBundle?.getStringArrayList(RecognizerIntent.EXTRA_RESULTS)
         if (null != userSaid && userSaid.isNotEmpty()) {
             val speechResult = JSONObject()
             speechResult.put("finalResult", isFinal)
