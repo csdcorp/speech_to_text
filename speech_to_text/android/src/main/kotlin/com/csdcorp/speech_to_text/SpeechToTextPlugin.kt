@@ -314,7 +314,7 @@ public class SpeechToTextPlugin :
         recognizerCallback = (currentActivity as FragmentActivity).activityResultRegistry.register("key", StartActivityForResult()) { result: ActivityResult? ->
             if (result?.resultCode == Activity.RESULT_OK) {
                 val intent = result?.data
-                // notifyListening(isRecording = false)
+                notifyListening(isRecording = false)
                 updateResults(intent?.getExtras(), true)
             }
             if (recognizerCallback != null) {
