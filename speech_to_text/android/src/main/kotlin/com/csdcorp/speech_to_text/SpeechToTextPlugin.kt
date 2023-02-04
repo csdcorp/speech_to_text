@@ -2,6 +2,7 @@ package com.csdcorp.speech_to_text
 
 import android.Manifest
 import android.R.attr.data
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -13,6 +14,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -282,12 +284,30 @@ public class SpeechToTextPlugin :
         return !listening
     }
 
+    @SuppressLint("MissingPermission")
+    private fun checkBluetooth() {
+        val adapter = BluetoothAdapter.getDefaultAdapter()
+        if (adapter.getProfileConnectionState(BluetoothProfile.HEADSET) == BluetoothProfile.STATE_CONNECTED) {
+            Log.i("SpeechRecognition", "Bluetooth mic connected")
+            val localActivity = currentActivity;
+            if (localActivity != null) {
+                val audioManager =
+                    localActivity.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                audioManager.startBluetoothSco()
+                Log.i("SpeechRecognition", "Bluetooth mic initialized")
+            }
+        } else {
+            Log.i("SpeechRecognition", "Bluetooth mic not connected")
+        }
+    }
+
     private fun startListening(result: Result, languageTag: String, partialResults: Boolean,
                                listenModeIndex: Int, onDevice: Boolean) {
         if (sdkVersionTooLow() || isNotInitialized() || isListening()) {
             result.success(false)
             return
         }
+        checkBluetooth()
         resultSent = false
         createRecognizer(onDevice)
         minRms = 1000.0F
