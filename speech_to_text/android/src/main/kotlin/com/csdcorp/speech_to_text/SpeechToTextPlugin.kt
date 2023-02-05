@@ -353,8 +353,8 @@ public class SpeechToTextPlugin :
             result.success(false)
             return
         }
-//        checkBluetooth()
-        mute(true);
+        checkBluetooth()
+//        mute(true);
         resultSent = false
         createRecognizer(onDevice)
         minRms = 1000.0F
@@ -398,7 +398,7 @@ public class SpeechToTextPlugin :
     @RequiresApi(Build.VERSION_CODES.M)
     private fun stopListening(result: Result) {
         Log.i("SpeechRecognition", "Stop listening")
-        mute(false);
+//        mute(false);
         if (sdkVersionTooLow() || isNotInitialized() || isNotListening()) {
             result.success(false)
             return
