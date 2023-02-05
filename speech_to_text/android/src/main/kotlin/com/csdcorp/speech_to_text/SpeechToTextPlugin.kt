@@ -353,7 +353,7 @@ public class SpeechToTextPlugin :
             result.success(false)
             return
         }
-        checkBluetooth()
+//        checkBluetooth()
         mute(true);
         resultSent = false
         createRecognizer(onDevice)
