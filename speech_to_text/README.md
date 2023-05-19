@@ -294,6 +294,13 @@ support speech recognition.
 There have been a number of questions about whether speech can be recognized from recorded audio. The short answer is 
 that this may be possible on iOS but doesn't appear to be on Android. There is an open issue on this here #205. 
 
+### iOS interactions with other sound plugins, crash when listening or initializing, pauses
+On iOS the speech recognition plugin can interact with other sound plugins, things like WebRTC, or sound playback 
+or recording plugins. While this plugin tries hard to be a good citizen and properly share the various iOS sound 
+resources there is always room for interactions. One thing that might help is to add a brief delay between the end of 
+another sound plugin and starting to listen using SpeechToText. See this [issue](https://github.com/csdcorp/speech_to_text/issues/372) 
+for example.
+
 ### SDK version error trying to compile for Android
 ```
 Manifest merger failed : uses-sdk:minSdkVersion 16 cannot be smaller than version 21 declared in library [:speech_to_text] 
