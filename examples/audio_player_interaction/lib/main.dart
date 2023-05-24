@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final SpeechToText _speechToText = SpeechToText();
   final SoundPlayer _player = AudioSoundPlayer();
 
+  // ignore: unused_field
   String _info = '';
   String _currentActivity = 'stopped';
   int _loopCount = 0;
