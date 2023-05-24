@@ -15,7 +15,7 @@ class RecognitionResultsWidget extends StatelessWidget {
     var speechProvider = Provider.of<SpeechToTextProvider>(context);
     return Column(
       children: <Widget>[
-        Center(
+        const Center(
           child: Text(
             'Recognized Words',
             style: TextStyle(fontSize: 22.0),
@@ -25,7 +25,7 @@ class RecognitionResultsWidget extends StatelessWidget {
           child: Stack(
             children: <Widget>[
               Container(
-                color: Theme.of(context).selectedRowColor,
+                color: Theme.of(context).secondaryHeaderColor,
                 child: Center(
                   child: Text(
                     speechProvider.lastResult?.recognizedWords ?? '',
@@ -49,11 +49,11 @@ class RecognitionResultsWidget extends StatelessWidget {
                             color: Colors.black.withOpacity(.05))
                       ],
                       color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                      borderRadius: const BorderRadius.all(Radius.circular(50)),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.mic),
-                      onPressed: () => null,
+                      icon: const Icon(Icons.mic),
+                      onPressed: () {},
                     ),
                   ),
                 ),

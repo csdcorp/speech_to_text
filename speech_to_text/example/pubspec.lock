@@ -182,7 +182,7 @@ packages:
     source: hosted
     version: "1.9.1"
   speech_to_text:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       path: ".."
       relative: true
