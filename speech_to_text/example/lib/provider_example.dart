@@ -12,10 +12,10 @@ class ProviderDemoApp extends StatefulWidget {
   const ProviderDemoApp({Key? key}) : super(key: key);
 
   @override
-  ProviderDemoAppState createState() => ProviderDemoAppState();
+  State<ProviderDemoApp> createState() => _ProviderDemoAppState();
 }
 
-class ProviderDemoAppState extends State<ProviderDemoApp> {
+class _ProviderDemoAppState extends State<ProviderDemoApp> {
   final SpeechToText speech = SpeechToText();
   late SpeechToTextProvider speechProvider;
 
