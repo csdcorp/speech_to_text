@@ -12,13 +12,13 @@ class SpeechSampleApp extends StatefulWidget {
   const SpeechSampleApp({Key? key}) : super(key: key);
 
   @override
-  SpeechSampleAppState createState() => SpeechSampleAppState();
+  State<SpeechSampleApp> createState() => _SpeechSampleAppState();
 }
 
 /// An example that demonstrates the basic functionality of the
 /// SpeechToText plugin for using the speech recognition capability
 /// of the underlying platform.
-class SpeechSampleAppState extends State<SpeechSampleApp> {
+class _SpeechSampleAppState extends State<SpeechSampleApp> {
   bool _hasSpeech = false;
   bool _logEvents = false;
   bool _onDevice = false;
