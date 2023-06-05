@@ -136,7 +136,8 @@ class SpeechToTextProvider extends ChangeNotifier {
       bool soundLevel = false,
       Duration? listenFor,
       Duration? pauseFor,
-      String? localeId}) {
+      String? localeId,
+      ListenMode listenMode = ListenMode.confirmation}) {
     _lastLevel = 0;
     _lastResult = null;
     if (soundLevel) {
@@ -148,7 +149,8 @@ class SpeechToTextProvider extends ChangeNotifier {
           cancelOnError: true,
           onResult: _onListenResult,
           onSoundLevelChange: _onSoundLevelChange,
-          localeId: localeId);
+          localeId: localeId,
+          listenMode: listenMode);
     } else {
       _speechToText.listen(
           partialResults: partialResults,
@@ -157,7 +159,8 @@ class SpeechToTextProvider extends ChangeNotifier {
           pauseFor: pauseFor,
           cancelOnError: true,
           onResult: _onListenResult,
-          localeId: localeId);
+          localeId: localeId,
+          listenMode: listenMode);
     }
   }
 
