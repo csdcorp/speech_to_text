@@ -437,12 +437,16 @@ class SpeechToText {
   }
   void changePauseFor(Duration pauseFor) {
     //Setup new pauseFor only if listen is active and pauseFor is different
-    if ((_listenTimer?.isActive ?? false) && (_pauseFor == null || _pauseFor!.compareTo(pauseFor) != 0)) {
+    if(isNotListening) {
+      throw ListenNotStartedException();
+    }
+
+    if (_pauseFor == null || _pauseFor!.compareTo(pauseFor) != 0) {
       _listenTimer?.cancel();
       _listenTimer = null;
+      //Reset _lastSpeechEventAt for new pauseFor duration will count from now but not from start of listen
+      _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
       _setupListenAndPause(pauseFor, _listenFor);
-    } else {
-      throw ListenNotStartedException();
     }
   }
 
