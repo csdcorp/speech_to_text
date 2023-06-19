@@ -435,7 +435,7 @@ class SpeechToText {
       throw ListenFailedException(e.message, e.details, e.stacktrace);
     }
   }
-  void setPauseFor(Duration pauseFor) {
+  void changePauseFor(Duration pauseFor) {
     //Setup new pauseFor only if listen is active and pauseFor is different
     if ((_listenTimer?.isActive ?? false) && (_pauseFor == null || _pauseFor!.compareTo(pauseFor) != 0)) {
       _listenTimer?.cancel();
