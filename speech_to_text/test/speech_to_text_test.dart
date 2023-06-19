@@ -187,6 +187,60 @@ void main() {
         expect(speech.isListening, isTrue);
       });
     });
+    test('trows on setPauseFor when not listening', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        testPlatform.onStatus!(SpeechToText.notListeningStatus);
+        fa.flushMicrotasks();
+        expect(speech.isListening, isFalse);
+        try {
+          speech.setPauseFor(Duration(seconds: 5));
+          fail('Should have thrown');
+        } on ListenNotStartedException {
+          // This is a good result
+        } catch (wrongE) {
+          fail('Should have been ListenNotStartedException');
+        }
+      });
+    });
+    test('stops listen after late setPauseFor with no speech', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(pauseFor: Duration(seconds: 2));
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 1));
+        speech.setPauseFor(Duration(seconds: 5));
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 3));
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 2));
+        expect(speech.isListening, isFalse);
+      });
+    });
+    test('keeps listening after late setPauseFor with speech event', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(pauseFor: Duration(seconds: 2));
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 1));
+        expect(speech.isListening, isTrue);
+        speech.setPauseFor(Duration(seconds: 5));
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 3));
+        expect(speech.isListening, isTrue);
+        testPlatform
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 3));
+        expect(speech.isListening, isTrue);
+      });
+    });
     test('creates finalResult true if none provided', () async {
       fakeAsync((fa) {
         speech.initialize(finalTimeout: Duration(milliseconds: 100));
