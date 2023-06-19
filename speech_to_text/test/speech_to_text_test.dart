@@ -187,7 +187,7 @@ void main() {
         expect(speech.isListening, isTrue);
       });
     });
-    test('trows on setPauseFor when not listening', () async {
+    test('trows on changePauseFor when not listening', () async {
       fakeAsync((fa) {
         speech.initialize();
         fa.flushMicrotasks();
@@ -204,7 +204,7 @@ void main() {
         }
       });
     });
-    test('stops listen after late setPauseFor with no speech', () async {
+    test('stops listen after late changePauseFor with no speech', () async {
       fakeAsync((fa) {
         speech.initialize();
         fa.flushMicrotasks();
@@ -221,7 +221,7 @@ void main() {
         expect(speech.isListening, isFalse);
       });
     });
-    test('keeps listening after late setPauseFor with speech event', () async {
+    test('keeps listening after late changePauseFor with speech event', () async {
       fakeAsync((fa) {
         speech.initialize();
         fa.flushMicrotasks();
@@ -255,6 +255,25 @@ void main() {
         // 100 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2100));
         expect(listener.results.last.finalResult, isTrue);
+      });
+    });
+    test('Stop listen after late changePauseFor without initial pauseFor', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen();
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 5));
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 1));
+        speech.changePauseFor(Duration(seconds: 5));
+        fa.elapse(Duration(seconds: 3));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 2));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isFalse);
       });
     });
     test('respects finalTimeout', () async {
