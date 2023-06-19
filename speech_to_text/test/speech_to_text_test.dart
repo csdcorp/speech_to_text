@@ -241,22 +241,6 @@ void main() {
         expect(speech.isListening, isTrue);
       });
     });
-    test('creates finalResult true if none provided', () async {
-      fakeAsync((fa) {
-        speech.initialize(finalTimeout: Duration(milliseconds: 100));
-        fa.flushMicrotasks();
-        speech.listen(
-            pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
-        fa.flushMicrotasks();
-        testPlatform
-            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
-        fa.flushMicrotasks();
-        // 2200 because it is the 2 second duration of the pauseFor then
-        // 100 milliseconds to create the synthetic result
-        fa.elapse(Duration(milliseconds: 2100));
-        expect(listener.results.last.finalResult, isTrue);
-      });
-    });
     test('Stop listen after late changePauseFor without initial pauseFor', () async {
       fakeAsync((fa) {
         speech.initialize();
@@ -274,6 +258,22 @@ void main() {
         fa.elapse(Duration(seconds: 2));
         fa.flushMicrotasks();
         expect(speech.isListening, isFalse);
+      });
+    });
+    test('creates finalResult true if none provided', () async {
+      fakeAsync((fa) {
+        speech.initialize(finalTimeout: Duration(milliseconds: 100));
+        fa.flushMicrotasks();
+        speech.listen(
+            pauseFor: Duration(seconds: 2), onResult: listener.onSpeechResult);
+        fa.flushMicrotasks();
+        testPlatform
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
+        fa.flushMicrotasks();
+        // 2200 because it is the 2 second duration of the pauseFor then
+        // 100 milliseconds to create the synthetic result
+        fa.elapse(Duration(milliseconds: 2100));
+        expect(listener.results.last.finalResult, isTrue);
       });
     });
     test('respects finalTimeout', () async {
