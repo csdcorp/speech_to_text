@@ -195,7 +195,7 @@ void main() {
         fa.flushMicrotasks();
         expect(speech.isListening, isFalse);
         try {
-          speech.setPauseFor(Duration(seconds: 5));
+          speech.changePauseFor(Duration(seconds: 5));
           fail('Should have thrown');
         } on ListenNotStartedException {
           // This is a good result
@@ -213,7 +213,7 @@ void main() {
         fa.flushMicrotasks();
         expect(speech.isListening, isTrue);
         fa.elapse(Duration(seconds: 1));
-        speech.setPauseFor(Duration(seconds: 5));
+        speech.changePauseFor(Duration(seconds: 5));
         fa.flushMicrotasks();
         fa.elapse(Duration(seconds: 3));
         expect(speech.isListening, isTrue);
@@ -230,7 +230,7 @@ void main() {
         fa.flushMicrotasks();
         fa.elapse(Duration(seconds: 1));
         expect(speech.isListening, isTrue);
-        speech.setPauseFor(Duration(seconds: 5));
+        speech.changePauseFor(Duration(seconds: 5));
         fa.flushMicrotasks();
         fa.elapse(Duration(seconds: 3));
         expect(speech.isListening, isTrue);
