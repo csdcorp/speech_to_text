@@ -445,14 +445,13 @@ class SpeechToText {
     if (_pauseFor == null || _pauseFor!.compareTo(pauseFor) != 0) {
       _listenTimer?.cancel();
       _listenTimer = null;
-      //Reset _lastSpeechEventAt for new pauseFor duration will count from now but not from start of listen
-      _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
-      _setupListenAndPause(pauseFor, _listenFor);
+      //Ignore elapsed pause for prevent immediately stop listen
+      _setupListenAndPause(pauseFor, _listenFor, ignoreElapsedPause: true);
     }
   }
 
   void _setupListenAndPause(
-      Duration? initialPauseFor, Duration? initialListenFor) {
+      Duration? initialPauseFor, Duration? initialListenFor, {bool ignoreElapsedPause = false}) {
     _pauseFor = null;
     _listenFor = null;
     if (null == initialPauseFor && null == initialListenFor) {
@@ -461,7 +460,7 @@ class SpeechToText {
     var pauseFor = initialPauseFor;
     var listenFor = initialListenFor;
     if (null != pauseFor) {
-      var remainingMillis = pauseFor.inMilliseconds - _elapsedSinceSpeechEvent;
+      var remainingMillis = pauseFor.inMilliseconds - (ignoreElapsedPause ? 0 : _elapsedSinceSpeechEvent);
       pauseFor = Duration(milliseconds: max(remainingMillis, 0));
     }
     if (null != listenFor) {
