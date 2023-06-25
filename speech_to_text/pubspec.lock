@@ -465,10 +465,10 @@ packages:
     dependency: "direct main"
     description:
       name: speech_to_text_platform_interface
-      sha256: "13d90215a7554b9a8c1ce47c0a1739af8eacd2cf196ca66351e54dfd2172746d"
+      sha256: "2ef9c0abf3b4340998fcb489afc4fc8cd7574eff21d912673be59b60ff16850c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.0"
   stack_trace:
     dependency: transitive
     description:
