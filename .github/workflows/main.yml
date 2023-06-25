@@ -15,7 +15,7 @@ jobs:
       - name: Cache Flutter
         uses: actions/cache@v2
         env:
-          cache-name: cache-flutter
+          cache-name: cache-flutter-v3
         with:
           # Flutter cache files are stored in `~/.flutter` on Linux/macOS
           path: /opt/hostedtoolcache/flutter
@@ -24,7 +24,7 @@ jobs:
       - name: Install flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.3.2'
+          flutter-version: '3.10.5'
           channel: 'stable'
 
       - name: Get platform interface dependencies
