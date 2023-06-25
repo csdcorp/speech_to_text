@@ -1,3 +1,6 @@
+## 2.1.0
+- Updated for Flutter 3.0
+
 ## 2.0.1
 - fix test method deprecation
 
