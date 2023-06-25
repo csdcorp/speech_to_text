@@ -1,6 +1,13 @@
 # Changelog
 
-## 6.1.1
+## 6.2.0
+
+### New
+* Upgrades and fixes for Flutter 3.0
+
+### Fix
+  * Error status is cleared on each `listen` call. 
+  
 
 ### Fix
   * Bluetooth permission check no longer crashes on some Android devices
