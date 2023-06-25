@@ -10,8 +10,9 @@ void main() {
 
   setUp(() {
     speechToText = MethodChannelSpeechToText();
-    speechToText?.channel
-        .setMockMethodCallHandler(channelHandler.methodCallHandler);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+            speechToText!.channel, channelHandler.methodCallHandler);
     channelHandler.reset();
   });
 
