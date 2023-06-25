@@ -407,6 +407,7 @@ class SpeechToText {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
+    _lastError = null;
     _lastRecognized = '';
     _userEnded = false;
     _lastSpeechResult = null;

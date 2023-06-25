@@ -410,6 +410,7 @@ void main() {
       testPlatform.onStatus!(SpeechToText.listeningStatus);
       testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
+      expect(speech.hasError, isTrue);
     });
     test('Error not sent after cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
@@ -418,6 +419,7 @@ void main() {
       testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 0);
+      expect(speech.hasError, isFalse);
     });
     test('Error still sent after implicit cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
@@ -426,6 +428,16 @@ void main() {
       testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 2);
+      expect(speech.hasError, isTrue);
+    });
+    test('Error status cleared on next listen', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen(cancelOnError: true);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
+      expect(speech.isListening, isFalse);
+      await speech.listen(cancelOnError: true);
+      await speech.stop();
+      expect(speech.hasError, isFalse);
     });
   });
 
