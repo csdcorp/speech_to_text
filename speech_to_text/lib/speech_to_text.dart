@@ -436,22 +436,25 @@ class SpeechToText {
       throw ListenFailedException(e.message, e.details, e.stacktrace);
     }
   }
+
   void changePauseFor(Duration pauseFor) {
     //Setup new pauseFor only if listen is active and pauseFor is different
-    if(isNotListening) {
+    if (isNotListening) {
       throw ListenNotStartedException();
     }
 
-    if (_pauseFor == null || _pauseFor!.compareTo(pauseFor) != 0) {
+    if (_pauseFor != pauseFor) {
       _listenTimer?.cancel();
       _listenTimer = null;
-      //Ignore elapsed pause for prevent immediately stop listen
+      // ignoreElapsePause ensures that the timer waits for the full pauseFor
+      // duration before stopping the listen
       _setupListenAndPause(pauseFor, _listenFor, ignoreElapsedPause: true);
     }
   }
 
   void _setupListenAndPause(
-      Duration? initialPauseFor, Duration? initialListenFor, {bool ignoreElapsedPause = false}) {
+      Duration? initialPauseFor, Duration? initialListenFor,
+      {bool ignoreElapsedPause = false}) {
     _pauseFor = null;
     _listenFor = null;
     if (null == initialPauseFor && null == initialListenFor) {
@@ -460,7 +463,8 @@ class SpeechToText {
     var pauseFor = initialPauseFor;
     var listenFor = initialListenFor;
     if (null != pauseFor) {
-      var remainingMillis = pauseFor.inMilliseconds - (ignoreElapsedPause ? 0 : _elapsedSinceSpeechEvent);
+      var remainingMillis = pauseFor.inMilliseconds -
+          (ignoreElapsedPause ? 0 : _elapsedSinceSpeechEvent);
       pauseFor = Duration(milliseconds: max(remainingMillis, 0));
     }
     if (null != listenFor) {
@@ -485,8 +489,13 @@ class SpeechToText {
     _listenTimer = Timer(minDuration, _stopOnPauseOrListen);
   }
 
+  /// milliseconds since the last listen was started, this is used for
+  /// the listen for calculations
   int get _elapsedListenMillis =>
       clock.now().millisecondsSinceEpoch - _listenStartedAt;
+
+  /// milliseconds since the last speech event was detected, this
+  /// is used for the pause calculations
   int get _elapsedSinceSpeechEvent =>
       clock.now().millisecondsSinceEpoch - _lastSpeechEventAt;
 
