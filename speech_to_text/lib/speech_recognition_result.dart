@@ -19,7 +19,7 @@ class SpeechRecognitionResult {
   /// value. Use the confidence for each alternate transcription
   /// to determine how likely it is. Note that not all platforms
   /// do a good job with confidence, there are convenience methods
-  /// on [SpeechRecogntionWords] to work with possibly missing
+  /// on [SpeechRecognitionWords] to work with possibly missing
   /// confidence values.
   // TODO: Fix up the interface.
   // List<SpeechRecognitionWords> get alternates =>
@@ -55,7 +55,7 @@ class SpeechRecognitionResult {
           ? alternates.first.isConfident(threshold: threshold)
           : false;
 
-  /// true if [confidence] is not the [missingConfidence] value, false
+  /// true if [confidence] is not the [SpeechRecognitionWords.missingConfidence] value, false
   /// otherwise.
   bool get hasConfidenceRating =>
       alternates.isNotEmpty ? alternates.first.hasConfidenceRating : false;

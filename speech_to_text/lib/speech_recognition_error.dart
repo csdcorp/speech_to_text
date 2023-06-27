@@ -6,7 +6,7 @@ part 'speech_recognition_error.g.dart';
 ///
 /// Errors are either transient or permanent. Permanent errors
 /// block speech recognition from continuing and must be
-/// addressed before recogntion will work. Transient errors
+/// addressed before recognition will work. Transient errors
 /// cause individual recognition sessions to fail but subsequent
 /// attempts may well succeed.
 @JsonSerializable()

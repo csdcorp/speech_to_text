@@ -17,7 +17,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   bool _resultSent = false;
   bool _doneSent = false;
 
-  /// Registers this class as the default instance of [UrlLauncherPlatform].
+  /// Registers this class as the default instance of [SpeechToTextPlatform].
   static void registerWith(Registrar registrar) {
     SpeechToTextPlatform.instance = SpeechToTextPlugin();
   }
@@ -45,7 +45,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   ///
   /// [debugLogging] controls whether there is detailed logging from the underlying
   /// plugins. It is off by default, usually only useful for troubleshooting issues
-  /// with a paritcular OS version or device, fairly verbose
+  /// with a particular OS version or device, fairly verbose
   @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption>? options}) async {
