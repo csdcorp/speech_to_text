@@ -518,7 +518,6 @@ public class SpeechToTextPlugin :
                     }
                 }
                 setupBluetooth()
-//                createRecognizer(false)
             } else {
                 debugLog("null context during initialization")
                 activeResult?.success(false)
