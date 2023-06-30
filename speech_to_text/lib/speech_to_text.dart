@@ -462,6 +462,10 @@ class SpeechToText {
     }
   }
 
+  /// Call this while [listen] is active to change the pauseFor duration.
+  /// This will restart the timer for the new duration. It is useful for
+  /// allowing a long first pause then dynamically shortening it once
+  /// the user starts speaking.
   void changePauseFor(Duration pauseFor) {
     //Setup new pauseFor only if listen is active and pauseFor is different
     if (isNotListening) {
