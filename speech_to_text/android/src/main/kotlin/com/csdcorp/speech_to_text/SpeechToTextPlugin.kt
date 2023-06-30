@@ -493,14 +493,32 @@ public class SpeechToTextPlugin :
             debugLog("Testing recognition availability")
             val localContext = pluginContext
             if (localContext != null) {
-                if (!SpeechRecognizer.isRecognitionAvailable(localContext) && !SpeechRecognizer.isOnDeviceRecognitionAvailable(localContext)) {
-                    Log.e(logTag, "Speech recognition not available on this device")
-                    activeResult?.error(SpeechToTextErrors.recognizerNotAvailable.name,
-                            "Speech recognition not available on this device", "")
-                    activeResult = null
-                    return
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (!SpeechRecognizer.isRecognitionAvailable(localContext) && !SpeechRecognizer.isOnDeviceRecognitionAvailable(
+                            localContext
+                        )
+                    ) {
+                        Log.e(logTag, "Speech recognition not available on this device")
+                        activeResult?.error(
+                            SpeechToTextErrors.recognizerNotAvailable.name,
+                            "Speech recognition not available on this device", ""
+                        )
+                        activeResult = null
+                        return
+                    }
+                    setupBluetooth()
+                } else {
+                    if (!SpeechRecognizer.isRecognitionAvailable(localContext)) {
+                        Log.e(logTag, "Speech recognition not available on this device")
+                        activeResult?.error(
+                            SpeechToTextErrors.recognizerNotAvailable.name,
+                            "Speech recognition not available on this device", ""
+                        )
+                        activeResult = null
+                        return
+                    }
+                    setupBluetooth()
                 }
-                setupBluetooth()
 //                createRecognizer(false)
             } else {
                 debugLog("null context during initialization")
