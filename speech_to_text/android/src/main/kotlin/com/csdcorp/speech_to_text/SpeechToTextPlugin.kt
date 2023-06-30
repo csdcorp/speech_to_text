@@ -487,47 +487,41 @@ public class SpeechToTextPlugin :
     }
 
     private fun completeInitialize() {
-
         debugLog("completeInitialize")
-        try {
-            if (permissionToRecordAudio) {
-                debugLog("Testing recognition availability")
-                val localContext = pluginContext
-                if (localContext != null) {
-                    if (!SpeechRecognizer.isRecognitionAvailable(localContext) && !SpeechRecognizer.isOnDeviceRecognitionAvailable(
-                            localContext
-                        )
-                    ) {
-                        Log.e(logTag, "Speech recognition not available on this device")
-                        activeResult?.error(
-                            SpeechToTextErrors.recognizerNotAvailable.name,
-                            "Speech recognition not available on this device", ""
-                        )
-                        activeResult = null
-                        return
-                    }
-                    debugLog("setupBluetooth")
-                    setupBluetooth()
-                    // createRecognizer(false)
-                } else {
-                    debugLog("null context during initialization")
-                    activeResult?.success(false)
+        if (permissionToRecordAudio) {
+            debugLog("Testing recognition availability")
+            val localContext = pluginContext
+            if (localContext != null) {
+                var support = false;
+                try {
+                    support = SpeechRecognizer.isRecognitionAvailable(localContext);
+                    support = support || SpeechRecognizer.isOnDeviceRecognitionAvailable(localContext);
+                } catch (e: Throwable) {
+                    Log.e(logTag, "Speech recognition completeInitialize check support($support) error", e)
+                }
+
+                if (!support) {
+                    Log.e(logTag, "Speech recognition not available on this device")
                     activeResult?.error(
-                        SpeechToTextErrors.missingContext.name,
-                        "context unexpectedly null, initialization failed", ""
+                        SpeechToTextErrors.recognizerNotAvailable.name,
+                        "Speech recognition not available on this device", ""
                     )
                     activeResult = null
                     return
                 }
+                debugLog("setupBluetooth")
+                setupBluetooth()
+                // createRecognizer(false)
+            } else {
+                debugLog("null context during initialization")
+                activeResult?.success(false)
+                activeResult?.error(
+                    SpeechToTextErrors.missingContext.name,
+                    "context unexpectedly null, initialization failed", ""
+                )
+                activeResult = null
+                return
             }
-        } catch (e: Throwable) {
-            Log.e(logTag, "Speech recognition completeInitialize error", e)
-            activeResult?.error(
-                SpeechToTextErrors.recognizerNotAvailable.name,
-                "Speech recognition not available on this device", ""
-            )
-            activeResult = null
-            return;
         }
 
         initializedSuccessfully = permissionToRecordAudio
