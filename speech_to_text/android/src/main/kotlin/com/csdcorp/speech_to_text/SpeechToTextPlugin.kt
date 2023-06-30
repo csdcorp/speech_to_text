@@ -506,7 +506,6 @@ public class SpeechToTextPlugin :
                         activeResult = null
                         return
                     }
-                    setupBluetooth()
                 } else {
                     if (!SpeechRecognizer.isRecognitionAvailable(localContext)) {
                         Log.e(logTag, "Speech recognition not available on this device")
@@ -517,8 +516,8 @@ public class SpeechToTextPlugin :
                         activeResult = null
                         return
                     }
-                    setupBluetooth()
                 }
+                setupBluetooth()
 //                createRecognizer(false)
             } else {
                 debugLog("null context during initialization")
