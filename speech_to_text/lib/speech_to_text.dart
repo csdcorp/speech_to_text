@@ -613,6 +613,17 @@ class SpeechToText {
     if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
       _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
     }
+    if (speechResult.alternates.length > 1) {
+      // Merge all alternates into one string
+      var recognizedWords = speechResult.alternates
+          .map((alternate) => alternate.recognizedWords)
+          .join(' ')
+          .replaceAll('  ', ' ');
+      speechResult = SpeechRecognitionResult([
+        SpeechRecognitionWords(
+            recognizedWords, speechResult.alternates.first.confidence)
+      ], speechResult.finalResult);
+    }
     _lastSpeechResult = speechResult;
     if (!_partialResults && !speechResult.finalResult) {
       return;
