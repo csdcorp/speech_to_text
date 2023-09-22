@@ -610,9 +610,6 @@ class SpeechToText {
 
   void _notifyResults(SpeechRecognitionResult speechResult) {
     if (_notifiedFinal) return;
-    if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
-      _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
-    }
     if (speechResult.alternates.length > 1) {
       // Merge all alternates into one string
       var recognizedWords = speechResult.alternates
@@ -623,6 +620,9 @@ class SpeechToText {
         SpeechRecognitionWords(
             recognizedWords, speechResult.alternates.first.confidence)
       ], speechResult.finalResult);
+    }
+    if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
+      _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
     }
     _lastSpeechResult = speechResult;
     if (!_partialResults && !speechResult.finalResult) {
