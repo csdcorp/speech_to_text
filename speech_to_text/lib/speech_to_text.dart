@@ -491,15 +491,20 @@ class SpeechToText {
     }
     var pauseFor = initialPauseFor;
     var listenFor = initialListenFor;
-    if (null != pauseFor) {
-      var remainingMillis = pauseFor.inMilliseconds -
-          (ignoreElapsedPause ? 0 : _elapsedSinceSpeechEvent);
-      pauseFor = Duration(milliseconds: max(remainingMillis, 0));
-    }
-    if (null != listenFor) {
-      var remainingMillis = listenFor.inMilliseconds - _elapsedListenMillis;
-      listenFor = Duration(milliseconds: max(remainingMillis, 0));
-    }
+    // This section does not make sense to me. As we stop the listen according
+    // to the variables _elapsedListenMillis and _elapsedSinceSpeechEvent, why
+    // do we need to update our reference values?
+    // _elapsedListenMillis & _elapsedSinceSpeechEvent are being updated already
+    // Tested on web and solves an issue of early timeout.
+    // if (null != pauseFor) {
+    //   var remainingMillis = pauseFor.inMilliseconds -
+    //       (ignoreElapsedPause ? 0 : _elapsedSinceSpeechEvent);
+    //   pauseFor = Duration(milliseconds: max(remainingMillis, 0));
+    // }
+    // if (listenFor != null) {
+    //   var remainingMillis = listenFor.inMilliseconds - _elapsedListenMillis;
+    //   listenFor = Duration(milliseconds: max(remainingMillis, 0));
+    // }
     Duration minDuration;
     if (null == pauseFor) {
       _listenFor = Duration(milliseconds: listenFor!.inMilliseconds);
