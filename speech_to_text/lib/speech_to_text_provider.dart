@@ -15,7 +15,7 @@ import 'package:speech_to_text_platform_interface/speech_to_text_platform_interf
 /// var speechProvider = SpeechToTextProvider( SpeechToText());
 /// var available = await speechProvider.initialize();
 /// StreamSubscription<SpeechRecognitionEvent> _subscription;
-/// _subscription = speechProvider.recognitionController.stream.listen((recognitionEvent) {
+/// _subscription = speechProvider.stream.listen((recognitionEvent) {
 ///   if (recognitionEvent.eventType == SpeechRecognitionEventType.finalRecognitionEvent )  {
 ///       print("I heard: ${recognitionEvent.recognitionResult.recognizedWords}");
 ///     }
