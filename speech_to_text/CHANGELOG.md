@@ -1,5 +1,12 @@
 # Changelog
 
+## 6.4.0
+
+### New
+* Fix web handling of alternates and multiple phrases was incorrect. Before this change 
+multiple phrases were being seen as alternates. This properly combines those phrases into 
+a single set of recognized words and produces alternates as appropriate. 
+
 ## 6.3.0
 
 ### New
