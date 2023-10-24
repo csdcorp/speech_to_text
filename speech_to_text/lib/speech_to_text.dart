@@ -558,6 +558,11 @@ class SpeechToText {
   /// identifier for the locale as well as a name for
   /// display. The name is localized for the system locale on
   /// the device.
+  ///
+  /// Android: The list of languages is based on the locales supported by
+  /// the on device recognizer. This list may not be the complete list of
+  /// languages available for online recognition. Unfortunately there is no
+  /// way to get the list of languages supported by the online recognizer.
   Future<List<LocaleName>> locales() async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
