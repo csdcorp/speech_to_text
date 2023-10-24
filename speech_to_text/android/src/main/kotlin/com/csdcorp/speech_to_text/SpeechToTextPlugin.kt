@@ -365,7 +365,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun locales(result: Result) {
-        if (sdkVersionTooLow() ) {
+        if (sdkVersionTooLow()) {
             result.success(false)
             return
         }

@@ -564,9 +564,6 @@ class SpeechToText {
   /// languages available for online recognition. Unfortunately there is no
   /// way to get the list of languages supported by the online recognizer.
   Future<List<LocaleName>> locales() async {
-    if (!_initWorked) {
-      throw SpeechToTextNotInitializedException();
-    }
     final locales = await SpeechToTextPlatform.instance.locales();
     var filteredLocales = locales
         .map((locale) {
