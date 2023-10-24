@@ -365,11 +365,13 @@ public class SpeechToTextPlugin :
     }
 
     private fun locales(result: Result) {
-        if (sdkVersionTooLow() || isNotInitialized()) {
+        if (sdkVersionTooLow() ) {
             result.success(false)
             return
         }
-        if (Build.VERSION.SDK_INT >= 33 ) {
+        var hasPermission = ContextCompat.checkSelfPermission(pluginContext!!,
+            Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        if (Build.VERSION.SDK_INT >= 33 && hasPermission) {
             if ( SpeechRecognizer.isOnDeviceRecognitionAvailable(pluginContext!!)) {
                 // after much experimentation this was the only working iteration of the
                 // checkRecognitionSupport that works.
