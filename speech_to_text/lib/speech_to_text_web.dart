@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
+import 'dart:math';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:speech_to_text/balanced_alternates.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
@@ -17,7 +19,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   bool _resultSent = false;
   bool _doneSent = false;
 
-  /// Registers this class as the default instance of [UrlLauncherPlatform].
+  /// Registers this class as the default instance of [SpeechToTextPlatform].
   static void registerWith(Registrar registrar) {
     SpeechToTextPlatform.instance = SpeechToTextPlugin();
   }
@@ -45,7 +47,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   ///
   /// [debugLogging] controls whether there is detailed logging from the underlying
   /// plugins. It is off by default, usually only useful for troubleshooting issues
-  /// with a paritcular OS version or device, fairly verbose
+  /// with a particular OS version or device, fairly verbose
   @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption>? options}) async {
@@ -199,21 +201,37 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     var recogResults = <SpeechRecognitionWords>[];
     var results = event.results;
     if (null == results) return;
+    final balanced = BalancedAlternates();
+    var resultIndex = 0;
+    var longestAlt = 0;
     for (var recognitionResult in results) {
       if (null == recognitionResult.length || recognitionResult.length == 0) {
         continue;
       }
-      for (var altIndex = 0; altIndex < recognitionResult.length!; ++altIndex) {
+
+      for (var altIndex = 0;
+          altIndex < (recognitionResult.length ?? 0);
+          ++altIndex) {
+        longestAlt = max(longestAlt, altIndex);
         var alt = js_util.callMethod(recognitionResult, 'item', [altIndex]);
         if (null == alt) continue;
         String? transcript = js_util.getProperty(alt, 'transcript');
         num? confidence = js_util.getProperty(alt, 'confidence');
-        if (null != transcript && null != confidence) {
-          recogResults
-              .add(SpeechRecognitionWords(transcript, confidence.toDouble()));
+        if (null != transcript) {
+          balanced.add(resultIndex, transcript, confidence?.toDouble() ?? 1.0);
+          // final fullTranscript =
+          //     recogResults[altIndex].recognizedWords + transcript;
+          // final fullConfidence = min(
+          //     recogResults[altIndex].confidence, confidence?.toDouble() ?? 1.0);
+          // recogResults[altIndex] =
+          //     SpeechRecognitionWords(fullTranscript, fullConfidence.toDouble());
+          // recogResults
+          //     .add(SpeechRecognitionWords(transcript, confidence.toDouble()));
         }
       }
+      ++resultIndex;
     }
+    recogResults = balanced.getAlternates();
     var result = SpeechRecognitionResult(recogResults, isFinal);
     onTextRecognition?.call(jsonEncode(result.toJson()));
     _resultSent = true;

@@ -4,14 +4,14 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 List<Language> languages = [
   const Language('System', 'default'),
   const Language('Francais', 'fr_FR'),
   const Language('English', 'en_US'),
-  const Language('Pусский', 'ru_RU'),
+  const Language("Pyccкий", 'ru_RU'),
   const Language('Italiano', 'it_IT'),
   const Language('Español', 'es_ES'),
 ];
@@ -24,8 +24,10 @@ class Language {
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
@@ -47,7 +49,7 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> activateSpeechRecognizer() async {
-    print('_MyAppState.activateSpeechRecognizer... ');
+    debugPrint('_MyAppState.activateSpeechRecognizer... ');
     _speech = SpeechToText();
     // _speech.setCurrentLocaleHandler(onCurrentLocale);
     // _speech.setRecognitionStartedHandler(onRecognitionStarted);
@@ -56,8 +58,9 @@ class _MyAppState extends State<MyApp> {
         onError: errorHandler, onStatus: onSpeechAvailability);
     var localeNames = await _speech.locales();
     languages.clear();
-    localeNames.forEach((localeName) =>
-        languages.add(Language(localeName.name, localeName.localeId)));
+    for (var localeName in localeNames) {
+      languages.add(Language(localeName.name, localeName.localeId));
+    }
     var currentLocale = await _speech.systemLocale();
     if (null != currentLocale) {
       selectedLang =
@@ -71,7 +74,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('SpeechRecognition'),
+          title: const Text('SpeechRecognition'),
           actions: [
             PopupMenuButton<Language>(
               onSelected: _selectLangHandler,
@@ -80,7 +83,7 @@ class _MyAppState extends State<MyApp> {
           ],
         ),
         body: Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -127,7 +130,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildButton({String label = '', VoidCallback? onPressed}) => Padding(
-      padding: EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12.0),
       child: ElevatedButton(
         onPressed: onPressed,
         child: Text(
@@ -157,7 +160,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onCurrentLocale(String locale) {
-    print('_MyAppState.onCurrentLocale... $locale');
+    debugPrint('_MyAppState.onCurrentLocale... $locale');
     setState(
         () => selectedLang = languages.firstWhere((l) => l.code == locale));
   }
@@ -169,5 +172,5 @@ class _MyAppState extends State<MyApp> {
 
   // void onRecognitionComplete() => setState(() => _isListening = false);
 
-  void errorHandler(SpeechRecognitionError error) => print(error);
+  void errorHandler(SpeechRecognitionError error) => debugPrint(error.errorMsg);
 }

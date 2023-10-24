@@ -6,11 +6,13 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-void main() => runApp(SpeechSampleApp());
+void main() => runApp(const SpeechSampleApp());
 
 class SpeechSampleApp extends StatefulWidget {
+  const SpeechSampleApp({Key? key}) : super(key: key);
+
   @override
-  _SpeechSampleAppState createState() => _SpeechSampleAppState();
+  State<SpeechSampleApp> createState() => _SpeechSampleAppState();
 }
 
 /// An example that demonstrates the basic functionality of the
@@ -19,6 +21,7 @@ class SpeechSampleApp extends StatefulWidget {
 class _SpeechSampleAppState extends State<SpeechSampleApp> {
   bool _hasSpeech = false;
   bool _logEvents = false;
+  bool _onDevice = false;
   final TextEditingController _pauseForController =
       TextEditingController(text: '3');
   final TextEditingController _listenForController =
@@ -48,7 +51,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
       var hasSpeech = await speech.initialize(
         onError: errorListener,
         onStatus: statusListener,
-        debugLogging: true,
+        debugLogging: _logEvents,
       );
       if (hasSpeech) {
         // Get the list of languages installed on the supporting platform so they
@@ -79,24 +82,24 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
           title: const Text('Speech to Text Example'),
         ),
         body: Column(children: [
-          HeaderWidget(),
-          Container(
-            child: Column(
-              children: <Widget>[
-                InitSpeechWidget(_hasSpeech, initSpeechState),
-                SpeechControlWidget(_hasSpeech, speech.isListening,
-                    startListening, stopListening, cancelListening),
-                SessionOptionsWidget(
-                  _currentLocaleId,
-                  _switchLang,
-                  _localeNames,
-                  _logEvents,
-                  _switchLogging,
-                  _pauseForController,
-                  _listenForController,
-                ),
-              ],
-            ),
+          const HeaderWidget(),
+          Column(
+            children: <Widget>[
+              InitSpeechWidget(_hasSpeech, initSpeechState),
+              SpeechControlWidget(_hasSpeech, speech.isListening,
+                  startListening, stopListening, cancelListening),
+              SessionOptionsWidget(
+                _currentLocaleId,
+                _switchLang,
+                _localeNames,
+                _logEvents,
+                _switchLogging,
+                _pauseForController,
+                _listenForController,
+                _onDevice,
+                _switchOnDevice,
+              ),
+            ],
           ),
           Expanded(
             flex: 4,
@@ -120,19 +123,21 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     lastError = '';
     final pauseFor = int.tryParse(_pauseForController.text);
     final listenFor = int.tryParse(_listenForController.text);
-    // Note that `listenFor` is the maximum, not the minimun, on some
+    // Note that `listenFor` is the maximum, not the minimum, on some
     // systems recognition will be stopped before this value is reached.
     // Similarly `pauseFor` is a maximum not a minimum and may be ignored
     // on some devices.
     speech.listen(
-        onResult: resultListener,
-        listenFor: Duration(seconds: listenFor ?? 30),
-        pauseFor: Duration(seconds: pauseFor ?? 3),
-        partialResults: true,
-        localeId: _currentLocaleId,
-        onSoundLevelChange: soundLevelListener,
-        cancelOnError: true,
-        listenMode: ListenMode.confirmation);
+      onResult: resultListener,
+      listenFor: Duration(seconds: listenFor ?? 30),
+      pauseFor: Duration(seconds: pauseFor ?? 3),
+      partialResults: true,
+      localeId: _currentLocaleId,
+      onSoundLevelChange: soundLevelListener,
+      cancelOnError: true,
+      listenMode: ListenMode.confirmation,
+      onDevice: _onDevice,
+    );
     setState(() {});
   }
 
@@ -183,7 +188,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     _logEvent(
         'Received listener status: $status, listening: ${speech.isListening}');
     setState(() {
-      lastStatus = '$status';
+      lastStatus = status;
     });
   }
 
@@ -191,19 +196,25 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     setState(() {
       _currentLocaleId = selectedVal;
     });
-    print(selectedVal);
+    debugPrint(selectedVal);
   }
 
   void _logEvent(String eventDescription) {
     if (_logEvents) {
       var eventTime = DateTime.now().toIso8601String();
-      print('$eventTime $eventDescription');
+      debugPrint('$eventTime $eventDescription');
     }
   }
 
   void _switchLogging(bool? val) {
     setState(() {
       _logEvents = val ?? false;
+    });
+  }
+
+  void _switchOnDevice(bool? val) {
+    setState(() {
+      _onDevice = val ?? false;
     });
   }
 }
@@ -223,7 +234,7 @@ class RecognitionResultsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Center(
+        const Center(
           child: Text(
             'Recognized Words',
             style: TextStyle(fontSize: 22.0),
@@ -233,7 +244,7 @@ class RecognitionResultsWidget extends StatelessWidget {
           child: Stack(
             children: <Widget>[
               Container(
-                color: Theme.of(context).selectedRowColor,
+                color: Theme.of(context).secondaryHeaderColor,
                 child: Center(
                   child: Text(
                     lastWords,
@@ -257,11 +268,11 @@ class RecognitionResultsWidget extends StatelessWidget {
                             color: Colors.black.withOpacity(.05))
                       ],
                       color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                      borderRadius: const BorderRadius.all(Radius.circular(50)),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.mic),
-                      onPressed: () => null,
+                      icon: const Icon(Icons.mic),
+                      onPressed: () {},
                     ),
                   ),
                 ),
@@ -281,7 +292,7 @@ class HeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Text(
         'Speech recognition available',
         style: TextStyle(fontSize: 22.0),
@@ -304,7 +315,7 @@ class ErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Center(
+        const Center(
           child: Text(
             'Error Status',
             style: TextStyle(fontSize: 22.0),
@@ -338,15 +349,15 @@ class SpeechControlWidget extends StatelessWidget {
       children: <Widget>[
         TextButton(
           onPressed: !hasSpeech || isListening ? null : startListening,
-          child: Text('Start'),
+          child: const Text('Start'),
         ),
         TextButton(
           onPressed: isListening ? stopListening : null,
-          child: Text('Stop'),
+          child: const Text('Stop'),
         ),
         TextButton(
           onPressed: isListening ? cancelListening : null,
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         )
       ],
     );
@@ -362,16 +373,20 @@ class SessionOptionsWidget extends StatelessWidget {
       this.switchLogging,
       this.pauseForController,
       this.listenForController,
+      this.onDevice,
+      this.switchOnDevice,
       {Key? key})
       : super(key: key);
 
   final String currentLocaleId;
   final void Function(String?) switchLang;
   final void Function(bool?) switchLogging;
+  final void Function(bool?) switchOnDevice;
   final TextEditingController pauseForController;
   final TextEditingController listenForController;
   final List<LocaleName> localeNames;
   final bool logEvents;
+  final bool onDevice;
 
   @override
   Widget build(BuildContext context) {
@@ -382,7 +397,7 @@ class SessionOptionsWidget extends StatelessWidget {
         children: <Widget>[
           Row(
             children: [
-              Text('Language: '),
+              const Text('Language: '),
               DropdownButton<String>(
                 onChanged: (selectedVal) => switchLang(selectedVal),
                 value: currentLocaleId,
@@ -399,18 +414,18 @@ class SessionOptionsWidget extends StatelessWidget {
           ),
           Row(
             children: [
-              Text('pauseFor: '),
+              const Text('pauseFor: '),
               Container(
-                  padding: EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.only(left: 8),
                   width: 80,
                   child: TextFormField(
                     controller: pauseForController,
                   )),
               Container(
-                  padding: EdgeInsets.only(left: 16),
-                  child: Text('listenFor: ')),
+                  padding: const EdgeInsets.only(left: 16),
+                  child: const Text('listenFor: ')),
               Container(
-                  padding: EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.only(left: 8),
                   width: 80,
                   child: TextFormField(
                     controller: listenForController,
@@ -419,7 +434,12 @@ class SessionOptionsWidget extends StatelessWidget {
           ),
           Row(
             children: [
-              Text('Log events: '),
+              const Text('On device: '),
+              Checkbox(
+                value: onDevice,
+                onChanged: switchOnDevice,
+              ),
+              const Text('Log events: '),
               Checkbox(
                 value: logEvents,
                 onChanged: switchLogging,
@@ -446,7 +466,7 @@ class InitSpeechWidget extends StatelessWidget {
       children: <Widget>[
         TextButton(
           onPressed: hasSpeech ? null : initSpeechState,
-          child: Text('Initialize'),
+          child: const Text('Initialize'),
         ),
       ],
     );
@@ -465,15 +485,15 @@ class SpeechStatusWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 20),
-      color: Theme.of(context).backgroundColor,
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      color: Theme.of(context).colorScheme.background,
       child: Center(
         child: speech.isListening
-            ? Text(
+            ? const Text(
                 "I'm listening...",
                 style: TextStyle(fontWeight: FontWeight.bold),
               )
-            : Text(
+            : const Text(
                 'Not listening',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),

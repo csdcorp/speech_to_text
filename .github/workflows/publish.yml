@@ -1,0 +1,18 @@
+# .github/workflows/publish.yml
+name: Publish speech_to_text to pub.dev
+
+on:
+  push:
+    tags:
+    # must align with the tag-pattern configured on pub.dev, often just replace
+    #  with [0-9]+.[0-9]+.[0-9]+*
+    - 'speech_to_text-v[0-9]+.[0-9]+.[0-9]+*' # tag-pattern on pub.dev: 'v'
+
+# Publish using the reusable workflow from dart-lang.
+jobs:
+  publish:
+    permissions:
+      id-token: write # Required for authentication using OIDC
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: speech_to_text

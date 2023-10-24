@@ -15,7 +15,7 @@ import 'package:speech_to_text_platform_interface/speech_to_text_platform_interf
 /// var speechProvider = SpeechToTextProvider( SpeechToText());
 /// var available = await speechProvider.initialize();
 /// StreamSubscription<SpeechRecognitionEvent> _subscription;
-/// _subscription = speechProvider.recognitionController.stream.listen((recognitionEvent) {
+/// _subscription = speechProvider.stream.listen((recognitionEvent) {
 ///   if (recognitionEvent.eventType == SpeechRecognitionEventType.finalRecognitionEvent )  {
 ///       print("I heard: ${recognitionEvent.recognitionResult.recognizedWords}");
 ///     }
@@ -136,7 +136,8 @@ class SpeechToTextProvider extends ChangeNotifier {
       bool soundLevel = false,
       Duration? listenFor,
       Duration? pauseFor,
-      String? localeId}) {
+      String? localeId,
+      ListenMode listenMode = ListenMode.confirmation}) {
     _lastLevel = 0;
     _lastResult = null;
     if (soundLevel) {
@@ -148,7 +149,8 @@ class SpeechToTextProvider extends ChangeNotifier {
           cancelOnError: true,
           onResult: _onListenResult,
           onSoundLevelChange: _onSoundLevelChange,
-          localeId: localeId);
+          localeId: localeId,
+          listenMode: listenMode);
     } else {
       _speechToText.listen(
           partialResults: partialResults,
@@ -157,7 +159,8 @@ class SpeechToTextProvider extends ChangeNotifier {
           pauseFor: pauseFor,
           cancelOnError: true,
           onResult: _onListenResult,
-          localeId: localeId);
+          localeId: localeId,
+          listenMode: listenMode);
     }
   }
 

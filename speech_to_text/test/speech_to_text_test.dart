@@ -187,6 +187,81 @@ void main() {
         expect(speech.isListening, isTrue);
       });
     });
+    test('throws on changePauseFor when not listening', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        testPlatform.onStatus!(SpeechToText.notListeningStatus);
+        fa.flushMicrotasks();
+        expect(speech.isListening, isFalse);
+        try {
+          speech.changePauseFor(Duration(seconds: 5));
+          fail('Should have thrown');
+        } on ListenNotStartedException {
+          // This is a good result
+        } catch (wrongE) {
+          fail('Should have been ListenNotStartedException');
+        }
+      });
+    });
+    test('stops listen after late changePauseFor with no speech', () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(pauseFor: Duration(seconds: 2));
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 1));
+        speech.changePauseFor(Duration(seconds: 5));
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 3));
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 2));
+        expect(speech.isListening, isFalse);
+      });
+    });
+    test('keeps listening after late changePauseFor with speech event',
+        () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen(pauseFor: Duration(seconds: 2));
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 1));
+        expect(speech.isListening, isTrue);
+        speech.changePauseFor(Duration(seconds: 5));
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 3));
+        expect(speech.isListening, isTrue);
+        testPlatform
+            .onTextRecognition!(TestSpeechChannelHandler.firstRecognizedJson);
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 3));
+        expect(speech.isListening, isTrue);
+      });
+    });
+    test('Stop listen after late changePauseFor without initial pauseFor',
+        () async {
+      fakeAsync((fa) {
+        speech.initialize();
+        fa.flushMicrotasks();
+        speech.listen();
+        testPlatform.onStatus!(SpeechToText.listeningStatus);
+        fa.flushMicrotasks();
+        fa.elapse(Duration(seconds: 5));
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 1));
+        speech.changePauseFor(Duration(seconds: 5));
+        fa.elapse(Duration(seconds: 3));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isTrue);
+        fa.elapse(Duration(seconds: 2));
+        fa.flushMicrotasks();
+        expect(speech.isListening, isFalse);
+      });
+    });
     test('creates finalResult true if none provided', () async {
       fakeAsync((fa) {
         speech.initialize(finalTimeout: Duration(milliseconds: 100));
@@ -410,6 +485,7 @@ void main() {
       testPlatform.onStatus!(SpeechToText.listeningStatus);
       testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
+      expect(speech.hasError, isTrue);
     });
     test('Error not sent after cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
@@ -418,6 +494,7 @@ void main() {
       testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 0);
+      expect(speech.hasError, isFalse);
     });
     test('Error still sent after implicit cancel', () async {
       await speech.initialize(onError: listener.onSpeechError);
@@ -426,6 +503,16 @@ void main() {
       testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
       expect(speech.isListening, isFalse);
       expect(listener.speechErrors, 2);
+      expect(speech.hasError, isTrue);
+    });
+    test('Error status cleared on next listen', () async {
+      await speech.initialize(onError: listener.onSpeechError);
+      await speech.listen(cancelOnError: true);
+      testPlatform.onError!(TestSpeechChannelHandler.permanentErrorJson);
+      expect(speech.isListening, isFalse);
+      await speech.listen(cancelOnError: true);
+      await speech.stop();
+      expect(speech.hasError, isFalse);
     });
   });
 

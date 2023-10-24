@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v6.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v6.2.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -11,21 +11,12 @@ conversion or always on listening.
 
 ## Recent Updates
 
+6.2.0 Upgrades for Flutter 3.x thanks to [jinosh05](https://github.com/jinosh05) for that!
+
 6.0.0 Provides the first minimal Mac support. The plugin will compile and run on Mac though
 it will always report speech as unavailable. This allows the plugin to be used in apps that 
 target the Mac platform and use speech as an optional part of the app. Further support for 
 Mac will be available in future versions. 
-
-5.4.2 Supports bluetooth headsets on Android, this requires new permissions, see the permissions section below. 
-Note that bluetooth  permission is requested from the user, when upgrading users may have to manually set the permission 
-or clear their cache to force a re-request.  
-
-5.3.0 Fixes a longstanding issue with web support and improves error handling on iOS. From 5.2.0+
-`compileSdkVersion 31` must be used for Android. 
-
-5.0.0 improves audio handling on iOS thanks to work by @deJong-IT. It also adds a new `done` status sent after
-the listening session is complete and the plugin has finished with the audio subsystem on the device. This 
-should help coordinate multiple audio plugins.
 
 *Note*: Feedback from any test devices is welcome. 
 
@@ -191,7 +182,7 @@ Add the record audio permission to your _AndroidManifest.xml_ file, located in `
 * `android.permission.INTERNET` - this permission is required because speech recognition may use remote services.
 * `android.permission.BLUETOOTH` - this permission is required because speech recognition can use bluetooth headsets when connected.
 * `android.permission.BLUETOOTH_ADMIN` - this permission is required because speech recognition can use bluetooth headsets when connected.
-* `android.permission.BLUETOOTH_ADMIN` - this permission is required because speech recognition can use bluetooth headsets when connected.
+* `android.permission.BLUETOOTH_CONNECT` - this permission is required because speech recognition can use bluetooth headsets when connected.
 
 ```xml
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
@@ -254,6 +245,14 @@ as `LocaleName` instances. Then the `listen` method takes an optional `localeId`
 
 ## Troubleshooting
 
+### Speech recognition not working on iOS Simulator
+
+If speech recognition is not working on your simulator try going to the Settings app in the simulator:
+Accessibility -> Spoken content -> Voices
+
+From there select any language and any speaker and it should download to the device. After that speech 
+recognition should work on the simulator. 
+
 ### Speech recognition stops after a brief pause on Android
 
 Android speech recognition has a very short timeout when the speaker pauses. The duration seems to vary by device 
@@ -293,6 +292,13 @@ support speech recognition.
 ### Speech recognition from recorded audio 
 There have been a number of questions about whether speech can be recognized from recorded audio. The short answer is 
 that this may be possible on iOS but doesn't appear to be on Android. There is an open issue on this here #205. 
+
+### iOS interactions with other sound plugins, crash when listening or initializing, pauses
+On iOS the speech recognition plugin can interact with other sound plugins, things like WebRTC, or sound playback 
+or recording plugins. While this plugin tries hard to be a good citizen and properly share the various iOS sound 
+resources there is always room for interactions. One thing that might help is to add a brief delay between the end of 
+another sound plugin and starting to listen using SpeechToText. See this [issue](https://github.com/csdcorp/speech_to_text/issues/372) 
+for example.
 
 ### SDK version error trying to compile for Android
 ```

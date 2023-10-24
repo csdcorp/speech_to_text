@@ -6,11 +6,13 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
 import 'package:speech_to_text_example/recognition_results_widget.dart';
 
-void main() => runApp(ProviderDemoApp());
+void main() => runApp(const ProviderDemoApp());
 
 class ProviderDemoApp extends StatefulWidget {
+  const ProviderDemoApp({Key? key}) : super(key: key);
+
   @override
-  _ProviderDemoAppState createState() => _ProviderDemoAppState();
+  State<ProviderDemoApp> createState() => _ProviderDemoAppState();
 }
 
 class _ProviderDemoAppState extends State<ProviderDemoApp> {
@@ -37,7 +39,7 @@ class _ProviderDemoAppState extends State<ProviderDemoApp> {
           appBar: AppBar(
             title: const Text('Speech to Text Provider Example'),
           ),
-          body: SpeechProviderExampleWidget(),
+          body: const SpeechProviderExampleWidget(),
         ),
       ),
     );
@@ -45,12 +47,14 @@ class _ProviderDemoAppState extends State<ProviderDemoApp> {
 }
 
 class SpeechProviderExampleWidget extends StatefulWidget {
+  const SpeechProviderExampleWidget({Key? key}) : super(key: key);
+
   @override
-  _SpeechProviderExampleWidgetState createState() =>
-      _SpeechProviderExampleWidgetState();
+  SpeechProviderExampleWidgetState createState() =>
+      SpeechProviderExampleWidgetState();
 }
 
-class _SpeechProviderExampleWidgetState
+class SpeechProviderExampleWidgetState
     extends State<SpeechProviderExampleWidget> {
   String _currentLocaleId = '';
 
@@ -64,68 +68,66 @@ class _SpeechProviderExampleWidgetState
   Widget build(BuildContext context) {
     var speechProvider = Provider.of<SpeechToTextProvider>(context);
     if (speechProvider.isNotAvailable) {
-      return Center(
+      return const Center(
         child: Text(
             'Speech recognition not available, no permission or not available on the device.'),
       );
     }
     _setCurrentLocale(speechProvider);
     return Column(children: [
-      Center(
+      const Center(
         child: Text(
           'Speech recognition available',
           style: TextStyle(fontSize: 22.0),
         ),
       ),
-      Container(
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                TextButton(
-                  onPressed:
-                      !speechProvider.isAvailable || speechProvider.isListening
-                          ? null
-                          : () => speechProvider.listen(
-                              partialResults: true, localeId: _currentLocaleId),
-                  child: Text('Start'),
-                ),
-                TextButton(
-                  onPressed: speechProvider.isListening
-                      ? () => speechProvider.stop()
-                      : null,
-                  child: Text('Stop'),
-                ),
-                TextButton(
-                  onPressed: speechProvider.isListening
-                      ? () => speechProvider.cancel()
-                      : null,
-                  child: Text('Cancel'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                DropdownButton(
-                  onChanged: (selectedVal) => _switchLang(selectedVal),
-                  value: _currentLocaleId,
-                  items: speechProvider.locales
-                      .map(
-                        (localeName) => DropdownMenuItem(
-                          value: localeName.localeId,
-                          child: Text(localeName.name),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
-            )
-          ],
-        ),
+      Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              TextButton(
+                onPressed:
+                    !speechProvider.isAvailable || speechProvider.isListening
+                        ? null
+                        : () => speechProvider.listen(
+                            partialResults: true, localeId: _currentLocaleId),
+                child: const Text('Start'),
+              ),
+              TextButton(
+                onPressed: speechProvider.isListening
+                    ? () => speechProvider.stop()
+                    : null,
+                child: const Text('Stop'),
+              ),
+              TextButton(
+                onPressed: speechProvider.isListening
+                    ? () => speechProvider.cancel()
+                    : null,
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              DropdownButton(
+                onChanged: (selectedVal) => _switchLang(selectedVal),
+                value: _currentLocaleId,
+                items: speechProvider.locales
+                    .map(
+                      (localeName) => DropdownMenuItem(
+                        value: localeName.localeId,
+                        child: Text(localeName.name),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          )
+        ],
       ),
-      Expanded(
+      const Expanded(
         flex: 4,
         child: RecognitionResultsWidget(),
       ),
@@ -133,7 +135,7 @@ class _SpeechProviderExampleWidgetState
         flex: 1,
         child: Column(
           children: <Widget>[
-            Center(
+            const Center(
               child: Text(
                 'Error Status',
                 style: TextStyle(fontSize: 22.0),
@@ -148,15 +150,15 @@ class _SpeechProviderExampleWidgetState
         ),
       ),
       Container(
-        padding: EdgeInsets.symmetric(vertical: 20),
-        color: Theme.of(context).backgroundColor,
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        color: Theme.of(context).colorScheme.background,
         child: Center(
           child: speechProvider.isListening
-              ? Text(
+              ? const Text(
                   "I'm listening...",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 )
-              : Text(
+              : const Text(
                   'Not listening',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
@@ -169,6 +171,6 @@ class _SpeechProviderExampleWidgetState
     setState(() {
       _currentLocaleId = selectedVal;
     });
-    print(selectedVal);
+    debugPrint(selectedVal);
   }
 }

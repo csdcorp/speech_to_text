@@ -9,68 +9,88 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
+/// Describes the goal of your speech recognition to the system.
+///
+/// Currently only supported on **iOS**.
+///
+/// See also:
+/// * https://developer.apple.com/documentation/speech/sfspeechrecognitiontaskhint
 enum ListenMode {
+  /// The device default.
   deviceDefault,
+
+  /// When using captured speech for text entry.
+  ///
+  /// Use this when you are using speech recognition for a task that's similar to the keyboard's built-in dictation function.
   dictation,
+
+  /// When using captured speech to specify search terms.
+  ///
+  /// Use this when you are using speech recognition to identify search terms.
   search,
+
+  /// When using captured speech for short, confirmation-style requests.
+  ///
+  /// Use this when you are using speech recognition to handle confirmation commands, such as "yes", "no" or "maybe".
   confirmation,
 }
 
 /// A single locale with a [name], localized to the current system locale,
-/// and a [localeId] which can be used in the [listen] method to choose a
+/// and a [localeId] which can be used in the [SpeechToText.listen] method to choose a
 /// locale for speech recognition.
 class LocaleName {
   final String localeId;
   final String name;
+
   LocaleName(this.localeId, this.name);
 }
 
 /// Notified as words are recognized with the current set of recognized words.
 ///
-/// See the [onResult] argument on the [listen] method for use.
+/// See the [onResult] argument on the [SpeechToText.listen] method for use.
 typedef SpeechResultListener = void Function(SpeechRecognitionResult result);
 
-/// Notified if errors occur during recognition or intialization.
+/// Notified if errors occur during recognition or initialization.
 ///
 /// Possible errors per the Android docs are described here:
 /// https://developer.android.com/reference/android/speech/SpeechRecognizer
-///   "error_audio_error"
-///   "error_client"
-///   "error_permission"
-///   "error_network"
-///   "error_network_timeout"
-///   "error_no_match"
-///   "error_busy"
-///   "error_server"
-///   "error_speech_timeout"
-///   "error_language_not_supported"
-///   "error_language_unavailable"
-///   "error_server_disconnected"
-///   "error_too_many_requests"
+/// * "error_audio_error"
+/// * "error_client"
+/// * "error_permission"
+/// * "error_network"
+/// * "error_network_timeout"
+/// * "error_no_match"
+/// * "error_busy"
+/// * "error_server"
+/// * "error_speech_timeout"
+/// * "error_language_not_supported"
+/// * "error_language_unavailable"
+/// * "error_server_disconnected"
+/// * "error_too_many_requests"
 ///
 /// iOS errors are not well documented in the iOS SDK, so far these are the
 /// errors that have been observed:
-///   "error_speech_recognizer_disabled"
-///   "error_retry"
-///   "error_no_match"
+/// * "error_speech_recognizer_disabled"
+/// * "error_retry"
+/// * "error_no_match"
 ///
 /// Both platforms use this message for an unrecognized error:
-///   "error_unknown ($errorCode)" where $errorCode provides more detail
-
-/// See the [onError] argument on the [initialize] method for use.
+/// * "error_unknown ($errorCode)" where `$errorCode` provides more detail
+///
+/// See the [onError] argument on the [SpeechToText.initialize] method for use.
 typedef SpeechErrorListener = void Function(
     SpeechRecognitionError errorNotification);
 
 /// Notified when recognition status changes.
 ///
-/// See the [onStatus] argument on the [initialize] method for use.
+/// See the [onStatus] argument on the [SpeechToText.initialize] method for use.
 typedef SpeechStatusListener = void Function(String status);
 
 /// Notified when the sound level changes during a listen method.
 ///
 /// [level] is a measure of the decibels of the current sound on
 /// the recognition input. See the [onSoundLevelChange] argument on
-/// the [listen] method for use.
+/// the [SpeechToText.listen] method for use.
 typedef SpeechSoundLevelChange = Function(double level);
 
 /// An interface to device specific speech recognition services.
@@ -216,6 +236,7 @@ class SpeechToText {
   ///
   /// Also goes false when listening times out if listenFor was set.
   bool get isListening => _listening;
+
   bool get isNotListening => !isListening;
 
   /// The last error received or null if none, see [initialize] to
@@ -242,6 +263,7 @@ class SpeechToText {
   /// successful, false if failed.
   ///
   /// This method must be called before any other speech functions.
+  ///
   /// If this method returns false no further [SpeechToText] methods
   /// should be used. Should only be called once if successful but does protect
   /// itself if called repeatedly. False usually means that the user has denied
@@ -250,22 +272,26 @@ class SpeechToText {
   ///
   /// [onError] is an optional listener for errors like
   /// timeout, or failure of the device speech recognition.
+  ///
   /// [onStatus] is an optional listener for status changes. There are three
   /// possible status values:
-  /// - 'listening' when speech recognition begins after calling the [listen]
-  /// method;
-  /// - 'notListening' when speech recognition is no longer listening to the
-  /// microphone after a timeout, [cancel] or [stop] call;
-  /// - 'done' when all results have been delivered.
+  /// * `listening` when speech recognition begins after calling the [listen]
+  /// method.
+  /// * `notListening` when speech recognition is no longer listening to the
+  /// microphone after a timeout, [cancel] or [stop] call.
+  /// * `done` when all results have been delivered.
+  ///
   /// [debugLogging] controls whether there is detailed logging from the
   /// underlying platform code. It is off by default, usually only useful
-  /// for troubleshooting issueswith a paritcular OS version or device,
+  /// for troubleshooting issues with a particular OS version or device,
   /// fairly verbose
+  ///
   /// [finalTimeout] a duration to wait for a final result from the device
   /// speech recognition service. If no final result is received within this
   /// time the last partial result is returned as final. This defaults to
   /// two seconds. A duration of fifty milliseconds or less disables the
   /// check and final results will only be returned from the device.
+  ///
   /// [options] pass platform specific configuration options to the
   /// platform specific implementation.
   Future<bool> initialize(
@@ -368,7 +394,7 @@ class SpeechToText {
   ///
   /// [onSoundLevelChange] is an optional listener that is notified when the
   /// sound level of the input changes. Use this to update the UI in response to
-  /// more or less input. The values currently differ between Ancroid and iOS,
+  /// more or less input. The values currently differ between Android and iOS,
   /// haven't yet been able to determine from the Android documentation what the
   /// value means. On iOS the value returned is in decibels.
   ///
@@ -391,8 +417,7 @@ class SpeechToText {
   ///
   /// [sampleRate] optional for compatibility with certain iOS devices, some devices
   /// crash with `sampleRate != device's supported sampleRate`, try 44100 if seeing
-  /// crashes
-  ///
+  /// crashes.
   Future listen(
       {SpeechResultListener? onResult,
       Duration? listenFor,
@@ -407,6 +432,7 @@ class SpeechToText {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
+    _lastError = null;
     _lastRecognized = '';
     _userEnded = false;
     _lastSpeechResult = null;
@@ -436,8 +462,28 @@ class SpeechToText {
     }
   }
 
+  /// Call this while [listen] is active to change the pauseFor duration.
+  /// This will restart the timer for the new duration. It is useful for
+  /// allowing a long first pause then dynamically shortening it once
+  /// the user starts speaking.
+  void changePauseFor(Duration pauseFor) {
+    //Setup new pauseFor only if listen is active and pauseFor is different
+    if (isNotListening) {
+      throw ListenNotStartedException();
+    }
+
+    if (_pauseFor != pauseFor) {
+      _listenTimer?.cancel();
+      _listenTimer = null;
+      // ignoreElapsePause ensures that the timer waits for the full pauseFor
+      // duration before stopping the listen
+      _setupListenAndPause(pauseFor, _listenFor, ignoreElapsedPause: true);
+    }
+  }
+
   void _setupListenAndPause(
-      Duration? initialPauseFor, Duration? initialListenFor) {
+      Duration? initialPauseFor, Duration? initialListenFor,
+      {bool ignoreElapsedPause = false}) {
     _pauseFor = null;
     _listenFor = null;
     if (null == initialPauseFor && null == initialListenFor) {
@@ -446,7 +492,8 @@ class SpeechToText {
     var pauseFor = initialPauseFor;
     var listenFor = initialListenFor;
     if (null != pauseFor) {
-      var remainingMillis = pauseFor.inMilliseconds - _elapsedSinceSpeechEvent;
+      var remainingMillis = pauseFor.inMilliseconds -
+          (ignoreElapsedPause ? 0 : _elapsedSinceSpeechEvent);
       pauseFor = Duration(milliseconds: max(remainingMillis, 0));
     }
     if (null != listenFor) {
@@ -471,8 +518,13 @@ class SpeechToText {
     _listenTimer = Timer(minDuration, _stopOnPauseOrListen);
   }
 
+  /// Milliseconds since the last listen was started, this is used for
+  /// the listen for calculations
   int get _elapsedListenMillis =>
       clock.now().millisecondsSinceEpoch - _listenStartedAt;
+
+  /// Milliseconds since the last speech event was detected, this
+  /// is used for the pause calculations
   int get _elapsedSinceSpeechEvent =>
       clock.now().millisecondsSinceEpoch - _lastSpeechEventAt;
 
@@ -490,7 +542,7 @@ class SpeechToText {
     }
   }
 
-  /// returns the list of speech locales available on the device or those
+  /// Returns the list of speech locales available on the device or those
   /// supported by the speech recognizer on the device.
   ///
   /// Being on this list does not guarantee that the device will be able to
@@ -506,6 +558,11 @@ class SpeechToText {
   /// identifier for the locale as well as a name for
   /// display. The name is localized for the system locale on
   /// the device.
+  ///
+  /// Android: The list of languages is based on the locales supported by
+  /// the on device recognizer. This list may not be the complete list of
+  /// languages available for online recognition. Unfortunately there is no
+  /// way to get the list of languages supported by the online recognizer.
   Future<List<LocaleName>> locales() async {
     final locales = await SpeechToTextPlatform.instance.locales();
     var filteredLocales = locales
@@ -528,7 +585,7 @@ class SpeechToText {
     return filteredLocales;
   }
 
-  /// returns the locale that will be used if no localeId is passed
+  /// Returns the locale that will be used if no localeId is passed
   /// to the [listen] method.
   Future<LocaleName?> systemLocale() async {
     if (null == _systemLocale) {
@@ -605,8 +662,8 @@ class SpeechToText {
       case _finalStatus:
         if (!_notifiedDone) return;
 
-        /// the [_finalStatus] is just to indicate that it can send the
-        /// [doneStatus] if [_notifiedDone] has already happened.
+        // the [_finalStatus] is just to indicate that it can send the
+        // [doneStatus] if [_notifiedDone] has already happened.
         status = doneStatus;
         break;
       case _doneNoResultStatus:
@@ -648,10 +705,13 @@ class SpeechToText {
 class SpeechToTextNotInitializedException implements Exception {}
 
 /// Thrown when listen fails to properly start a speech listening session
-/// on the device
+/// on the device.
 class ListenFailedException implements Exception {
   final String? message;
   final String? details;
   final String? stackTrace;
+
   ListenFailedException(this.message, [this.details, this.stackTrace]);
 }
+
+class ListenNotStartedException implements Exception {}

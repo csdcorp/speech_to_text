@@ -1,7 +1,6 @@
 import 'package:audio_player_interaction/sound_player.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 void main() {
@@ -36,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final SpeechToText _speechToText = SpeechToText();
   final SoundPlayer _player = AudioSoundPlayer();
 
+  // ignore: unused_field
   String _info = '';
   String _currentActivity = 'stopped';
   int _loopCount = 0;

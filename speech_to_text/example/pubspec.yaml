@@ -1,7 +1,7 @@
 name: speech_to_text_example
 description: Demonstrates how to use the speech_to_text plugin.
 version: 1.1.0
-publish_to: 'none'
+publish_to: "none"
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -10,22 +10,20 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.2
-  provider: 
+  speech_to_text:
+    path: ../
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  speech_to_text:
-    path: ../
+  flutter_lints: ^2.0.1
 
 # The following section is specific to Flutter.
 flutter:
-
   uses-material-design: true
 
   assets:
-  - assets/sounds/speech_to_text_listening.m4r
-  - assets/sounds/speech_to_text_cancel.m4r
-  - assets/sounds/speech_to_text_stop.m4r
+    - assets/sounds/speech_to_text_listening.m4r
+    - assets/sounds/speech_to_text_cancel.m4r
+    - assets/sounds/speech_to_text_stop.m4r

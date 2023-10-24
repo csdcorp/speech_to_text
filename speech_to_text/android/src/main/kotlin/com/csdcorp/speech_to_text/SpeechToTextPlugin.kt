@@ -18,10 +18,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.speech.RecognitionListener
-import android.speech.RecognitionService
-import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
+import android.speech.*
 import android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer
 import android.speech.SpeechRecognizer.createSpeechRecognizer
 import android.util.Log
@@ -41,6 +38,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
+import java.util.concurrent.Executors
 
 
 enum class SpeechToTextErrors {
@@ -371,14 +369,39 @@ public class SpeechToTextPlugin :
             result.success(false)
             return
         }
-        var detailsIntent = RecognizerIntent.getVoiceDetailsIntent(pluginContext)
-        if (null == detailsIntent) {
-            detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
-            detailsIntent.setPackage("com.google.android.googlequicksearchbox")
+        var hasPermission = ContextCompat.checkSelfPermission(pluginContext!!,
+            Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        if (Build.VERSION.SDK_INT >= 33 && hasPermission) {
+            if ( SpeechRecognizer.isOnDeviceRecognitionAvailable(pluginContext!!)) {
+                // after much experimentation this was the only working iteration of the
+                // checkRecognitionSupport that works.
+            var recognizer = createOnDeviceSpeechRecognizer(pluginContext!!)
+            var recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+//            var recognizer = createSpeechRecognizer(pluginContext!!)
+//            var recognizerIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
+            recognizer?.checkRecognitionSupport(recognizerIntent, Executors.newSingleThreadExecutor(),
+                object : RecognitionSupportCallback {
+                    override fun onSupportResult(recognitionSupport: RecognitionSupport) {
+                        var details = LanguageDetailsChecker( result, debugLogging )
+                        details.createResponse(recognitionSupport.supportedOnDeviceLanguages )
+                        recognizer?.destroy()
+                    }
+                    override fun onError(error: Int) {
+                        debugLog("error from checkRecognitionSupport: " + error)
+                        recognizer?.destroy()
+                    }
+                })
+            }
+        } else {
+            var detailsIntent = RecognizerIntent.getVoiceDetailsIntent(pluginContext)
+            if (null == detailsIntent) {
+                detailsIntent = Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS)
+                detailsIntent.setPackage("com.google.android.googlequicksearchbox")
+            }
+            pluginContext?.sendOrderedBroadcast(
+                    detailsIntent, null, LanguageDetailsChecker(result, debugLogging),
+                    null, Activity.RESULT_OK, null, null)
         }
-        pluginContext?.sendOrderedBroadcast(
-                detailsIntent, null, LanguageDetailsChecker(result, debugLogging),
-                null, Activity.RESULT_OK, null, null)
     }
 
     private fun notifyListening(isRecording: Boolean ) {
@@ -493,15 +516,31 @@ public class SpeechToTextPlugin :
             debugLog("Testing recognition availability")
             val localContext = pluginContext
             if (localContext != null) {
-                if (!SpeechRecognizer.isRecognitionAvailable(localContext)) {
-                    Log.e(logTag, "Speech recognition not available on this device")
-                    activeResult?.error(SpeechToTextErrors.recognizerNotAvailable.name,
-                            "Speech recognition not available on this device", "")
-                    activeResult = null
-                    return
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (!SpeechRecognizer.isRecognitionAvailable(localContext) && !SpeechRecognizer.isOnDeviceRecognitionAvailable(
+                            localContext
+                        )
+                    ) {
+                        Log.e(logTag, "Speech recognition not available on this device")
+                        activeResult?.error(
+                            SpeechToTextErrors.recognizerNotAvailable.name,
+                            "Speech recognition not available on this device", ""
+                        )
+                        activeResult = null
+                        return
+                    }
+                } else {
+                    if (!SpeechRecognizer.isRecognitionAvailable(localContext)) {
+                        Log.e(logTag, "Speech recognition not available on this device")
+                        activeResult?.error(
+                            SpeechToTextErrors.recognizerNotAvailable.name,
+                            "Speech recognition not available on this device", ""
+                        )
+                        activeResult = null
+                        return
+                    }
                 }
                 setupBluetooth()
-//                createRecognizer(false)
             } else {
                 debugLog("null context during initialization")
                 activeResult?.success(false)
@@ -565,7 +604,7 @@ public class SpeechToTextPlugin :
                         pluginContext,
                         pluginContext?.findComponentName()
                     ).apply {
-                        debugLog("Setting listener")
+                        debugLog("Setting listener after intent lookup")
                         setRecognitionListener(this@SpeechToTextPlugin)
                     }
                 } else {
@@ -574,14 +613,14 @@ public class SpeechToTextPlugin :
                         supportsLocal = SpeechRecognizer.isOnDeviceRecognitionAvailable(pluginContext!!)
                         if (supportsLocal ) {
                             speechRecognizer = createOnDeviceSpeechRecognizer(pluginContext!!).apply {
-                                debugLog("Setting listener")
+                                debugLog("Setting on device listener")
                                 setRecognitionListener(this@SpeechToTextPlugin)
                             }
                         }
                     }
                     if ( null == speechRecognizer) {
                             speechRecognizer = createSpeechRecognizer(pluginContext).apply {
-                                debugLog("Setting listener")
+                                debugLog("Setting default listener")
                                 setRecognitionListener(this@SpeechToTextPlugin)
                         }
                     }
@@ -652,7 +691,7 @@ public class SpeechToTextPlugin :
             speechToTextPermissionCode -> {
                 permissionToRecordAudio = grantResults.isNotEmpty() &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED
-                bluetoothDisabled = (grantResults.isEmpty() ||
+                bluetoothDisabled = (grantResults.isEmpty() || grantResults.size == 1 ||
                         grantResults[1] != PackageManager.PERMISSION_GRANTED) ||
                         noBluetoothOpt
                 completeInitialize()
@@ -762,7 +801,7 @@ class LanguageDetailsChecker(flutterResult: Result, logging: Boolean ) : Broadca
         }
     }
 
-    private fun createResponse(supportedLanguages: List<String>?) {
+    public fun createResponse(supportedLanguages: List<String>?) {
         val currentLocale = Locale.getDefault()
         val localeNames = ArrayList<String>()
         localeNames.add(buildIdNameForLocale(currentLocale))

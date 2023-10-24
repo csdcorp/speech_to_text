@@ -1,5 +1,39 @@
 # Changelog
 
+## 6.4.0
+
+### Fix
+* Fix web handling of alternates and multiple phrases was incorrect. Before this change 
+multiple phrases were being seen as alternates. This properly combines those phrases into 
+a single set of recognized words and produces alternates as appropriate. 
+
+* Android 33+ now returns a valid list from `locales`. It returns the supported on device 
+languages. This is (probably) smaller than the full list of online languages but better than 
+the current list that only has the default language in it. It also seems to be the only 
+option that's available.
+
+## 6.3.0
+
+### New
+* New `changePauseFor` method allows the pause duration to be modified during a 
+`listen` session. 
+
+### Fix
+  * Documentation cleanup and improvements, thanks @Bungeefan
+  * Crash on Android versions 11 and below
+
+## 6.2.0
+
+### New
+* Upgrades and fixes for Flutter 3.0
+
+### Fix
+  * Error status is cleared on each `listen` call. 
+  
+
+### Fix
+  * Bluetooth permission check no longer crashes on some Android devices
+
 ## 6.1.0
 
 ### New
