@@ -517,21 +517,28 @@ void main() {
   });
 
   group('locales', () {
-    test('fails with exception if not initialized', () async {
+    test('allows call even if not initialized', () async {
       try {
-        await speech.locales();
-        fail('Expected an exception.');
+        testPlatform.localesResult.addAll([
+          TestSpeechChannelHandler.locale1,
+          TestSpeechChannelHandler.locale2
+        ]);
+        final locales = await speech.locales();
+        expect(locales, hasLength(2));
       } on SpeechToTextNotInitializedException {
-        // This is a good result
+        fail('Should not have thrown');
       }
     });
-    test('system locale null if not initialized', () async {
-      LocaleName? current;
+    test('system locale first even if not initialized', () async {
       try {
-        current = await speech.systemLocale();
-        fail('Expected an exception.');
+        testPlatform.localesResult.addAll([
+          TestSpeechChannelHandler.locale1,
+          TestSpeechChannelHandler.locale2
+        ]);
+        var current = await speech.systemLocale();
+        expect(current?.localeId, TestSpeechChannelHandler.localeId1);
       } on SpeechToTextNotInitializedException {
-        expect(current, isNull);
+        fail('Should not have thrown');
       }
     });
     test('handles an empty list', () async {
