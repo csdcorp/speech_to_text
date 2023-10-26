@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v6.2.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v6.4.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -11,12 +11,9 @@ conversion or always on listening.
 
 ## Recent Updates
 
-6.2.0 Upgrades for Flutter 3.x thanks to [jinosh05](https://github.com/jinosh05) for that!
+6.4.0 Better support for newer Android devices, locales a
 
-6.0.0 Provides the first minimal Mac support. The plugin will compile and run on Mac though
-it will always report speech as unavailable. This allows the plugin to be used in apps that 
-target the Mac platform and use speech as an optional part of the app. Further support for 
-Mac will be available in future versions. 
+6.2.0 Upgrades for Flutter 3.x thanks to [jinosh05](https://github.com/jinosh05) for that!
 
 *Note*: Feedback from any test devices is welcome. 
 
