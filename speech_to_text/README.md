@@ -336,6 +336,11 @@ This happens when the Swift language version is not set correctly. See this thre
 ```
 This usually happens for older projects that only support Objective-C. See this thread for help https://github.com/csdcorp/speech_to_text/issues/88. 
 
+### Last word lost on Android
+There's a discussion here https://github.com/csdcorp/speech_to_text/issues/434 about this known issue 
+with some Android speech recognition. This issue is up to Google and other Android implementers to 
+address, the plugin can't improve on their recognition quality. 
+
 ### Not working on a particular Android device
 The symptom for this issue is that the `initialize` method will always fail. If you turn on debug logging 
 using the `debugLogging: true` flag on the `initialize` method you'll see `'Speech recognition unavailable'`
