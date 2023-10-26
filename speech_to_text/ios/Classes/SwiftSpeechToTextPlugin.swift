@@ -82,6 +82,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var failedListen: Bool = false
     private var onDeviceStatus: Bool = false
     private var listening = false
+    private var stopping = false
     private let audioSession = AVAudioSession.sharedInstance()
     private let audioEngine = AVAudioEngine()
     private var inputNode: AVAudioInputNode?
@@ -260,6 +261,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             sendBoolResult( false, result );
             return
         }
+        stopping = true
         stopAllPlayers()
         self.currentTask?.finish()
         if let sound = successSound {
@@ -281,6 +283,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             sendBoolResult( false, result );
             return
         }
+        stopping = true
         stopAllPlayers()
         self.currentTask?.cancel()
         if let sound = cancelSound {
@@ -342,6 +345,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         currentTask = nil
         onPlayEnd = nil
         listening = false
+        stopping = false
     }
     
     private func listenForSpeech( _ result: @escaping FlutterResult, localeStr: String?, partialResults: Bool, onDevice: Bool, listenMode: ListenMode, sampleRate: Int ) {
@@ -352,6 +356,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         do {
         //    let inErrorTest = true
             failedListen = false
+            stopping = false
             returnPartialResults = partialResults
             setupRecognizerForLocale(locale: getLocale(localeStr))
             guard let localRecognizer = recognizer else {
@@ -598,7 +603,17 @@ extension SwiftSpeechToTextPlugin : SFSpeechRecognitionTaskDelegate {
                 }
             }
         }
-        stopCurrentListen( )
+        if !stopping {
+            if let sound = successfully ? successSound : cancelSound {
+                onPlayEnd = {() -> Void in
+                    self.stopCurrentListen( )
+                }
+                sound.play()
+            }
+            else {
+                stopCurrentListen( )
+            }
+        }
     }
     
     public func speechRecognitionTask(_ task: SFSpeechRecognitionTask, didHypothesizeTranscription transcription: SFTranscription) {
