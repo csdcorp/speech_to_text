@@ -383,10 +383,16 @@ class SpeechToText {
   /// are recognized.
   ///
   /// [listenFor] sets the maximum duration that it will listen for, after
-  /// that it automatically stops the listen for you.
+  /// that it automatically stops the listen for you. The system may impose
+  /// a shorter maximum listen due to resource limitations or other reasons.
+  /// The plugin ensures that listening is no longer than this but it may be
+  /// shorter.
   ///
   /// [pauseFor] sets the maximum duration of a pause in speech with no words
-  /// detected, after that it automatically stops the listen for you.
+  /// detected, after that it automatically stops the listen for you. On some
+  /// systems, notably Android, there is a system imposed pause of from one to
+  /// three seconds that cannot be overridden. The plugin ensures that the
+  /// pause is no longer than the pauseFor value but it may be shorter.
   ///
   /// [localeId] is an optional locale that can be used to listen in a language
   /// other than the current system default. See [locales] to find the list of
