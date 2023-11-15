@@ -1,9 +1,9 @@
 # Changelog
 
-## 6.5.0
+## 6.4.1
 
 ### Fix
-* 
+* Removed incorrect MODIFY_PHONE_STATE permission from Android manifest
 
 ## 6.4.0
 

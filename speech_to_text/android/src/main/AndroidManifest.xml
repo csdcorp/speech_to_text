@@ -2,5 +2,4 @@
   package="com.csdcorp.speech_to_text">
 
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
 </manifest>
