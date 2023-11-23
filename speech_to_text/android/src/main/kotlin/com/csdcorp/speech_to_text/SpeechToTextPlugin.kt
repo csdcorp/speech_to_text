@@ -244,9 +244,10 @@ public class SpeechToTextPlugin :
             result.success(hasPerm)
         }
     }
-private fun abc(){
- debugLog("Start initialize")
-}
+    
+   private fun abc(){
+    debugLog("Start initialize")
+  }
     private fun initialize(result: Result) {
         if (sdkVersionTooLow()) {
             result.success(false)
