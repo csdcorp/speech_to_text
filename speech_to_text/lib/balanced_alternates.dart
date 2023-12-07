@@ -1,9 +1,19 @@
 import 'dart:math';
 
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 class BalancedAlternates {
   final Map<int, List<SpeechRecognitionWords>> _alternates = {};
+
+  static bool isAggregateResultsEnabled(List<SpeechConfigOption>? options) {
+    if (null == options) return true;
+    final any = options.any((option) =>
+        option.platform == 'web' &&
+        option.name == 'aggregate' &&
+        option.value == false);
+    return !any;
+  }
 
   /// Add a new phrase to a particular alternate. The way this works is
   /// that the first alternate is the most likely, the second alternate is
@@ -26,29 +36,51 @@ class BalancedAlternates {
   /// phrase that is missing an alternate has that alternate filled in with the
   /// previous alternate. This is done so that the result is a complete
   /// transcript of all the alternates.
-  List<SpeechRecognitionWords> getAlternates() {
+  List<SpeechRecognitionWords> getAlternates(bool aggregateResults) {
     final phraseCount = _alternates.length;
     var result = <SpeechRecognitionWords>[];
     final maxAlternates = _alternates.values
         .fold(0, (max, list) => max = list.length > max ? list.length : max);
-    for (var phraseIndex = 0; phraseIndex < phraseCount; ++phraseIndex) {
-      final phraseAlternates = _alternates[phraseIndex] ?? [];
-      for (var altIndex = max(1, phraseAlternates.length);
-          altIndex < maxAlternates;
-          ++altIndex) {
-        phraseAlternates.add(phraseAlternates[altIndex - 1]);
-      }
-    }
+    print(
+        'Speech recognition alternates: $maxAlternates, phrases: $phraseCount');
 
-    for (var altCount = 0; altCount < maxAlternates; ++altCount) {
-      var alternatePhrase = '';
-      var alternateConfidence = 1.0;
+    if (aggregateResults) {
       for (var phraseIndex = 0; phraseIndex < phraseCount; ++phraseIndex) {
-        alternatePhrase += _alternates[phraseIndex]![altCount].recognizedWords;
-        alternateConfidence = min(alternateConfidence,
-            _alternates[phraseIndex]![altCount].confidence);
+        final phraseAlternates = _alternates[phraseIndex] ?? [];
+        for (var altIndex = max(1, phraseAlternates.length);
+            altIndex < maxAlternates;
+            ++altIndex) {
+          phraseAlternates.add(phraseAlternates[altIndex - 1]);
+        }
       }
-      result.add(SpeechRecognitionWords(alternatePhrase, alternateConfidence));
+      for (var altCount = 0; altCount < maxAlternates; ++altCount) {
+        var alternatePhrase = '';
+        var alternateConfidence = 1.0;
+        for (var phraseIndex = 0; phraseIndex < phraseCount; ++phraseIndex) {
+          alternatePhrase +=
+              _alternates[phraseIndex]![altCount].recognizedWords;
+          alternateConfidence = min(alternateConfidence,
+              _alternates[phraseIndex]![altCount].confidence);
+        }
+        result
+            .add(SpeechRecognitionWords(alternatePhrase, alternateConfidence));
+      }
+    } else {
+      for (var phraseIndex = phraseCount - 1; phraseIndex >= 0; --phraseIndex) {
+        if ((_alternates[phraseIndex]?[0].recognizedWords.trim() ?? '')
+            .isEmpty) {
+          continue;
+        }
+        for (var altIndex = 0;
+            altIndex < _alternates[phraseIndex]!.length;
+            ++altIndex) {
+          result.add(_alternates[phraseIndex]![altIndex]);
+        }
+        // result.add(SpeechRecognitionWords(
+        //     _alternates[phraseIndex]![0].recognizedWords,
+        //     _alternates[phraseIndex]![0].confidence));
+        break;
+      }
     }
     return result;
   }

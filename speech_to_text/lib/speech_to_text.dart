@@ -154,6 +154,11 @@ class SpeechToText {
   static final SpeechConfigOption iosNoBluetooth =
       SpeechConfigOption('ios', 'noBluetooth', true);
 
+  /// This option does nothing yet, may disable Bluetooth on iOS if there is
+  /// a need.
+  static final SpeechConfigOption webDoNotAggregate =
+      SpeechConfigOption('web', 'aggregate', false);
+
   static final SpeechToText _instance = SpeechToText.withMethodChannel();
   bool _initWorked = false;
 
