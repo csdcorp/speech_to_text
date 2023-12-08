@@ -41,8 +41,8 @@ class BalancedAlternates {
     var result = <SpeechRecognitionWords>[];
     final maxAlternates = _alternates.values
         .fold(0, (max, list) => max = list.length > max ? list.length : max);
-    print(
-        'Speech recognition alternates: $maxAlternates, phrases: $phraseCount');
+    // print(
+    //     'Speech recognition alternates: $maxAlternates, phrases: $phraseCount');
 
     if (aggregateResults) {
       for (var phraseIndex = 0; phraseIndex < phraseCount; ++phraseIndex) {
