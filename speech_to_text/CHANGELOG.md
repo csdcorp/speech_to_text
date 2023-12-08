@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.5.0
+
+### New
+* `SpeechToText.webDoNotAggregate` option for use in the `option`
+parameter of the `initialize` method. This can be used to change the 
+behaviour on some browsers that implement the speech API differently. 
+Test the user agent to decided whether to set this option. Currently 
+it seems to be required on mobile Android to prevent duplicate results. 
+
 ## 6.4.1
 
 ### Fix
