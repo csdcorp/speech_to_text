@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v6.4.1-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v6.5.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/build/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3Abuild) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -9,11 +9,25 @@ capabilities of the underlying platform in Flutter. It supports Android, iOS and
 target use cases for this library are commands and short phrases, not continuous spoken
 conversion or always on listening. 
 
+## Platform Support
+            
+| Support | Android | iOS | MacOS | Web* | Linux | Windows |
+| :-----: | :-----: | :-: | :---: | :-: | :---: | :-----: |
+|   build    | ✅  |  ✅   | ✅  |  ✅   |   ✘    | ✘    |
+|   speech    | ✅  |  ✅   | ✘  |   ✅  |    ✘   | ✘    |
+
+_build: means you can build and run with the plugin on that platform_
+
+_speech: means most speech recognition features work. Platforms with build but not speech report false for `initialize`_
+
+\* _Only some browsers are supported, see [here](https://caniuse.com/?search=Web%20Speech%20API)_
+
 ## Recent Updates
 
-6.4.0 Better support for newer Android devices, locales a
+6.5.0 New `initialize` option to improve support for some mobile browsers, `SpeechToText.webDoNotAggregate`. Test the browser user agent to see if it should be used. 
 
-6.2.0 Upgrades for Flutter 3.x thanks to [jinosh05](https://github.com/jinosh05) for that!
+6.4.0 Better support for newer Android devices, now returns the list of supported languages for
+on device speech recognition. 
 
 *Note*: Feedback from any test devices is welcome. 
 

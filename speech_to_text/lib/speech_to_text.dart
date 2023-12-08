@@ -154,12 +154,13 @@ class SpeechToText {
   static final SpeechConfigOption iosNoBluetooth =
       SpeechConfigOption('ios', 'noBluetooth', true);
 
-  /// On some mobile web browsers, notably Chrome on Android the speech
+  /// On some mobile web browsers, notably Chrome on Android, the speech
   /// results behave differently. The default behaviour is to aggregate
   /// separate phrases into a single result and return it. On
   /// Chrome Android that approach creates duplicates so this option
-  /// can be used to disable the aggregation and just the expected
-  /// result.
+  /// can be used to disable the aggregation and return just the expected
+  /// result. You will need to test the user agent of the browser to
+  /// decide whether to use this option.
   static final SpeechConfigOption webDoNotAggregate =
       SpeechConfigOption('web', 'aggregate', false);
 
