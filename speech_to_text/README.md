@@ -274,7 +274,7 @@ there appears to be no way to change that behaviour.
 
 This is a feature of the Android OS and there is no supported way to disable it. 
 
-Android build
+### Android build
 Version 5.2.0 of the plugin and later require at least `compileSdkVersion 31` for the Android build.  This property can be set in the `build.gradle` file.
 
 ### Continuous speech recognition
