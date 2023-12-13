@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.5.1
+
+### Fix
+* Removed BLUETOOTH_CONNECT permission from the plugin Android manifest, should be in apps
+
 ## 6.5.0
 
 ### New
