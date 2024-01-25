@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v6.5.1-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v6.6.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -24,10 +24,10 @@ _speech: means most speech recognition features work. Platforms with build but n
 
 ## Recent Updates
 
-6.5.0 New `initialize` option to improve support for some mobile browsers, `SpeechToText.webDoNotAggregate`. Test the browser user agent to see if it should be used. 
+6.6.0 `listen` now uses 'SpeechListenOptions' to specify the options for the current listen session, including new
+options for controlling haptics and punctuation during recognition on iOS. 
 
-6.4.0 Better support for newer Android devices, now returns the list of supported languages for
-on device speech recognition. 
+6.5.0 New `initialize` option to improve support for some mobile browsers, `SpeechToText.webDoNotAggregate`. Test the browser user agent to see if it should be used. 
 
 *Note*: Feedback from any test devices is welcome. 
 

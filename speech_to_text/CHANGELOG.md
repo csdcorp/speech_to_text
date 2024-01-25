@@ -1,5 +1,12 @@
 # Changelog
 
+## 6.6.0-dev
+
+### New
+* `listen` now has a new `SpeechListenOptions listenOptions` parameter to specify the recognizer 
+options for the listen session. Some of the separate parameters have been deprecated as a 
+result. See the `listen` method for documentation. 
+
 ## 6.5.1
 
 ### Fix

@@ -8,32 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
-
-/// Describes the goal of your speech recognition to the system.
-///
-/// Currently only supported on **iOS**.
-///
-/// See also:
-/// * https://developer.apple.com/documentation/speech/sfspeechrecognitiontaskhint
-enum ListenMode {
-  /// The device default.
-  deviceDefault,
-
-  /// When using captured speech for text entry.
-  ///
-  /// Use this when you are using speech recognition for a task that's similar to the keyboard's built-in dictation function.
-  dictation,
-
-  /// When using captured speech to specify search terms.
-  ///
-  /// Use this when you are using speech recognition to identify search terms.
-  search,
-
-  /// When using captured speech for short, confirmation-style requests.
-  ///
-  /// Use this when you are using speech recognition to handle confirmation commands, such as "yes", "no" or "maybe".
-  confirmation,
-}
+export 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart'
+    show ListenMode, SpeechConfigOption, SpeechListenOptions;
 
 /// A single locale with a [name], localized to the current system locale,
 /// and a [localeId] which can be used in the [SpeechToText.listen] method to choose a
@@ -419,32 +395,41 @@ class SpeechToText {
   /// called from the error handler.
   ///
   /// [partialResults] if true the listen reports results as they are recognized,
-  /// when false only final results are reported. Defaults to true.
+  /// when false only final results are reported. Defaults to true. Deprecated
+  ///  use [listenOptions.partialResults] instead.
   ///
   /// [onDevice] if true the listen attempts to recognize locally with speech never
   /// leaving the device. If it cannot do this the listen attempt will fail. This is
   /// usually only needed for sensitive content where privacy or security is a concern.
+  /// Deprecated use [listenOptions.onDevice] instead.
   ///
   /// [listenMode] tunes the speech recognition engine to expect certain
   /// types of spoken content. It defaults to [ListenMode.confirmation] which
   /// is the most common use case, words or short phrases to confirm a command.
   /// [ListenMode.dictation] is for longer spoken content, sentences or
   /// paragraphs, while [ListenMode.search] expects a sequence of search terms.
+  /// Deprecated use [listenOptions.listenMode] instead.
   ///
   /// [sampleRate] optional for compatibility with certain iOS devices, some devices
   /// crash with `sampleRate != device's supported sampleRate`, try 44100 if seeing
   /// crashes.
+  /// Deprecated use [listenOptions.sampleRate] instead.
+  ///
+  /// [listenOptions] used to specify the options to use for the listen
+  /// session. See [SpeechListenOptions] for details.
   Future listen(
       {SpeechResultListener? onResult,
       Duration? listenFor,
       Duration? pauseFor,
       String? localeId,
       SpeechSoundLevelChange? onSoundLevelChange,
-      cancelOnError = false,
-      partialResults = true,
-      onDevice = false,
+      @Deprecated('Use listenOptions instead') cancelOnError = false,
+      @Deprecated('Use listenOptions instead') partialResults = true,
+      @Deprecated('Use listenOptions instead') onDevice = false,
+      @Deprecated('Use listenOptions instead')
       ListenMode listenMode = ListenMode.confirmation,
-      sampleRate = 0}) async {
+      @Deprecated('Use listenOptions instead') sampleRate = 0,
+      SpeechListenOptions? listenOptions}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();
     }
@@ -467,7 +452,8 @@ class SpeechToText {
           onDevice: onDevice,
           listenMode: listenMode.index,
           sampleRate: sampleRate,
-          localeId: localeId);
+          localeId: localeId,
+          options: listenOptions);
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
         _lastSpeechEventAt = _listenStartedAt;

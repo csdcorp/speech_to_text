@@ -83,7 +83,8 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
       partialResults = true,
       onDevice = false,
       int listenMode = 0,
-      sampleRate = 0}) async {
+      sampleRate = 0,
+      SpeechListenOptions? options}) async {
     listenInvoked = true;
     listenLocale = localeId;
     if (listenException) {
