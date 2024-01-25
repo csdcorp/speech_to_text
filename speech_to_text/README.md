@@ -167,6 +167,31 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ```
 
+### Example Apps
+
+In the example directory you'll find a few different example apps that demonstrate how to use the 
+plugin. 
+
+#### Basic example ([example/lib/main.dart](https://github.com/csdcorp/speech_to_text/blob/main/speech_to_text/example/lib/main.dart))
+This shows how to initialize and use the plugin and allows many of the options to be set through 
+a simple UI. This is probably the first example to look at to understand how to use the plugin. 
+
+#### Provide example ([example/lib/provider_example.dart](https://github.com/csdcorp/speech_to_text/blob/main/speech_to_text/example/lib/provider_example.dart))
+If you are using the (Provider)[https://pub.dev/packages/provider] package in Flutter then this example shows how 
+to use the plugin as a provider throught the `SpeechToTextProvider` class. 
+
+#### Audio player interaction ([examples/audio_player_interaction/lib/main.dart](https://github.com/csdcorp/speech_to_text/blob/main/examples/audio_player_interaction/lib/main.dart))
+A common use case is to have this plugin and an audio playback plugin working together. This example shows one 
+way to make them work well together. 
+
+#### Plugin stress test ([example/lib/stress.dart](https://github.com/csdcorp/speech_to_text/blob/main/speech_to_text/example/lib/stress.dart))
+The plugin opens and closes several platform resources as it is used. To help ensure that the plugin 
+does not leak resources this stress test loops through various operations to make it easier to 
+track resource usage. This is mostly an internal development tool so not as useful for reference 
+purposes. 
+
+
+
 ### Initialize once
 The `initialize` method only needs to be called once per application session. After that `listen`, 
 `start`, `stop`, and `cancel` can be used to interact with the plugin. Subsequent calls to `initialize` 
