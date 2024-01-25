@@ -10,8 +10,7 @@ abstract class SoundPlayer {
 }
 
 class AudioSoundPlayer implements SoundPlayer {
-  final AudioCache player = AudioCache();
-  AudioPlayer? _audio;
+  final AudioPlayer player = AudioPlayer();
   void Function()? _onStop;
 
   @override
@@ -25,19 +24,19 @@ class AudioSoundPlayer implements SoundPlayer {
   @override
   Future play(String assetToPlay, {bool loop = false}) async {
     if (loop) {
-      _audio = await player.loop(assetToPlay);
+      await player.play(AssetSource(assetToPlay));
     } else {
-      _audio = await player.play(
+      await player.play(AssetSource(
         assetToPlay,
-      );
+      ));
     }
-    _audio?.onPlayerStateChanged
-        .listen((s) => s == PlayerState.COMPLETED ? _onStop?.call() : null);
+    player.onPlayerStateChanged
+        .listen((s) => s == PlayerState.completed ? _onStop?.call() : null);
   }
 
   @override
   Future stop() async {
-    _audio?.stop();
+    player.stop();
   }
 
   @override
