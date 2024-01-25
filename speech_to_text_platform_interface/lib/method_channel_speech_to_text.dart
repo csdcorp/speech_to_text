@@ -99,15 +99,18 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   @override
   Future<bool> listen(
       {String? localeId,
-      partialResults = true,
-      onDevice = false,
-      int listenMode = 0,
-      sampleRate = 0}) async {
+      @deprecated partialResults = true,
+      @deprecated onDevice = false,
+      @deprecated int listenMode = 0,
+      @deprecated sampleRate = 0,
+      SpeechListenOptions? options}) async {
     Map<String, dynamic> listenParams = {
-      "partialResults": partialResults,
-      "onDevice": onDevice,
-      "listenMode": listenMode,
-      "sampleRate": sampleRate,
+      "partialResults": options?.partialResults ?? partialResults,
+      "onDevice": options?.onDevice ?? onDevice,
+      "listenMode": options?.listenMode.index ?? listenMode,
+      "sampleRate": options?.sampleRate ?? sampleRate,
+      "enableHaptics": options?.enableHapticFeedback ?? false,
+      "autoPunctuation": options?.autoPunctuation ?? false,
     };
     if (null != localeId) {
       listenParams["localeId"] = localeId;

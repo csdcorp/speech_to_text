@@ -1,3 +1,6 @@
+## 2.2.0
+- Added options for listen method in place of separate parameters
+
 ## 2.1.0
 - Updated for Flutter 3.0
 
