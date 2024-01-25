@@ -1,3 +1,8 @@
+## 1.1.0
+
+### New
+* Listen changed to use new SpeechListenOptions
+
 ## 1.0.2
 
 ### Fix

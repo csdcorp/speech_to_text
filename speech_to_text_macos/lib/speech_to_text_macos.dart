@@ -92,10 +92,11 @@ class SpeechToTextMacOS extends SpeechToTextPlatform {
   @override
   Future<bool> listen(
       {String? localeId,
-      partialResults = true,
-      onDevice = false,
-      int listenMode = 0,
-      sampleRate = 0}) async {
+      @Deprecated('Use options instead') partialResults = true,
+      @Deprecated('Use options instead') onDevice = false,
+      @Deprecated('Use options instead') int listenMode = 0,
+      @Deprecated('Use options instead') sampleRate = 0,
+      SpeechListenOptions? options}) async {
     return false;
   }
 
