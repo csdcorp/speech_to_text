@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _info += "Open Audio Session\n";
     String testAudioAsset = 'sounds/notification.m4r';
+    logIt('Playing $testAudioAsset');
     await _player.play(testAudioAsset, loop: false);
 
     _info += "Start Player\n";
@@ -122,10 +123,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _onStatus(String status) {
+  void _onStatus(String status) async {
+    logIt('onStatus: $status');
     _info += "Speech Status: ${status}\n";
     if (_inTest && status == SpeechToText.doneStatus) {
-      print('listener stopped');
+      logIt('listener stopped');
+      // await _speechToText.stop();
+      // print('speech stopped');
       _loopTest();
     }
     setState(() {});
@@ -136,11 +140,18 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-  void _onPlayerStop() {
-    print('Player stopped');
+  void _onPlayerStop() async {
+    logIt('Player stopped');
     _currentActivity = 'listening';
     ++_loopCount;
-    _speechToText.listen(listenFor: Duration(seconds: 1));
+    // await Future.delayed(Duration(seconds: 1));
+    _speechToText.listen(listenFor: Duration(seconds: 5));
     setState(() {});
+  }
+
+  void logIt(String message) {
+    final now = DateTime.now();
+    debugPrint('SoundLoop: $now, $message');
+    _info += message + '\n';
   }
 }

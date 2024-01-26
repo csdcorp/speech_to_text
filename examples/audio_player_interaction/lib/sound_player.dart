@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 
 abstract class SoundPlayer {
   bool get isPlaying;
@@ -30,18 +31,28 @@ class AudioSoundPlayer implements SoundPlayer {
         assetToPlay,
       ));
     }
-    player.onPlayerStateChanged
-        .listen((s) => s == PlayerState.completed ? _onStop?.call() : null);
+    player.onPlayerStateChanged.listen((s) => _listen(s));
+  }
+
+  void _listen(PlayerState s) {
+    logIt('Player state changed: $s');
+    if (s == PlayerState.completed) {
+      stop();
+    }
   }
 
   @override
   Future stop() async {
-    player.stop();
+    _onStop?.call();
   }
 
   @override
   Future setAsset(String assetPath,
       {bool preload = true, Duration? initialPosition}) async {
     // return player.setAsset(assetPath);
+  }
+
+  void logIt(String msg) {
+    debugPrint('SoundLoop: $msg');
   }
 }
