@@ -1,11 +1,15 @@
 # Changelog
 
-## 6.6.0-dev
+## 6.6.0
 
 ### New
 * `listen` now has a new `SpeechListenOptions listenOptions` parameter to specify the recognizer 
 options for the listen session. Some of the separate parameters have been deprecated as a 
 result. See the `listen` method for documentation. 
+*  `SpeechListenOptions.enableHapticFeedback` is a new option which allows haptic feedback during
+speech recognition on iOS. Usually haptics are disabled to avoid interfering with the microphone. 
+* `SpeechListenOptions.autoPunctuation` is a new option which turns on automatic punction inference 
+during speech recognition on iOS. 
 
 ## 6.5.1
 

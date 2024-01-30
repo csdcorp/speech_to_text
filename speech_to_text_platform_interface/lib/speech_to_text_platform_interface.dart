@@ -214,10 +214,12 @@ abstract class SpeechToTextPlatform extends PlatformInterface {
   ///
   Future<bool> listen(
       {String? localeId,
-      @deprecated partialResults = true,
-      @deprecated onDevice = false,
-      @deprecated int listenMode = 0,
-      @deprecated sampleRate = 0,
+      @Deprecated('Use SpeechListenOptions.partialResults instead')
+      partialResults = true,
+      @Deprecated('Use SpeechListenOptions.onDevice instead') onDevice = false,
+      @Deprecated('Use SpeechListenOptions.listenMode instead')
+      int listenMode = 0,
+      @Deprecated('Use SpeechListenOptions.sampleRate instead') sampleRate = 0,
       SpeechListenOptions? options}) {
     throw UnimplementedError('listen() has not been implemented.');
   }

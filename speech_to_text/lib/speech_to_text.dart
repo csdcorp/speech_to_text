@@ -423,12 +423,14 @@ class SpeechToText {
       Duration? pauseFor,
       String? localeId,
       SpeechSoundLevelChange? onSoundLevelChange,
-      @Deprecated('Use listenOptions instead') cancelOnError = false,
-      @Deprecated('Use listenOptions instead') partialResults = true,
-      @Deprecated('Use listenOptions instead') onDevice = false,
-      @Deprecated('Use listenOptions instead')
+      @Deprecated('Use SpeechListenOptions.cancelOnError instead')
+      cancelOnError = false,
+      @Deprecated('Use SpeechListenOptions.partialResults instead')
+      partialResults = true,
+      @Deprecated('Use SpeechListenOptions.onDevice instead') onDevice = false,
+      @Deprecated('Use SpeechListenOptions.listenMode instead')
       ListenMode listenMode = ListenMode.confirmation,
-      @Deprecated('Use listenOptions instead') sampleRate = 0,
+      @Deprecated('Use SpeechListenOptions.sampleRate instead') sampleRate = 0,
       SpeechListenOptions? listenOptions}) async {
     if (!_initWorked) {
       throw SpeechToTextNotInitializedException();

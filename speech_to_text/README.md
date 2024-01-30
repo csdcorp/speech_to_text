@@ -180,15 +180,15 @@ a simple UI. This is probably the first example to look at to understand how to 
 If you are using the (Provider)[https://pub.dev/packages/provider] package in Flutter then this example shows how 
 to use the plugin as a provider throught the `SpeechToTextProvider` class. 
 
-#### Audio player interaction ([examples/audio_player_interaction/lib/main.dart](https://github.com/csdcorp/speech_to_text/blob/main/examples/audio_player_interaction/lib/main.dart))
-A common use case is to have this plugin and an audio playback plugin working together. This example shows one 
-way to make them work well together. 
-
 #### Plugin stress test ([example/lib/stress.dart](https://github.com/csdcorp/speech_to_text/blob/main/speech_to_text/example/lib/stress.dart))
 The plugin opens and closes several platform resources as it is used. To help ensure that the plugin 
 does not leak resources this stress test loops through various operations to make it easier to 
 track resource usage. This is mostly an internal development tool so not as useful for reference 
 purposes. 
+
+#### Audio player interaction ([examples/audio_player_interaction/lib/main.dart](https://github.com/csdcorp/speech_to_text/blob/main/examples/audio_player_interaction/lib/main.dart))
+A common use case is to have this plugin and an audio playback plugin working together. This example shows one 
+way to make them work well together. You can find this in 
 
 
 
