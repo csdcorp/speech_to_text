@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.6.1
+
+### New
+* More detailed error returns on iOS
+* Updated JS dependency to 0.7.0 (would it kill you to release a 1.0 version?)
+
 ## 6.6.0
 
 ### New
