@@ -10,7 +10,7 @@ jobs:
     name: Test on Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache Flutter
         uses: actions/cache@v2
@@ -24,7 +24,7 @@ jobs:
       - name: Install flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.5'
+          flutter-version: flutter-version: '3.16.9'
           channel: 'stable'
 
       - name: Get platform interface dependencies
