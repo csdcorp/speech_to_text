@@ -24,7 +24,7 @@ jobs:
       - name: Install flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: flutter-version: '3.16.9'
+          flutter-version: '3.16.9'
           channel: 'stable'
 
       - name: Get platform interface dependencies
