@@ -4,7 +4,7 @@
 
 ### New
 * More detailed error returns on iOS
-* Updated JS dependency to 0.7.0 (would it kill you to release a 1.0 version?)
+* Updated JS dependency to 0.7.1 (would it kill you to release a 1.0 version?)
 
 ## 6.6.0
 
