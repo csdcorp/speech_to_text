@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.6.2
+
+### New
+* on iOS now mixes audio with other uses to allow multiple audio plugins to coexist
+
 ## 6.6.1
 
 ### New
