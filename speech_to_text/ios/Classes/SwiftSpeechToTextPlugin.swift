@@ -84,7 +84,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var listening = false
     private var stopping = false
     private let audioSession = AVAudioSession.sharedInstance()
-    private let audioEngine = AVAudioEngine()
+    private var audioEngine: AVAudioEngine?
     private var inputNode: AVAudioInputNode?
     private let jsonEncoder = JSONEncoder()
     private let busForNodeTap = 0
@@ -234,15 +234,19 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
             onDeviceStatus = localRecognizer.supportsOnDeviceRecognition
         }
         recognizer?.delegate = self
-        inputNode = audioEngine.inputNode
-        guard inputNode != nil else {
-            os_log("Error no input node", log: pluginLog, type: .error)
-            sendBoolResult( false, result );
-            return
-        }
         setupListeningSound()
         
         sendBoolResult( true, result );
+    }
+
+    private func initAudioEngine( _ result: @escaping FlutterResult) -> Bool {
+        audioEngine = AVAudioEngine()
+        inputNode = audioEngine?.inputNode
+        if inputNode == nil {
+            os_log("Error no input node", log: pluginLog, type: .error)
+            sendBoolResult( false, result );
+        }
+        return inputNode != nil
     }
     
     private func setupRecognizerForLocale( locale: Locale ) {
@@ -316,7 +320,7 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         stopAllPlayers()
         do {
             try trap {
-                self.audioEngine.stop()
+                self.audioEngine?.stop()
             }
         }
         catch {
@@ -400,7 +404,9 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
                 }
                 sound.play()
             }
-            self.audioEngine.reset();
+            if !initAudioEngine(result) {
+                return
+            }
             if(inputNode?.inputFormat(forBus: 0).channelCount == 0){
                 throw SpeechToTextError.runtimeError("Not enough available inputs.")
             }
@@ -442,8 +448,8 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
         //    if ( inErrorTest ){
         //        throw SpeechToTextError.runtimeError("for testing only")
         //    }
-            self.audioEngine.prepare()
-            try self.audioEngine.start()
+            self.audioEngine?.prepare()
+            try self.audioEngine?.start()
             if nil == listeningSound {
                 listening = true
                 self.invokeFlutter( SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.listening.rawValue )
