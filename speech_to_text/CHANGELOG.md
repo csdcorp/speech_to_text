@@ -5,6 +5,9 @@
 ### New
 * on iOS now mixes audio with other uses to allow multiple audio plugins to coexist
 
+### Fix
+* Second iOS listen now starts faster
+
 ## 6.6.1
 
 ### New
