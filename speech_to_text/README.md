@@ -299,6 +299,11 @@ there appears to be no way to change that behaviour.
 
 This is a feature of the Android OS and there is no supported way to disable it. 
 
+### Duplicate results in browser recogntion
+
+On Android in Chrome and possibly other browsers, the speech API has been implemented differently. The plugin supports a fix for it but
+it requires a flag to be set on initialization. You can see the details in this [issue](https://github.com/csdcorp/speech_to_text/issues/521)
+
 ### Android build
 Version 5.2.0 of the plugin and later require at least `compileSdkVersion 31` for the Android build.  This property can be set in the `build.gradle` file.
 
