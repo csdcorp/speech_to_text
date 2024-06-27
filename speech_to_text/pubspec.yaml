@@ -38,8 +38,10 @@ flutter:
         pluginClass: SpeechToTextPlugin
       ios:
         pluginClass: SpeechToTextPlugin
+        sharedDarwinSource: true
       web:
         pluginClass: SpeechToTextPlugin
         fileName: speech_to_text_web.dart
       macos:
-        default_package: speech_to_text_macos
+        pluginClass: SpeechToTextPlugin
+        sharedDarwinSource: true
