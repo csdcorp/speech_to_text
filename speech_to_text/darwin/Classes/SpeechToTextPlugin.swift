@@ -5,6 +5,7 @@ import os.log
 #if os(OSX)
   import FlutterMacOS
   import Cocoa
+  import AVFoundation
 #else
   import Flutter
   import UIKit
@@ -79,8 +80,13 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private var listeningSound: AVAudioPlayer?
   private var successSound: AVAudioPlayer?
   private var cancelSound: AVAudioPlayer?
-  private var rememberedAudioCategory: AVAudioSession.Category?
-  private var rememberedAudioCategoryOptions: AVAudioSession.CategoryOptions?
+  private var audioRecorder: AVAudioRecorder?
+
+  #if os(iOS)
+    private var rememberedAudioCategory: AVAudioSession.Category?
+    private var rememberedAudioCategoryOptions: AVAudioSession.CategoryOptions?
+    private let audioSession = AVAudioSession.sharedInstance()
+  #endif
   private var previousLocale: Locale?
   private var onPlayEnd: (() -> Void)?
   private var returnPartialResults: Bool = true
@@ -88,7 +94,6 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private var onDeviceStatus: Bool = false
   private var listening = false
   private var stopping = false
-  private let audioSession = AVAudioSession.sharedInstance()
   private var audioEngine: AVAudioEngine?
   private var inputNode: AVAudioInputNode?
   private let jsonEncoder = JSONEncoder()
@@ -177,9 +182,12 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   }
 
   private func hasPermission(_ result: @escaping FlutterResult) {
-    let has =
+    var has =
       SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.authorized
-      && self.audioSession.recordPermission == AVAudioSession.RecordPermission.granted
+    #if os(iOS)
+      has = has && self.audioSession.recordPermission == AVAudioSession.RecordPermission.granted
+    #endif
+
     DispatchQueue.main.async {
       result(has)
     }
@@ -470,7 +478,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       default:
         break
       }
-      if #available(iOS 16.0, *) {
+      if #available(iOS 16.0, macOS 13, *) {
         currentRequest.addsPunctuation = autoPunctuation
       }
       self.currentTask = self.recognizer?.recognitionTask(with: currentRequest, delegate: self)
@@ -635,7 +643,7 @@ extension SpeechToTextPlugin: SFSpeechRecognizerDelegate {
   }
 }
 
-@available(iOS 10.0, *)
+@available(iOS 10.0, macOS 10.15, *)
 extension SpeechToTextPlugin: SFSpeechRecognitionTaskDelegate {
   public func speechRecognitionDidDetectSpeech(_ task: SFSpeechRecognitionTask) {
     // Do nothing for now
@@ -742,7 +750,7 @@ extension SpeechToTextPlugin: SFSpeechRecognitionTaskDelegate {
   }
 }
 
-@available(iOS 10.0, *)
+@available(iOS 10.0, macOS 10.15, *)
 extension SpeechToTextPlugin: AVAudioPlayerDelegate {
 
   public func audioPlayerDidFinishPlaying(

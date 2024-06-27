@@ -18,7 +18,7 @@ A new Flutter plugin project.
   s.ios.dependency 'Flutter'
   s.osx.dependency 'FlutterMacOS'
   s.ios.deployment_target = '8.0'
-  s.osx.deployment_target = '10.11'
+  s.osx.deployment_target = '10.13'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version = '5.0'
   s.ios.dependency 'Try'
