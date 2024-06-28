@@ -87,6 +87,8 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     private var rememberedAudioCategoryOptions: AVAudioSession.CategoryOptions?
     private let audioSession = AVAudioSession.sharedInstance()
   #endif
+
+  private var outputFile: AVAudioFile? = nil
   private var previousLocale: Locale?
   private var onPlayEnd: (() -> Void)?
   private var returnPartialResults: Bool = true
@@ -201,14 +203,42 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       SFSpeechRecognizer.requestAuthorization({ (status) -> Void in
         success = status == SFSpeechRecognizerAuthorizationStatus.authorized
         if success {
-          self.audioSession.requestRecordPermission({ (granted: Bool) -> Void in
-            if granted {
-              self.setupSpeechRecognition(result)
-            } else {
-              self.sendBoolResult(false, result)
-              os_log("User denied permission", log: self.pluginLog, type: .info)
+
+          #if os(iOS)
+
+            self.audioSession.requestRecordPermission({ (granted: Bool) -> Void in
+              if granted {
+                self.setupSpeechRecognition(result)
+              } else {
+                self.sendBoolResult(false, result)
+                os_log("User denied permission", log: self.pluginLog, type: .info)
+              }
+            })
+
+          #else
+
+            self.setupSpeechRecognition(result)
+            guard let input = self.audioEngine?.inputNode else {
+              return
             }
-          })
+            let bus = 0
+            let inputFormat = input.inputFormat(forBus: bus)
+
+            let outputURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+              .first!.appendingPathComponent("out.caf")
+            print("writing to \(outputURL)")
+
+            self.outputFile = try! AVAudioFile(
+              forWriting: outputURL, settings: inputFormat.settings,
+              commonFormat: inputFormat.commonFormat, interleaved: inputFormat.isInterleaved)
+
+            input.installTap(onBus: bus, bufferSize: 512, format: inputFormat) { (buffer, time) in
+              try! self.outputFile?.write(from: buffer)
+            }
+
+            try! self.audioEngine!.start()
+
+          #endif
         } else {
           self.sendBoolResult(false, result)
         }
@@ -261,7 +291,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       sendBoolResult(false, result)
       return
     }
-    if #available(iOS 13.0, *), let localRecognizer = recognizer {
+    if #available(iOS 13.0, macOS 10.15, *), let localRecognizer = recognizer {
       onDeviceStatus = localRecognizer.supportsOnDeviceRecognition
     }
     recognizer?.delegate = self
@@ -350,6 +380,8 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     do {
       try trap {
         self.audioEngine?.stop()
+        self.outputFile = nil
+
       }
     } catch {
       os_log(
@@ -364,24 +396,27 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       os_log(
         "Error removing trap: %{PUBLIC}@", log: pluginLog, type: .error, error.localizedDescription)
     }
-    do {
-      if let rememberedAudioCategory = rememberedAudioCategory,
-        let rememberedAudioCategoryOptions = rememberedAudioCategoryOptions
-      {
-        try self.audioSession.setCategory(
-          rememberedAudioCategory, options: rememberedAudioCategoryOptions)
+    #if os(iOS)
+      do {
+        if let rememberedAudioCategory = rememberedAudioCategory,
+          let rememberedAudioCategoryOptions = rememberedAudioCategoryOptions
+        {
+          try self.audioSession.setCategory(
+            rememberedAudioCategory, options: rememberedAudioCategoryOptions)
+        }
+      } catch {
+        os_log(
+          "Error stopping listen: %{PUBLIC}@", log: pluginLog, type: .error,
+          error.localizedDescription)
       }
-    } catch {
-      os_log(
-        "Error stopping listen: %{PUBLIC}@", log: pluginLog, type: .error,
-        error.localizedDescription)
-    }
-    do {
-      try self.audioSession.setActive(false, options: .notifyOthersOnDeactivation)
-    } catch {
-      os_log(
-        "Error deactivation: %{PUBLIC}@", log: pluginLog, type: .info, error.localizedDescription)
-    }
+      do {
+        try self.audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+      } catch {
+        os_log(
+          "Error deactivation: %{PUBLIC}@", log: pluginLog, type: .info, error.localizedDescription)
+      }
+
+    #endif
     self.invokeFlutter(
       SwiftSpeechToTextCallbackMethods.notifyStatus, arguments: SpeechToTextStatus.done.rawValue)
 
@@ -424,20 +459,23 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
               details: nil))
         }
       }
-      rememberedAudioCategory = self.audioSession.category
-      rememberedAudioCategoryOptions = self.audioSession.categoryOptions
-      try self.audioSession.setCategory(
-        AVAudioSession.Category.playAndRecord,
-        options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
-      //            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
-      if sampleRate > 0 {
-        try self.audioSession.setPreferredSampleRate(Double(sampleRate))
-      }
-      try self.audioSession.setMode(AVAudioSession.Mode.default)
-      try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-      if #available(iOS 13.0, *) {
-        try self.audioSession.setAllowHapticsAndSystemSoundsDuringRecording(enableHaptics)
-      }
+
+      #if os(iOS)
+        rememberedAudioCategory = self.audioSession.category
+        rememberedAudioCategoryOptions = self.audioSession.categoryOptions
+        try self.audioSession.setCategory(
+          AVAudioSession.Category.playAndRecord,
+          options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
+        //            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
+        if sampleRate > 0 {
+          try self.audioSession.setPreferredSampleRate(Double(sampleRate))
+        }
+        try self.audioSession.setMode(AVAudioSession.Mode.default)
+        try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        if #available(iOS 13.0, *) {
+          try self.audioSession.setAllowHapticsAndSystemSoundsDuringRecording(enableHaptics)
+        }
+      #endif
       if let sound = listeningSound {
         self.onPlayEnd = { () -> Void in
           if !self.failedListen {
@@ -483,10 +521,20 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       }
       self.currentTask = self.recognizer?.recognitionTask(with: currentRequest, delegate: self)
       let recordingFormat = inputNode?.outputFormat(forBus: self.busForNodeTap)
-      let theSampleRate = audioSession.sampleRate
-      let fmt = AVAudioFormat(
-        commonFormat: recordingFormat!.commonFormat, sampleRate: theSampleRate,
-        channels: recordingFormat!.channelCount, interleaved: recordingFormat!.isInterleaved)
+      var fmt: AVAudioFormat!
+      #if os(iOS)
+
+        let theSampleRate = audioSession.sampleRate
+
+        fmt = AVAudioFormat(
+          commonFormat: recordingFormat!.commonFormat, sampleRate: theSampleRate,
+          channels: recordingFormat!.channelCount, interleaved: recordingFormat!.isInterleaved)
+
+      #else
+        fmt = AVAudioFormat(
+          commonFormat: recordingFormat!.commonFormat, sampleRate: 44100,
+          channels: recordingFormat!.channelCount, interleaved: recordingFormat!.isInterleaved)
+      #endif
       try trap {
         self.inputNode?.installTap(
           onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: fmt
