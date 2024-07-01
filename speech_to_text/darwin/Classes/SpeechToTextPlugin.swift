@@ -291,7 +291,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       sendBoolResult(false, result)
       return
     }
-    if #available(iOS 13.0, macOS 10.15, *), let localRecognizer = recognizer {
+    if #available(iOS 13.0, *), let localRecognizer = recognizer {
       onDeviceStatus = localRecognizer.supportsOnDeviceRecognition
     }
     recognizer?.delegate = self

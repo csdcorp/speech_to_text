@@ -204,14 +204,6 @@ packages:
       relative: true
     source: path
     version: "6.6.2"
-  speech_to_text_macos:
-    dependency: transitive
-    description:
-      name: speech_to_text_macos
-      sha256: e685750f7542fcaa087a5396ee471e727ec648bf681f4da83c84d086322173f6
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   speech_to_text_platform_interface:
     dependency: transitive
     description:
