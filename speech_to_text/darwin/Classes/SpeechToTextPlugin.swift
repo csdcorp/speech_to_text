@@ -188,6 +188,8 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       SFSpeechRecognizer.authorizationStatus() == SFSpeechRecognizerAuthorizationStatus.authorized
     #if os(iOS)
       has = has && self.audioSession.recordPermission == AVAudioSession.RecordPermission.granted
+    #else
+      has = has && AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     #endif
 
     DispatchQueue.main.async {
@@ -202,6 +204,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     case SFSpeechRecognizerAuthorizationStatus.notDetermined:
       SFSpeechRecognizer.requestAuthorization({ (status) -> Void in
         success = status == SFSpeechRecognizerAuthorizationStatus.authorized
+          print("Success auth", success)
         if success {
 
           #if os(iOS)
@@ -216,28 +219,15 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
             })
 
           #else
-
-            self.setupSpeechRecognition(result)
-            guard let input = self.audioEngine?.inputNode else {
-              return
+            self.requestMacOSMicrophonePermission { success in
+                if success {
+                    self.setupSpeechRecognition(result)
+                }
+                else {
+                    self.sendBoolResult(false, result)
+                    os_log("User denied permission", log: self.pluginLog, type: .info)
+                }
             }
-            let bus = 0
-            let inputFormat = input.inputFormat(forBus: bus)
-
-            let outputURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-              .first!.appendingPathComponent("out.caf")
-            print("writing to \(outputURL)")
-
-            self.outputFile = try! AVAudioFile(
-              forWriting: outputURL, settings: inputFormat.settings,
-              commonFormat: inputFormat.commonFormat, interleaved: inputFormat.isInterleaved)
-
-            input.installTap(onBus: bus, bufferSize: 512, format: inputFormat) { (buffer, time) in
-              try! self.outputFile?.write(from: buffer)
-            }
-
-            try! self.audioEngine!.start()
-
           #endif
         } else {
           self.sendBoolResult(false, result)
@@ -283,6 +273,28 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       }
     }
     return player
+  }
+
+  private func requestMacOSMicrophonePermission(completion: @escaping (Bool) -> Void) {
+    switch AVCaptureDevice.authorizationStatus(for: .audio) {
+    case .authorized:
+      completion(true)
+
+    case .notDetermined:
+      AVCaptureDevice.requestAccess(for: .audio) { granted in
+        if granted {
+          completion(granted)
+        } else {
+          completion(granted)
+        }
+      }
+
+    case .denied, .restricted:
+      completion(false)
+
+    @unknown default:
+      completion(false)
+    }
   }
 
   private func setupSpeechRecognition(_ result: @escaping FlutterResult) {
@@ -475,6 +487,32 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         if #available(iOS 13.0, *) {
           try self.audioSession.setAllowHapticsAndSystemSoundsDuringRecording(enableHaptics)
         }
+        #else
+        
+        guard let input = self.audioEngine?.inputNode else {
+          return
+        }
+        let bus = 0
+        let inputFormat = input.inputFormat(forBus: bus)
+
+        let outputURL = FileManager.default.urls(
+          for: .documentDirectory, in: .userDomainMask
+        )
+        .first!.appendingPathComponent("out.caf")
+        print("writing to \(outputURL)")
+
+        self.outputFile = try! AVAudioFile(
+          forWriting: outputURL, settings: inputFormat.settings,
+          commonFormat: inputFormat.commonFormat, interleaved: inputFormat.isInterleaved)
+
+        input.installTap(onBus: bus, bufferSize: 512, format: inputFormat) {
+          (buffer, time) in
+          try! self.outputFile?.write(from: buffer)
+        }
+
+        try! self.audioEngine!.start()
+
+        
       #endif
       if let sound = listeningSound {
         self.onPlayEnd = { () -> Void in
@@ -809,4 +847,15 @@ extension SpeechToTextPlugin: AVAudioPlayerDelegate {
       playEnd()
     }
   }
+}
+
+@available(macOS 10.15, *)
+extension SpeechToTextPlugin: AVAudioRecorderDelegate {
+    public func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+            print("audioRecorderDidFinishRecording")
+        }
+        
+        public func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+            print("audioRecorderEncodeErrorDidOccur \(String(describing: error?.localizedDescription))")
+        }
 }
