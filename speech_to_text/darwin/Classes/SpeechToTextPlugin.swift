@@ -80,7 +80,6 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private var listeningSound: AVAudioPlayer?
   private var successSound: AVAudioPlayer?
   private var cancelSound: AVAudioPlayer?
-  private var audioRecorder: AVAudioRecorder?
 
   #if os(iOS)
     private var rememberedAudioCategory: AVAudioSession.Category?
@@ -88,7 +87,6 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     private let audioSession = AVAudioSession.sharedInstance()
   #endif
 
-  private var outputFile: AVAudioFile? = nil
   private var previousLocale: Locale?
   private var onPlayEnd: (() -> Void)?
   private var returnPartialResults: Bool = true
@@ -204,7 +202,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     case SFSpeechRecognizerAuthorizationStatus.notDetermined:
       SFSpeechRecognizer.requestAuthorization({ (status) -> Void in
         success = status == SFSpeechRecognizerAuthorizationStatus.authorized
-          print("Success auth", success)
+        print("Success auth", success)
         if success {
 
           #if os(iOS)
@@ -220,13 +218,12 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
 
           #else
             self.requestMacOSMicrophonePermission { success in
-                if success {
-                    self.setupSpeechRecognition(result)
-                }
-                else {
-                    self.sendBoolResult(false, result)
-                    os_log("User denied permission", log: self.pluginLog, type: .info)
-                }
+              if success {
+                self.setupSpeechRecognition(result)
+              } else {
+                self.sendBoolResult(false, result)
+                os_log("User denied permission", log: self.pluginLog, type: .info)
+              }
             }
           #endif
         } else {
@@ -392,8 +389,6 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     do {
       try trap {
         self.audioEngine?.stop()
-        self.outputFile = nil
-
       }
     } catch {
       os_log(
@@ -487,32 +482,6 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         if #available(iOS 13.0, *) {
           try self.audioSession.setAllowHapticsAndSystemSoundsDuringRecording(enableHaptics)
         }
-        #else
-        
-        guard let input = self.audioEngine?.inputNode else {
-          return
-        }
-        let bus = 0
-        let inputFormat = input.inputFormat(forBus: bus)
-
-        let outputURL = FileManager.default.urls(
-          for: .documentDirectory, in: .userDomainMask
-        )
-        .first!.appendingPathComponent("out.caf")
-        print("writing to \(outputURL)")
-
-        self.outputFile = try! AVAudioFile(
-          forWriting: outputURL, settings: inputFormat.settings,
-          commonFormat: inputFormat.commonFormat, interleaved: inputFormat.isInterleaved)
-
-        input.installTap(onBus: bus, bufferSize: 512, format: inputFormat) {
-          (buffer, time) in
-          try! self.outputFile?.write(from: buffer)
-        }
-
-        try! self.audioEngine!.start()
-
-        
       #endif
       if let sound = listeningSound {
         self.onPlayEnd = { () -> Void in
@@ -569,9 +538,9 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
           channels: recordingFormat!.channelCount, interleaved: recordingFormat!.isInterleaved)
 
       #else
-        fmt = AVAudioFormat(
-          commonFormat: recordingFormat!.commonFormat, sampleRate: 44100,
-          channels: recordingFormat!.channelCount, interleaved: recordingFormat!.isInterleaved)
+        let bus = 0
+        fmt = self.inputNode?.inputFormat(forBus: bus)
+
       #endif
       try trap {
         self.inputNode?.installTap(
@@ -847,15 +816,4 @@ extension SpeechToTextPlugin: AVAudioPlayerDelegate {
       playEnd()
     }
   }
-}
-
-@available(macOS 10.15, *)
-extension SpeechToTextPlugin: AVAudioRecorderDelegate {
-    public func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-            print("audioRecorderDidFinishRecording")
-        }
-        
-        public func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
-            print("audioRecorderEncodeErrorDidOccur \(String(describing: error?.localizedDescription))")
-        }
 }
