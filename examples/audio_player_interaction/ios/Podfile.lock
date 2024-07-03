@@ -8,12 +8,18 @@ PODS:
   - speech_to_text (0.0.1):
     - Flutter
     - FlutterMacOS
+    - Try
+  - Try (2.1.1)
 
 DEPENDENCIES:
   - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - speech_to_text (from `.symlinks/plugins/speech_to_text/darwin`)
+
+SPEC REPOS:
+  trunk:
+    - Try
 
 EXTERNAL SOURCES:
   audioplayers_darwin:
@@ -29,7 +35,8 @@ SPEC CHECKSUMS:
   audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  speech_to_text: ef2b5f9fcaa98fc468f57ca822ac2a3376d0d222
+  speech_to_text: 627d3fd2194770b51abb324ba45c2d39398f24a8
+  Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
 
 PODFILE CHECKSUM: 7f3058696676819c0a0b2776032327aec03da512
 
