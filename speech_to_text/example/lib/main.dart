@@ -326,7 +326,7 @@ class ErrorWidget extends StatelessWidget {
           ),
         ),
         Center(
-          child: Text(lastError),
+          child: SelectableText(lastError),
         ),
       ],
     );
