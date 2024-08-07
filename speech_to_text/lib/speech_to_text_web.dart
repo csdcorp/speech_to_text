@@ -12,6 +12,14 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
+// TODO: Workaround to fix SpeechRecognition in release mode. Remove this when
+// are fix (#276)[https://github.com/dart-lang/web/issues/276].
+@JS('webkitSpeechRecognition')
+extension type _SpeechRecognition._(web.SpeechRecognition _)
+    implements web.SpeechRecognition {
+  external factory _SpeechRecognition();
+}
+
 /// Web implementation of the SpeechToText platform interface. This supports
 /// the speech to text functionality running in web browsers that have
 /// SpeechRecognition support.
@@ -66,7 +74,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
     }
     var initialized = false;
     try {
-      _webSpeech = web.SpeechRecognition();
+      _webSpeech = _SpeechRecognition();
 
       if (null != _webSpeech) {
         _aggregateResults =
