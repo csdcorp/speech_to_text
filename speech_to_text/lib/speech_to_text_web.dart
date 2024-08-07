@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'package:web/web.dart' as web;
-import 'dart:js_util' as js_util;
 import 'dart:math';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -231,13 +230,15 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
           altIndex < (recognitionResult.length);
           ++altIndex) {
         longestAlt = max(longestAlt, altIndex);
-        var alt = js_util.callMethod(recognitionResult, 'item', [altIndex]);
+        final web.SpeechRecognitionAlternative? alt =
+            recognitionResult.item(altIndex);
+
         if (null == alt) continue;
-        String? transcript = js_util.getProperty(alt, 'transcript');
-        num? confidence = js_util.getProperty(alt, 'confidence');
-        if (null != transcript) {
-          balanced.add(resultIndex, transcript, confidence?.toDouble() ?? 1.0);
-        }
+
+        final transcript = alt.transcript;
+        final confidence = alt.confidence;
+
+        balanced.add(resultIndex, transcript, confidence);
       }
       ++resultIndex;
     }
