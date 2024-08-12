@@ -1,5 +1,13 @@
 # Changelog
 
+## 7.0.0
+
+### New
+* support for speech recognition on MacOS
+
+### Fix
+* Remove support for deprecated v1 Android registration [#545](https://github.com/csdcorp/speech_to_text/issues/545)
+
 ## 6.6.2
 
 ### New
