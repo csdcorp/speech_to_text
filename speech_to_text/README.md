@@ -1,11 +1,11 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v6.6.2-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v7.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
 This plugin contains a set of classes that make it easy to use the speech recognition
-capabilities of the underlying platform in Flutter. It supports Android, iOS and web. The
+capabilities of the underlying platform in Flutter. It supports Android, iOS, MacOS and web. The
 target use cases for this library are commands and short phrases, not continuous spoken
 conversion or always on listening.
 
@@ -24,10 +24,11 @@ _speech: means most speech recognition features work. Platforms with build but n
 
 ## Recent Updates
 
+6.7.0 Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for their work 
+making this happen!
+
 6.6.0 `listen` now uses 'SpeechListenOptions' to specify the options for the current listen session, including new
 options for controlling haptics and punctuation during recognition on iOS.
-
-6.5.0 New `initialize` option to improve support for some mobile browsers, `SpeechToText.webDoNotAggregate`. Test the browser user agent to see if it should be used.
 
 _Note_: Feedback from any test devices is welcome.
 

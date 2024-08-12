@@ -4,11 +4,14 @@ PODS:
     - Flutter
     - FlutterMacOS
     - Try
+  - speech_to_text_macos (0.0.1):
+    - FlutterMacOS
   - Try (2.1.1)
 
 DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
   - speech_to_text (from `Flutter/ephemeral/.symlinks/plugins/speech_to_text/darwin`)
+  - speech_to_text_macos (from `Flutter/ephemeral/.symlinks/plugins/speech_to_text_macos/macos`)
 
 SPEC REPOS:
   trunk:
@@ -19,10 +22,13 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   speech_to_text:
     :path: Flutter/ephemeral/.symlinks/plugins/speech_to_text/darwin
+  speech_to_text_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/speech_to_text_macos/macos
 
 SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   speech_to_text: 627d3fd2194770b51abb324ba45c2d39398f24a8
+  speech_to_text_macos: ae04291713998dede24b85d3b50bd8fedcbfb565
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
