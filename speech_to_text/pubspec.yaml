@@ -11,7 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
   speech_to_text_platform_interface: ^2.2.0
-  speech_to_text_macos: ^1.1.0
   json_annotation: ^4.0.0
   clock: ^1.0.1
   pedantic: ^1.9.2
@@ -38,8 +37,10 @@ flutter:
         pluginClass: SpeechToTextPlugin
       ios:
         pluginClass: SpeechToTextPlugin
+        sharedDarwinSource: true
       web:
         pluginClass: SpeechToTextPlugin
         fileName: speech_to_text_web.dart
       macos:
-        default_package: speech_to_text_macos
+        pluginClass: SpeechToTextPlugin
+        sharedDarwinSource: true

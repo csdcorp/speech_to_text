@@ -23,7 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^5.2.1
+  audioplayers: ^6.0.0
   # speech_to_text: ^4.2.1
   speech_to_text:
     path: ../../speech_to_text
