@@ -223,6 +223,15 @@ When running the macOS app through VSCode, the app will crash when requesting pe
 
 You can only request permissions if you run the app directly from Xcode.
 
+If you are upgrading an existing MacOS app to use the new plugin don't forget to update your dependencies 
+and the pods by opening the project directory in your terminal and:
+```
+flutter clean
+flutter pub get
+cd macos
+pod install
+```
+
 ### Android
 
 Add the record audio permission to your _AndroidManifest.xml_ file, located in `<project root>/android/app/src/main/AndroidManifest.xml`.
