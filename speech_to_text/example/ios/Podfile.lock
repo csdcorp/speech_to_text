@@ -2,12 +2,13 @@ PODS:
   - Flutter (1.0.0)
   - speech_to_text (0.0.1):
     - Flutter
+    - FlutterMacOS
     - Try
   - Try (2.1.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - speech_to_text (from `.symlinks/plugins/speech_to_text/ios`)
+  - speech_to_text (from `.symlinks/plugins/speech_to_text/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -17,13 +18,13 @@ EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   speech_to_text:
-    :path: ".symlinks/plugins/speech_to_text/ios"
+    :path: ".symlinks/plugins/speech_to_text/darwin"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  speech_to_text: b43a7d99aef037bd758ed8e45d79bbac035d2dfe
+  speech_to_text: 627d3fd2194770b51abb324ba45c2d39398f24a8
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
 
 PODFILE CHECKSUM: c4c93c5f6502fe2754f48404d3594bf779584011
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2
