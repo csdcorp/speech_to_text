@@ -314,6 +314,9 @@ Accessibility -> Spoken content -> Voices
 From there select any language and any speaker and it should download to the device. After that speech
 recognition should work on the simulator.
 
+_Using a Bluetooth headset with your Mac may cause an issue with the simulator speech recognition, 
+see: https://github.com/csdcorp/speech_to_text/issues/539 for details._
+
 ### Speech recognition stops after a brief pause on Android
 
 Android speech recognition has a very short timeout when the speaker pauses. The duration seems to vary by device
