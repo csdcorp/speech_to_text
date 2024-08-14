@@ -139,27 +139,26 @@ class SpeechToTextProvider extends ChangeNotifier {
       ListenMode listenMode = ListenMode.confirmation}) {
     _lastLevel = 0;
     _lastResult = null;
+    final options = SpeechListenOptions(
+        partialResults: partialResults,
+        onDevice: onDevice,
+        cancelOnError: true,
+        listenMode: listenMode);
     if (soundLevel) {
       _speechToText.listen(
-          partialResults: partialResults,
-          onDevice: onDevice,
           listenFor: listenFor,
           pauseFor: pauseFor,
-          cancelOnError: true,
           onResult: _onListenResult,
           onSoundLevelChange: _onSoundLevelChange,
           localeId: localeId,
-          listenMode: listenMode);
+          listenOptions: options);
     } else {
       _speechToText.listen(
-          partialResults: partialResults,
-          onDevice: onDevice,
           listenFor: listenFor,
           pauseFor: pauseFor,
-          cancelOnError: true,
           onResult: _onListenResult,
           localeId: localeId,
-          listenMode: listenMode);
+          listenOptions: options);
     }
   }
 

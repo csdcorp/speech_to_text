@@ -151,7 +151,7 @@ class SpeechProviderExampleWidgetState
       ),
       Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
-        color: Theme.of(context).colorScheme.background,
+        color: Theme.of(context).colorScheme.surface,
         child: Center(
           child: speechProvider.isListening
               ? const Text(
