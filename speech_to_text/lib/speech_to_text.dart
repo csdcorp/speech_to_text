@@ -21,10 +21,9 @@ class LocaleName {
   LocaleName(this.localeId, this.name);
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    final LocaleName typedOther = other;
-    return this.localeId == typedOther.localeId;
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is LocaleName && localeId == other.localeId;
   }
 
   @override
