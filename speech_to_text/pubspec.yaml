@@ -4,7 +4,7 @@ version: 7.0.0-windowsbuild.8
 homepage: https://github.com/csdcorp/speech_to_text
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.3.0 <4.0.0"
   flutter: ">=3.10.0"
 
 dependencies:
@@ -17,7 +17,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   meta: ^1.1.7
-  js: ^0.7.1
+  web: ^1.0.0
 
 dev_dependencies:
   flutter_test:
