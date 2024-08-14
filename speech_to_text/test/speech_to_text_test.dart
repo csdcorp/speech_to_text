@@ -558,6 +558,20 @@ void main() {
       expect(localeNames[1].localeId, TestSpeechChannelHandler.localeId2);
       expect(localeNames[1].name, TestSpeechChannelHandler.name2);
     });
+    test('deduplicates returned locales', () async {
+      await speech.initialize();
+      testPlatform.localesResult.addAll([
+        TestSpeechChannelHandler.locale1,
+        TestSpeechChannelHandler.locale2,
+        TestSpeechChannelHandler.locale1
+      ]);
+      var localeNames = await speech.locales();
+      expect(localeNames, hasLength(2));
+      expect(localeNames[0].localeId, TestSpeechChannelHandler.localeId1);
+      expect(localeNames[0].name, TestSpeechChannelHandler.name1);
+      expect(localeNames[1].localeId, TestSpeechChannelHandler.localeId2);
+      expect(localeNames[1].name, TestSpeechChannelHandler.name2);
+    });
     test('skips incorrect locales', () async {
       await speech.initialize();
       testPlatform.localesResult.addAll([

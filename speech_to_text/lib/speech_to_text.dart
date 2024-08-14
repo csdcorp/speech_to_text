@@ -19,6 +19,16 @@ class LocaleName {
   final String name;
 
   LocaleName(this.localeId, this.name);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) return false;
+    final LocaleName typedOther = other;
+    return this.localeId == typedOther.localeId;
+  }
+
+  @override
+  int get hashCode => localeId.hashCode;
 }
 
 /// Notified as words are recognized with the current set of recognized words.
@@ -578,6 +588,7 @@ class SpeechToText {
           return LocaleName(components[0], components[1]);
         })
         .where((item) => item != null)
+        .toSet()
         .toList()
         .cast<LocaleName>();
     if (filteredLocales.isNotEmpty) {
