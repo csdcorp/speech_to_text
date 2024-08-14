@@ -4,10 +4,12 @@
 
 ### New
 * support for speech recognition on MacOS
+* supports WASM compliation for web
 
 ### Fix
 * Remove support for deprecated v1 Android registration [#545](https://github.com/csdcorp/speech_to_text/issues/545)
 * Update deprecated Android build settings
+* Improves handling of possible duplicates from the locales() method to ensure they are removed
 
 ## 6.6.2
 

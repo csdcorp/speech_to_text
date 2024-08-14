@@ -24,8 +24,9 @@ _speech: means most speech recognition features work. Platforms with build but n
 
 ## Recent Updates
 
-6.7.0 Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for their work 
-making this happen!
+6.7.0 
+* Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for the PR!
+* Now supports WASM compliation for web with many thanks to yeikel16 for the PR!
 
 6.6.0 `listen` now uses 'SpeechListenOptions' to specify the options for the current listen session, including new
 options for controlling haptics and punctuation during recognition on iOS.
