@@ -448,7 +448,7 @@ class SpeechToText {
     _lastRecognized = '';
     _userEnded = false;
     _lastSpeechResult = null;
-    _cancelOnError = cancelOnError;
+    _cancelOnError = listenOptions?.cancelOnError ?? cancelOnError;
     _recognized = false;
     _notifiedFinal = false;
     _notifiedDone = false;
@@ -457,14 +457,17 @@ class SpeechToText {
     _partialResults = partialResults;
     _notifyFinalTimer?.cancel();
     _notifyFinalTimer = null;
-    try {
-      var started = await SpeechToTextPlatform.instance.listen(
+    final usedOptions = listenOptions ??
+        SpeechListenOptions(
           partialResults: partialResults || null != pauseFor,
           onDevice: onDevice,
-          listenMode: listenMode.index,
+          listenMode: listenMode,
           sampleRate: sampleRate,
-          localeId: localeId,
-          options: listenOptions);
+          cancelOnError: cancelOnError,
+        );
+    try {
+      var started = await SpeechToTextPlatform.instance
+          .listen(localeId: localeId, options: usedOptions);
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
         _lastSpeechEventAt = _listenStartedAt;

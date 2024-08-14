@@ -185,7 +185,7 @@ class _MyAppState extends State<MyApp> {
           ),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 20),
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.surface,
             child: Center(
               child: speech.isListening
                   ? const Text(
@@ -239,8 +239,8 @@ class _MyAppState extends State<MyApp> {
         listenFor: const Duration(seconds: 10),
         localeId: _currentLocaleId,
         onSoundLevelChange: soundLevelListener,
-        cancelOnError: true,
-        partialResults: true);
+        listenOptions:
+            SpeechListenOptions(cancelOnError: true, partialResults: true));
     setState(() {});
   }
 
