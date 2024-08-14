@@ -183,6 +183,7 @@ public class SpeechToTextPlugin :
                     if (null == localeId) {
                         localeId = defaultLanguageTag
                     }
+                    localeId = localeId.replace( '_', '-')
                     var partialResults = call.argument<Boolean>("partialResults")
                     if (null == partialResults) {
                         partialResults = true
