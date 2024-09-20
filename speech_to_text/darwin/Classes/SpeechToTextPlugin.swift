@@ -96,6 +96,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private var stopping = false
   private var audioEngine: AVAudioEngine?
   private var inputNode: AVAudioInputNode?
+  private var aggregateResults: SpeechResultAggregator = SpeechResultAggregator()
   private let jsonEncoder = JSONEncoder()
   private let busForNodeTap = 0
   private let speechBufferSize: AVAudioFrameCount = 1024
@@ -202,7 +203,6 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     case SFSpeechRecognizerAuthorizationStatus.notDetermined:
       SFSpeechRecognizer.requestAuthorization({ (status) -> Void in
         success = status == SFSpeechRecognizerAuthorizationStatus.authorized
-        print("Success auth", success)
         if success {
 
           #if os(iOS)
@@ -448,6 +448,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       failedListen = false
       stopping = false
       returnPartialResults = partialResults
+      aggregateResults = SpeechResultAggregator()
       setupRecognizerForLocale(locale: getLocale(localeStr))
       guard let localRecognizer = recognizer else {
         result(
@@ -640,17 +641,12 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     return idName
   }
 
-  private func handleResult(_ transcriptions: [SFTranscription], isFinal: Bool) {
+    private func handleResult(_ transcriptions: [SFTranscription], isFinal: Bool, maybeFinal: Bool) {
     if !isFinal && !returnPartialResults {
       return
     }
-    var speechWords: [SpeechRecognitionWords] = []
-    for transcription in transcriptions {
-      let words: SpeechRecognitionWords = SpeechRecognitionWords(
-        recognizedWords: transcription.formattedString, confidence: confidenceIn(transcription))
-      speechWords.append(words)
-    }
-    let speechInfo = SpeechRecognitionResult(alternates: speechWords, finalResult: isFinal)
+    aggregateResults = aggregateResults.addResult(transcriptions, isFinal: isFinal, maybeFinal: maybeFinal)
+    let speechInfo = aggregateResults.results
     do {
       let speechMsg = try jsonEncoder.encode(speechInfo)
       if let speechStr = String(data: speechMsg, encoding: .utf8) {
@@ -781,7 +777,7 @@ extension SpeechToTextPlugin: SFSpeechRecognitionTaskDelegate {
   ) {
     os_log("HypothesizeTranscription", log: pluginLog, type: .debug)
     reportError(source: "HypothesizeTranscription", error: task.error)
-    handleResult([transcription], isFinal: false)
+      handleResult([transcription], isFinal: false, maybeFinal: false)
   }
 
   public func speechRecognitionTask(
@@ -792,8 +788,12 @@ extension SpeechToTextPlugin: SFSpeechRecognitionTaskDelegate {
     os_log(
       "FinishRecognition %{PUBLIC}@", log: pluginLog, type: .debug,
       recognitionResult.isFinal.description)
+    var pseudoFinal = false
+      if #available(iOS 14.0, macOS 13.0, *) {
+          pseudoFinal = recognitionResult.speechRecognitionMetadata != nil
+      }
     let isFinal = recognitionResult.isFinal
-    handleResult(recognitionResult.transcriptions, isFinal: isFinal)
+      handleResult(recognitionResult.transcriptions, isFinal: isFinal, maybeFinal: pseudoFinal )
   }
 
   private func reportError(source: String, error: Error?) {
@@ -816,4 +816,116 @@ extension SpeechToTextPlugin: AVAudioPlayerDelegate {
       playEnd()
     }
   }
+}
+
+private class SpeechResultAggregator {
+    private var speechTranscriptions: [SFTranscription]
+    private var previousTranscriptions: [[SFTranscription]]
+    private let isFinal: Bool
+    private let interimFinal: Bool
+    
+    init() {
+        speechTranscriptions = []
+        previousTranscriptions = []
+        isFinal = false
+        interimFinal = false
+    }
+    
+    init( withTranscriptions: [SFTranscription], final: Bool, maybeFinal: Bool) {
+        speechTranscriptions = []
+        speechTranscriptions.append( contentsOf: withTranscriptions)
+        previousTranscriptions = []
+        isFinal = final
+        interimFinal = maybeFinal
+    }
+    
+    init( withTranscriptions: [SFTranscription], existingTranscriptions: [[SFTranscription]], final: Bool, maybeFinal: Bool) {
+        speechTranscriptions = []
+        speechTranscriptions.append( contentsOf: withTranscriptions)
+        previousTranscriptions = []
+        previousTranscriptions.append(contentsOf: existingTranscriptions)
+        isFinal = final
+        interimFinal = maybeFinal
+    }
+    
+    /// returns a new SpeechResultAggregator.
+    /// If the existing aggregator has no content then return a new aggregator with just the
+    /// new content. If the existing is not empty and keepPrevious is true then append the
+    /// current transcription to the previous transcriptions and then return a new aggregator
+    /// with that set of transcriptions and the new content.
+    public func addResult( _ newResult: [SFTranscription], isFinal: Bool, maybeFinal: Bool ) -> SpeechResultAggregator {
+        if isEmpty {
+            return SpeechResultAggregator(withTranscriptions: newResult, final: isFinal, maybeFinal:  interimFinal)
+        }
+        if !maybeFinal && interimFinal {
+            previousTranscriptions.append(speechTranscriptions)
+        }
+        return SpeechResultAggregator(withTranscriptions: newResult, existingTranscriptions: previousTranscriptions, final: isFinal, maybeFinal: maybeFinal)
+    }
+    
+    public var isEmpty: Bool {
+        get {
+            speechTranscriptions.isEmpty
+        }
+    }
+    
+    public var hasPreviousTranscriptions: Bool {
+        get {
+            return !previousTranscriptions.isEmpty
+        }
+    }
+    
+    /// If there are previous transcriptions then generate a new transcription and insert it as
+    /// the first entry in the returned results.
+    /// This behaviour was created to handle an apparent bug in the iOS speech
+    /// recognition API. When the speaker pauses for a few seconds the recognition
+    /// engine discards the previous transcriptions and returns a transcription
+    /// with just the words after the pause. This is a change in behaviour that
+    /// happened some time in iOS 17 or 18. This class tries to simulate the previous
+    /// behaviour of returning the complete transcription including the words before
+    /// and after the pause.
+    public var results: SpeechRecognitionResult {
+        var speechWords: [SpeechRecognitionWords] = []
+        if hasPreviousTranscriptions {
+            var lowestConfidence: Decimal = 1.0
+            var aggregatePhrase = ""
+            for previousTranscription in previousTranscriptions {
+                if let transcription = previousTranscription.first {
+                    lowestConfidence = min( lowestConfidence, confidenceIn(transcription))
+                    if aggregatePhrase.count > 0 && aggregatePhrase.last != " " {
+                        aggregatePhrase += " "
+                    }
+                    aggregatePhrase += transcription.formattedString
+                }
+            }
+            if let transcription = speechTranscriptions.first {
+                lowestConfidence = min( lowestConfidence, confidenceIn(transcription))
+                if aggregatePhrase.count > 0 && aggregatePhrase.last != " " {
+                    aggregatePhrase += " "
+                }
+                aggregatePhrase += transcription.formattedString
+            }
+            speechWords.append(SpeechRecognitionWords(recognizedWords: aggregatePhrase, confidence: lowestConfidence))
+        }
+        for transcription in speechTranscriptions {
+            let words: SpeechRecognitionWords = SpeechRecognitionWords(
+                recognizedWords: transcription.formattedString, confidence: confidenceIn(transcription))
+            speechWords.append(words)
+        }
+        return SpeechRecognitionResult(alternates: speechWords, finalResult: isFinal )
+
+    }
+    
+    private func confidenceIn(_ transcription: SFTranscription) -> Decimal {
+      guard transcription.segments.count > 0 else {
+        return 0
+      }
+      var totalConfidence: Float = 0.0
+      for segment in transcription.segments {
+        totalConfidence += segment.confidence
+      }
+      let avgConfidence: Float = totalConfidence / Float(transcription.segments.count)
+      let confidence: Float = (avgConfidence * 1000).rounded() / 1000
+      return Decimal(string: String(describing: confidence))!
+    }
 }
