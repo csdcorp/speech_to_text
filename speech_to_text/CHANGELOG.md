@@ -1,5 +1,16 @@
 # Changelog
 
+## 7.1.0
+
+### Fix
+* on iOS there is a new bug in their speech recognition that resets the transcription after 
+a pause in the users' speech. This version attempts a mitigation by using meta information 
+from the recognizer to concatenate subsequent transcriptions so the whole is not lost. There
+are problems with this approach, notably extra capitalization and possibly incorrects spaces
+being added. The concatenated transcription is added as the first result but all other results 
+are still the same. See issue [#552](https://github.com/csdcorp/speech_to_text/issues/552) 
+for details. 
+
 ## 7.0.0
 
 ### New

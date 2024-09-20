@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v7.0.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v7.1.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -24,7 +24,7 @@ _speech: means most speech recognition features work. Platforms with build but n
 
 ## Recent Updates
 
-6.7.0 
+7.0.0 
 * Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for the PR!
 * Now supports WASM compliation for web with many thanks to yeikel16 for the PR!
 
