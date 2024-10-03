@@ -11,9 +11,9 @@ void main() {
   final firstRecognizedJson =
       '{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}';
   final firstWords =
-      SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
+      SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
   final secondWords =
-      SpeechRecognitionWords(secondRecognizedWords, secondConfidence);
+      SpeechRecognitionWords(secondRecognizedWords, null, secondConfidence);
 
   setUp(() {});
 
@@ -32,7 +32,7 @@ void main() {
     });
     test('equals true for different object with same values', () {
       var firstWordsA =
-          SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
+          SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
       expect(firstWords, firstWordsA);
     });
     test('equals false for different results', () {
@@ -43,7 +43,7 @@ void main() {
     });
     test('hash same for different object with same values', () {
       var firstWordsA =
-          SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
+          SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
       expect(firstWords.hashCode, firstWordsA.hashCode);
     });
     test('hash different for different results', () {
@@ -62,7 +62,7 @@ void main() {
     });
     test('true when missing', () {
       var words = SpeechRecognitionWords(
-          firstRecognizedWords, SpeechRecognitionWords.missingConfidence);
+          firstRecognizedWords, null, SpeechRecognitionWords.missingConfidence);
       expect(words.isConfident(), isTrue);
       expect(words.hasConfidenceRating, isFalse);
     });
@@ -80,6 +80,18 @@ void main() {
       var roundTripJson = words.toJson();
       var roundtripWords = SpeechRecognitionWords.fromJson(roundTripJson);
       expect(words, roundtripWords);
+    });
+    test('roundtrips correctly with phrases', () {
+      final phrase1 = 'first part';
+      final phrase2 = 'second part';
+      final initialWords = SpeechRecognitionWords(
+          firstRecognizedWords, [phrase1, phrase2], firstConfidence);
+      var roundTripJson = initialWords.toJson();
+      var roundtripWords = SpeechRecognitionWords.fromJson(roundTripJson);
+      expect(roundtripWords.recognizedPhrases,
+          containsAll(initialWords.recognizedPhrases!));
+      expect(roundtripWords.recognizedWords, initialWords.recognizedWords);
+      expect(roundtripWords.confidence, initialWords.confidence);
     });
   });
 }

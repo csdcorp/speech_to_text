@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -362,6 +364,38 @@ void main() {
       ]);
       expect(speech.lastRecognizedWords,
           TestSpeechChannelHandler.secondRecognizedWords);
+    });
+    test('aggregates phrases if provided', () async {
+      await speech.initialize();
+      await speech.listen(onResult: listener.onSpeechResult);
+      final resultWithAggregaes = SpeechRecognitionResult([
+        TestSpeechChannelHandler.firstPhrases,
+      ], false);
+      testPlatform.onTextRecognition!(jsonEncode(resultWithAggregaes.toJson()));
+      expect(listener.speechResults, 1);
+      expect(
+        listener.results.first.recognizedWords,
+        TestSpeechChannelHandler.firstAggregatePhrases,
+      );
+      expect(speech.lastRecognizedWords,
+          TestSpeechChannelHandler.firstAggregatePhrases);
+    });
+    test('uses custom aggregator if provided', () async {
+      await speech.initialize();
+      speech.unexpectedPhraseAggregator = (phrases) => phrases.join('. ');
+      await speech.listen(onResult: listener.onSpeechResult);
+      final resultWithAggregaes = SpeechRecognitionResult([
+        TestSpeechChannelHandler.firstPhrases,
+      ], false);
+      testPlatform.onTextRecognition!(jsonEncode(resultWithAggregaes.toJson()));
+      expect(listener.speechResults, 1);
+      final expectedAggregate =
+          '${TestSpeechChannelHandler.firstRecognizedWords}. ${TestSpeechChannelHandler.secondRecognizedWords}';
+      expect(
+        listener.results.first.recognizedWords,
+        expectedAggregate,
+      );
+      expect(speech.lastRecognizedWords, expectedAggregate);
     });
   });
 

@@ -96,6 +96,18 @@ class SpeechRecognitionWords {
   /// The sequence of words recognized
   final String recognizedWords;
 
+  /// If the platform provides it, a list of phrases that were recognized
+  /// as individual utterances. This can generally be ignored as it
+  /// is usually null and where it is not [recognizedWords] will contain
+  /// the same information aggregated into a single string.
+  /// Currently this is only populated on iOS 17.5 and 18 where a bug in
+  /// the speech recognizer causes unexpected extra phrases. These are
+  /// automatically handled by the plugin and recognizedWords will be
+  /// an aggregate of all the phrases. To customize the handling of
+  /// these phrases, use the [SpeechToText.unexpectedPhraseAggregator] property
+  /// to customize the aggregation.
+  final List<String>? recognizedPhrases;
+
   /// The confidence that the [recognizedWords] are correct.
   ///
   /// Confidence is expressed as a value between 0 and 1. 0
@@ -106,7 +118,8 @@ class SpeechRecognitionWords {
   static const double confidenceThreshold = 0.8;
   static const double missingConfidence = -1;
 
-  const SpeechRecognitionWords(this.recognizedWords, this.confidence);
+  const SpeechRecognitionWords(
+      this.recognizedWords, this.recognizedPhrases, this.confidence);
 
   /// true if there is confidence in this recognition, false otherwise.
   ///

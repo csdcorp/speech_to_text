@@ -37,9 +37,9 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
   static const String finalRecognizedJson =
       '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":true}';
   static const SpeechRecognitionWords firstWords =
-      SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
+      SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
   static const SpeechRecognitionWords secondWords =
-      SpeechRecognitionWords(secondRecognizedWords, secondConfidence);
+      SpeechRecognitionWords(secondRecognizedWords, null, secondConfidence);
   static final SpeechRecognitionResult firstRecognizedResult =
       SpeechRecognitionResult([firstWords], false);
   static final SpeechRecognitionResult secondRecognizedResult =

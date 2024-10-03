@@ -24,7 +24,7 @@ class BalancedAlternates {
   ///
   void add(int phrase, String words, double confidence) {
     _alternates[phrase] ??= [];
-    _alternates[phrase]?.add(SpeechRecognitionWords(words, confidence));
+    _alternates[phrase]?.add(SpeechRecognitionWords(words, null, confidence));
   }
 
   /// Return the full speech recognition results which is the concatenation
@@ -62,8 +62,8 @@ class BalancedAlternates {
           alternateConfidence = min(alternateConfidence,
               _alternates[phraseIndex]![altCount].confidence);
         }
-        result
-            .add(SpeechRecognitionWords(alternatePhrase, alternateConfidence));
+        result.add(
+            SpeechRecognitionWords(alternatePhrase, null, alternateConfidence));
       }
     } else {
       for (var phraseIndex = phraseCount - 1; phraseIndex >= 0; --phraseIndex) {

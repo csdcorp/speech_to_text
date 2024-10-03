@@ -53,6 +53,7 @@ public enum ListenMode: Int {
 
 struct SpeechRecognitionWords: Codable {
   let recognizedWords: String
+  let recognizedPhrases: [String]?
   let confidence: Decimal
 }
 
@@ -889,8 +890,10 @@ private class SpeechResultAggregator {
         if hasPreviousTranscriptions {
             var lowestConfidence: Decimal = 1.0
             var aggregatePhrase = ""
+            var recognizedPhrases: [String] = []
             for previousTranscription in previousTranscriptions {
                 if let transcription = previousTranscription.first {
+                    recognizedPhrases.append(transcription.formattedString)
                     lowestConfidence = min( lowestConfidence, confidenceIn(transcription))
                     if aggregatePhrase.count > 0 && aggregatePhrase.last != " " {
                         aggregatePhrase += " "
@@ -899,17 +902,18 @@ private class SpeechResultAggregator {
                 }
             }
             if let transcription = speechTranscriptions.first {
+                recognizedPhrases.append(transcription.formattedString)
                 lowestConfidence = min( lowestConfidence, confidenceIn(transcription))
                 if aggregatePhrase.count > 0 && aggregatePhrase.last != " " {
                     aggregatePhrase += " "
                 }
                 aggregatePhrase += transcription.formattedString
             }
-            speechWords.append(SpeechRecognitionWords(recognizedWords: aggregatePhrase, confidence: lowestConfidence))
+            speechWords.append(SpeechRecognitionWords(recognizedWords: aggregatePhrase, recognizedPhrases: recognizedPhrases, confidence: lowestConfidence))
         }
         for transcription in speechTranscriptions {
             let words: SpeechRecognitionWords = SpeechRecognitionWords(
-                recognizedWords: transcription.formattedString, confidence: confidenceIn(transcription))
+                recognizedWords: transcription.formattedString, recognizedPhrases: nil, confidence: confidenceIn(transcription))
             speechWords.append(words)
         }
         return SpeechRecognitionResult(alternates: speechWords, finalResult: isFinal )

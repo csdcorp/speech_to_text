@@ -11,9 +11,9 @@ void main() {
   final firstRecognizedJson =
       '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"finalResult":false}';
   final firstWords =
-      SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
+      SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
   final secondWords =
-      SpeechRecognitionWords(secondRecognizedWords, secondConfidence);
+      SpeechRecognitionWords(secondRecognizedWords, null, secondConfidence);
 
   setUp(() {});
 

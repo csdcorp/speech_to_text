@@ -45,15 +45,23 @@ class TestSpeechChannelHandler {
   static const String finalRecognizedJson =
       '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":true}';
   static const SpeechRecognitionWords firstWords =
-      SpeechRecognitionWords(firstRecognizedWords, firstConfidence);
+      SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
   static const SpeechRecognitionWords secondWords =
-      SpeechRecognitionWords(secondRecognizedWords, secondConfidence);
+      SpeechRecognitionWords(secondRecognizedWords, null, secondConfidence);
+  static const SpeechRecognitionWords firstPhrases = SpeechRecognitionWords(
+      secondRecognizedWords,
+      [firstRecognizedWords, secondRecognizedWords],
+      secondConfidence);
+  static const firstAggregatePhrases =
+      '$firstRecognizedWords $secondRecognizedWords';
   static final SpeechRecognitionResult firstRecognizedResult =
       SpeechRecognitionResult([firstWords], false);
   static final SpeechRecognitionResult secondRecognizedResult =
       SpeechRecognitionResult([secondWords], false);
   static final SpeechRecognitionResult finalRecognizedResult =
       SpeechRecognitionResult([secondWords], true);
+  static final SpeechRecognitionResult firstPhrasesResult =
+      SpeechRecognitionResult([firstPhrases], true);
   static const String transientErrorJson =
       '{"errorMsg":"network","permanent":false}';
   static const String permanentErrorJson =

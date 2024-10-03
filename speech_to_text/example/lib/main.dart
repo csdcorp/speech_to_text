@@ -54,6 +54,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         debugLogging: _logEvents,
       );
       if (hasSpeech) {
+        speech.unexpectedPhraseAggregator = _punctAggregator;
         // Get the list of languages installed on the supporting platform so they
         // can be displayed in the UI for selection by the user.
         _localeNames = await speech.locales();
@@ -72,6 +73,10 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         _hasSpeech = false;
       });
     }
+  }
+
+  String _punctAggregator(List<String> phrases) {
+    return phrases.join('. ');
   }
 
   @override
@@ -128,7 +133,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         listenMode: ListenMode.confirmation,
         cancelOnError: true,
         partialResults: true,
-        autoPunctuation: true,
+        autoPunctuation: false,
         enableHapticFeedback: true);
     // Note that `listenFor` is the maximum, not the minimum, on some
     // systems recognition will be stopped before this value is reached.
