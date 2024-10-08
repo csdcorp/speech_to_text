@@ -1,3 +1,6 @@
+## 2.3.0
+- Added copyWith to SpeechListenOptions
+
 ## 2.2.0
 - Added options for listen method in place of separate parameters
 

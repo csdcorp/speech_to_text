@@ -96,6 +96,25 @@ class SpeechListenOptions {
       /// Usually haptics are suppressed during speech recognition to avoid
       /// interference with the microphone. Currently only supported on iOS.
       this.enableHapticFeedback = false});
+
+  SpeechListenOptions copyWith(
+      {bool? cancelOnError,
+      bool? partialResults,
+      bool? onDevice,
+      ListenMode? listenMode,
+      int? sampleRate,
+      bool? autoPunctuation,
+      bool? enableHapticFeedback}) {
+    return SpeechListenOptions(
+        cancelOnError: cancelOnError ?? this.cancelOnError,
+        partialResults: partialResults ?? this.partialResults,
+        onDevice: onDevice ?? this.onDevice,
+        listenMode: listenMode ?? this.listenMode,
+        sampleRate: sampleRate ?? this.sampleRate,
+        autoPunctuation: autoPunctuation ?? this.autoPunctuation,
+        enableHapticFeedback:
+            enableHapticFeedback ?? this.enableHapticFeedback);
+  }
 }
 
 /// The interface that implementations of url_launcher must implement.
