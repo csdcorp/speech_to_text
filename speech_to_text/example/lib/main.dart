@@ -36,6 +36,8 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
   List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
 
+  SpeechConfig currentOptions = SpeechConfig(SpeechListenOptions(), "", false);
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +63,8 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
 
         var systemLocale = await speech.systemLocale();
         _currentLocaleId = systemLocale?.localeId ?? '';
+        currentOptions =
+            SpeechConfig(SpeechListenOptions(), _currentLocaleId, false);
       }
       if (!mounted) return;
 
@@ -82,42 +86,37 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Speech to Text Example'),
-        ),
-        body: Column(children: [
-          const HeaderWidget(),
-          Column(
-            children: <Widget>[
-              InitSpeechWidget(_hasSpeech, initSpeechState),
-              SpeechControlWidget(_hasSpeech, speech.isListening,
-                  startListening, stopListening, cancelListening),
-              SessionOptionsWidget(
-                _currentLocaleId,
-                _switchLang,
-                _localeNames,
-                _logEvents,
-                _switchLogging,
-                _pauseForController,
-                _listenForController,
-                _onDevice,
-                _switchOnDevice,
-              ),
-            ],
-          ),
-          Expanded(
-            flex: 4,
-            child: RecognitionResultsWidget(lastWords: lastWords, level: level),
-          ),
-          Expanded(
-            flex: 1,
-            child: ErrorWidget(lastError: lastError),
-          ),
-          SpeechStatusWidget(speech: speech),
-        ]),
+        home: Scaffold(
+      appBar: AppBar(
+        title: const Text('Speech to Text Example'),
       ),
-    );
+      body: Builder(
+        builder: (ctx) => SingleChildScrollView(
+          child: Column(children: [
+            const HeaderWidget(),
+            Row(
+              children: [
+                Expanded(child: InitSpeechWidget(_hasSpeech, initSpeechState)),
+                IconButton(
+                  // key: ,
+                  onPressed: () {
+                    showSetUp(ctx, currentOptions, _localeNames);
+                  },
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.settings),
+                  tooltip: 'set up session options',
+                ),
+              ],
+            ),
+            SpeechControlWidget(_hasSpeech, speech.isListening, startListening,
+                stopListening, cancelListening),
+            RecognitionResultsWidget(lastWords: lastWords, level: level),
+            ErrorWidget(lastError: lastError),
+            SpeechStatusWidget(speech: speech),
+          ]),
+        ),
+      ),
+    ));
   }
 
   // This is called each time the users wants to start a new speech
@@ -243,51 +242,52 @@ class RecognitionResultsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        const Center(
+        Center(
           child: Text(
             'Recognized Words',
-            style: TextStyle(fontSize: 22.0),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
-        Expanded(
-          child: Stack(
-            children: <Widget>[
-              Container(
-                color: Theme.of(context).secondaryHeaderColor,
-                child: Center(
-                  child: Text(
-                    lastWords,
-                    textAlign: TextAlign.center,
+        Stack(
+          children: <Widget>[
+            Container(
+              constraints: BoxConstraints(
+                minHeight: 200,
+              ),
+              color: Theme.of(context).secondaryHeaderColor,
+              child: Center(
+                child: Text(
+                  lastWords,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Positioned.fill(
+              bottom: 10,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                          blurRadius: .26,
+                          spreadRadius: level * 1.5,
+                          color: Colors.black.withOpacity(.05))
+                    ],
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.all(Radius.circular(50)),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.mic),
+                    onPressed: () {},
                   ),
                 ),
               ),
-              Positioned.fill(
-                bottom: 10,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            blurRadius: .26,
-                            spreadRadius: level * 1.5,
-                            color: Colors.black.withOpacity(.05))
-                      ],
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.all(Radius.circular(50)),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.mic),
-                      onPressed: () {},
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
@@ -301,10 +301,10 @@ class HeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
         'Speech recognition available',
-        style: TextStyle(fontSize: 22.0),
+        style: Theme.of(context).textTheme.titleMedium,
       ),
     );
   }
@@ -324,10 +324,12 @@ class ErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        const Center(
+        Container(
+          padding: EdgeInsets.all(8.0),
           child: Text(
-            'Error Status',
-            style: TextStyle(fontSize: 22.0),
+            'Error',
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
           ),
         ),
         Center(
@@ -374,28 +376,16 @@ class SpeechControlWidget extends StatelessWidget {
 }
 
 class SessionOptionsWidget extends StatelessWidget {
-  const SessionOptionsWidget(
-      this.currentLocaleId,
-      this.switchLang,
-      this.localeNames,
-      this.logEvents,
-      this.switchLogging,
-      this.pauseForController,
-      this.listenForController,
-      this.onDevice,
-      this.switchOnDevice,
-      {Key? key})
+  SessionOptionsWidget(
+      {required this.options, required this.localeNames, Key? key})
       : super(key: key);
 
-  final String currentLocaleId;
-  final void Function(String?) switchLang;
-  final void Function(bool?) switchLogging;
-  final void Function(bool?) switchOnDevice;
-  final TextEditingController pauseForController;
-  final TextEditingController listenForController;
+  final SpeechConfig options;
   final List<LocaleName> localeNames;
-  final bool logEvents;
-  final bool onDevice;
+
+  final TextEditingController listenForController = TextEditingController();
+
+  final TextEditingController pauseForController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -404,20 +394,27 @@ class SessionOptionsWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
+          Text(
+            'Session Options',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           Row(
             children: [
               const Text('Language: '),
-              DropdownButton<String>(
-                onChanged: (selectedVal) => switchLang(selectedVal),
-                value: currentLocaleId,
-                items: localeNames
-                    .map(
-                      (localeName) => DropdownMenuItem(
-                        value: localeName.localeId,
-                        child: Text(localeName.name),
-                      ),
-                    )
-                    .toList(),
+              Expanded(
+                child: DropdownButton<String>(
+                  onChanged: (selectedVal) {},
+                  value: options.localeId,
+                  isExpanded: true,
+                  items: localeNames
+                      .map(
+                        (localeName) => DropdownMenuItem(
+                          value: localeName.localeId,
+                          child: Text(localeName.name),
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
             ],
           ),
@@ -430,8 +427,12 @@ class SessionOptionsWidget extends StatelessWidget {
                   child: TextFormField(
                     controller: pauseForController,
                   )),
+            ],
+          ),
+          Row(
+            children: [
               Container(
-                  padding: const EdgeInsets.only(left: 16),
+                  // padding: const EdgeInsets.only(left: 16),
                   child: const Text('listenFor: ')),
               Container(
                   padding: const EdgeInsets.only(left: 8),
@@ -445,13 +446,17 @@ class SessionOptionsWidget extends StatelessWidget {
             children: [
               const Text('On device: '),
               Checkbox(
-                value: onDevice,
-                onChanged: switchOnDevice,
+                value: options.options.onDevice,
+                onChanged: (value) {},
               ),
+            ],
+          ),
+          Row(
+            children: [
               const Text('Log events: '),
               Checkbox(
-                value: logEvents,
-                onChanged: switchLogging,
+                value: options.logEvents,
+                onChanged: (value) {},
               ),
             ],
           ),
@@ -509,4 +514,44 @@ class SpeechStatusWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+class SpeechConfig {
+  final SpeechListenOptions options;
+  final String localeId;
+  final bool logEvents;
+
+  SpeechConfig(this.options, this.localeId, this.logEvents);
+}
+
+Future<SpeechConfig> showSetUp(BuildContext context,
+    SpeechConfig currentOptions, List<LocaleName> localeNames) async {
+  await showModalBottomSheet(
+      elevation: 0,
+      context: context,
+      isScrollControlled: true,
+      builder: (
+        context,
+      ) {
+        return Material(
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).copyWith().size.height * 0.65,
+              minHeight: MediaQuery.of(context).copyWith().size.height * 0.65,
+              maxWidth: double.infinity,
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Stack(
+              children: [
+                SessionOptionsWidget(
+                  options: currentOptions,
+                  localeNames: localeNames,
+                ),
+                // const BottomSheetCloseButton()
+              ],
+            ),
+          ),
+        );
+      });
+  return currentOptions;
 }
