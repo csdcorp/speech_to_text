@@ -4,6 +4,8 @@
 
 ### New
 * support for web search recognition type on Android thanks to @vongrad for the PR
+* example app improvements to expose more options, provide help, and improve behaviour 
+on smaller devices. 
 
 ### Fix
 * on iOS there is a new bug in their speech recognition that resets the transcription after 
