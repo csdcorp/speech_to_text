@@ -99,15 +99,14 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
             Row(
               children: [
                 Expanded(child: InitSpeechWidget(_hasSpeech, initSpeechState)),
-                IconButton(
+                TextButton.icon(
                   // key: ,
                   onPressed: () async {
                     currentOptions =
                         await showSetUp(ctx, currentOptions, _localeNames);
                   },
-                  visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.settings),
-                  tooltip: 'set up session options',
+                  label: const Text('Session Options'),
                 ),
               ],
             ),
@@ -336,129 +335,123 @@ class SessionOptionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Row(
-            children: [
-              const Text('Language: '),
-              Expanded(
-                child: DropdownButton<String>(
-                  onChanged: (selectedVal) => onChange(options.copyWith(
-                      localeId: selectedVal ?? options.localeId)),
-                  value: options.localeId,
-                  isExpanded: true,
-                  items: localeNames
-                      .map(
-                        (localeName) => DropdownMenuItem(
-                          value: localeName.localeId,
-                          child: Text(localeName.name),
-                        ),
-                      )
-                      .toList(),
-                ),
+    return Column(
+      children: <Widget>[
+        Row(
+          children: [
+            const Text('Language: '),
+            Expanded(
+              child: DropdownButton<String>(
+                onChanged: (selectedVal) => onChange(options.copyWith(
+                    localeId: selectedVal ?? options.localeId)),
+                value: options.localeId,
+                isExpanded: true,
+                items: localeNames
+                    .map(
+                      (localeName) => DropdownMenuItem(
+                        value: localeName.localeId,
+                        child: Text(localeName.name),
+                      ),
+                    )
+                    .toList(),
               ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('pauseFor: '),
-              Container(
-                  padding: const EdgeInsets.only(left: 8),
-                  width: 80,
-                  child: TextFormField(
-                    controller: pauseForController,
-                  )),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('listenFor: '),
-              Container(
-                  padding: const EdgeInsets.only(left: 8),
-                  width: 80,
-                  child: TextFormField(
-                    controller: listenForController,
-                  )),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('On device: '),
-              Checkbox(
-                value: options.options.onDevice,
-                onChanged: (value) {
-                  onChange(options.copyWith(
-                      options: options.options.copyWith(onDevice: value)));
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Auto Punctuation: '),
-              Checkbox(
-                value: options.options.autoPunctuation,
-                onChanged: (value) {
-                  onChange(options.copyWith(
-                      options:
-                          options.options.copyWith(autoPunctuation: value)));
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Enable Haptics: '),
-              Checkbox(
-                value: options.options.enableHapticFeedback,
-                onChanged: (value) {
-                  onChange(options.copyWith(
-                      options: options.options
-                          .copyWith(enableHapticFeedback: value)));
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Partial results: '),
-              Checkbox(
-                value: options.options.partialResults,
-                onChanged: (value) {
-                  onChange(options.copyWith(
-                      options:
-                          options.options.copyWith(partialResults: value)));
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Cancel on error: '),
-              Checkbox(
-                value: options.options.cancelOnError,
-                onChanged: (value) {
-                  onChange(options.copyWith(
-                      options: options.options.copyWith(cancelOnError: value)));
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Log events: '),
-              Checkbox(
-                value: options.logEvents,
-                onChanged: (value) =>
-                    onChange(options.copyWith(logEvents: value)),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('pauseFor: '),
+            Container(
+                padding: const EdgeInsets.only(left: 8),
+                width: 80,
+                child: TextFormField(
+                  controller: pauseForController,
+                )),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('listenFor: '),
+            Container(
+                padding: const EdgeInsets.only(left: 8),
+                width: 80,
+                child: TextFormField(
+                  controller: listenForController,
+                )),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('On device: '),
+            Checkbox(
+              value: options.options.onDevice,
+              onChanged: (value) {
+                onChange(options.copyWith(
+                    options: options.options.copyWith(onDevice: value)));
+              },
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Auto Punctuation: '),
+            Checkbox(
+              value: options.options.autoPunctuation,
+              onChanged: (value) {
+                onChange(options.copyWith(
+                    options: options.options.copyWith(autoPunctuation: value)));
+              },
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Enable Haptics: '),
+            Checkbox(
+              value: options.options.enableHapticFeedback,
+              onChanged: (value) {
+                onChange(options.copyWith(
+                    options:
+                        options.options.copyWith(enableHapticFeedback: value)));
+              },
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Partial results: '),
+            Checkbox(
+              value: options.options.partialResults,
+              onChanged: (value) {
+                onChange(options.copyWith(
+                    options: options.options.copyWith(partialResults: value)));
+              },
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Cancel on error: '),
+            Checkbox(
+              value: options.options.cancelOnError,
+              onChanged: (value) {
+                onChange(options.copyWith(
+                    options: options.options.copyWith(cancelOnError: value)));
+              },
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Text('Log events: '),
+            Checkbox(
+              value: options.logEvents,
+              onChanged: (value) =>
+                  onChange(options.copyWith(logEvents: value)),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -475,7 +468,7 @@ class InitSpeechWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        TextButton(
+        OutlinedButton(
           onPressed: hasSpeech ? null : initSpeechState,
           child: const Text('Initialize'),
         ),
@@ -560,24 +553,35 @@ Future<SpeechExampleConfig> showSetUp(BuildContext context,
         return Material(
           child: Container(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).copyWith().size.height * 0.65,
-              minHeight: MediaQuery.of(context).copyWith().size.height * 0.65,
+              maxHeight: MediaQuery.of(context).copyWith().size.height * 0.75,
+              minHeight: MediaQuery.of(context).copyWith().size.height * 0.5,
               maxWidth: double.infinity,
             ),
-            padding: const EdgeInsets.all(16),
             child: StatefulBuilder(
               builder: (context, setState) => Column(
                 children: [
-                  SessionOptionsWidget(
-                    onChange: (newOptions) {
-                      setState(() {
-                        updatedOptions = newOptions;
-                      });
-                    },
-                    listenForController: listenController,
-                    pauseForController: pauseController,
-                    options: updatedOptions,
-                    localeNames: localeNames,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Session Options",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+                      child: SessionOptionsWidget(
+                        onChange: (newOptions) {
+                          setState(() {
+                            updatedOptions = newOptions;
+                          });
+                        },
+                        listenForController: listenController,
+                        pauseForController: pauseController,
+                        options: updatedOptions,
+                        localeNames: localeNames,
+                      ),
+                    ),
                   ),
                 ],
               ),
