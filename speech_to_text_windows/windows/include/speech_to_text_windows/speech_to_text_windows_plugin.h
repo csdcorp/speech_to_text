@@ -1,0 +1,1 @@
+C:/Users/asher/Desktop/repositories/speech_to_text/speech_to_text_windows/windows/speech_to_text_windows_plugin.h
