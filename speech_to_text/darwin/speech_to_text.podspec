@@ -4,24 +4,24 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'speech_to_text'
-  s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin project.'
+  s.version          = '7.2.0'
+  s.summary          = 'Exposes iOS and macOS speech recognition capabilities to Flutter.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+A Flutter plugin module for iOS and macOS that uses native speech recognition.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/csdcorp/speech_to_text'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Corner Software Development' => 'info@csdcorp.com' }
 
   s.source           = { :path => '.' }
-  s.source_files     = 'Classes/**/*'
+  s.source_files     = 'speech_to_text/Sources/speech_to_text/**/*.swift'
   s.ios.dependency 'Flutter'
   s.osx.dependency 'FlutterMacOS'
-  s.ios.deployment_target = '8.0'
-  s.osx.deployment_target = '10.13'
+  s.ios.deployment_target = '13.0'
+  s.osx.deployment_target = '11.00'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version = '5.0'
-  s.ios.dependency 'Try'
-  s.osx.dependency 'Try'
+  s.ios.dependency 'CwlCatchException'
+  s.osx.dependency 'CwlCatchException'
 
 end
