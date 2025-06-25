@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.2.0
+## 7.2.0-beta.1
 
 ### New
 * Updated to latest build configuration for Android
