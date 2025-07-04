@@ -238,7 +238,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
         final transcript = alt.transcript;
         final confidence = alt.confidence;
 
-        balanced.add(resultIndex, transcript, confidence);
+        balanced.add(resultIndex, transcript, confidence.toDouble());
       }
       ++resultIndex;
     }
