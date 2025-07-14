@@ -32,6 +32,9 @@
 .pub/
 **/build/
 **/coverage/
+**/ephemeral/
+**/.build/
+**/.swiftpm/
 
 # Web related
 **/lib/generated_plugin_registrant.dart

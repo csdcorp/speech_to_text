@@ -1,5 +1,14 @@
 # Changelog
 
+## 7.2.0
+
+### New
+* Updated to latest build configuration for Android
+* Updated to use Swift packages instead of pods
+
+### Fix
+* Address incorrect language tag format on Android
+
 ## 7.1.0
 
 ### New

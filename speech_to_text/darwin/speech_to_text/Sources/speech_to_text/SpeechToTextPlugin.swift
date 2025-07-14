@@ -1,5 +1,5 @@
 import Speech
-import Try
+import CwlCatchException
 import os.log
 
 #if os(OSX)
@@ -261,6 +261,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     guard !soundKey.isEmpty else {
       return player
     }
+    
     if let soundPath = Bundle.main.path(forResource: soundKey, ofType: nil) {
       let soundUrl = URL(fileURLWithPath: soundPath)
       do {
@@ -388,7 +389,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     self.currentRequest?.endAudio()
     stopAllPlayers()
     do {
-      try trap {
+      try catchExceptionAsError {
         self.audioEngine?.stop()
       }
     } catch {
@@ -397,7 +398,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         error.localizedDescription)
     }
     do {
-      try trap {
+      try catchExceptionAsError {
         self.inputNode?.removeTap(onBus: self.busForNodeTap)
       }
     } catch {
@@ -544,7 +545,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         fmt = self.inputNode?.inputFormat(forBus: bus)
 
       #endif
-      try trap {
+      try catchExceptionAsError {
         self.inputNode?.installTap(
           onBus: self.busForNodeTap, bufferSize: self.speechBufferSize, format: fmt
         ) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
