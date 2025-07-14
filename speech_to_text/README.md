@@ -13,8 +13,8 @@ conversion or always on listening.
 
 | Support | Android | iOS | MacOS | Web\* | Linux | Windows |
 | :-----: | :-----: | :-: | :---: | :---: | :---: | :-----: |
-|  build  |   ✅    | ✅  |  ✅   |  ✅   |   ✘   |    ✘    |
-| speech  |   ✅    | ✅  |  ✅   |  ✅   |   ✘   |    ✘    |
+|  build  |   ✅    | ✅  |  ✅   |  ✅   |   ✘   |    ✅    |
+| speech  |   ✅    | ✅  |  ✅   |  ✅   |   ✘   |    ✅    |
 
 _build: means you can build and run with the plugin on that platform_
 
@@ -23,6 +23,11 @@ _speech: means most speech recognition features work. Platforms with build but n
 \* _Only some browsers are supported, see [here](https://caniuse.com/?search=Web%20Speech%20API)_
 
 ## Recent Updates
+
+7.3.0
+* Now supports speech recognition on Windows with many thanks to @asherchok 
+for the PR! Note that Windows support is currently in beta, if anyone can try 
+it out please provide feedback. 
 
 7.0.0 
 * Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for the PR!
