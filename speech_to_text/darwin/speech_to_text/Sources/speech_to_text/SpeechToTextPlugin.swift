@@ -130,7 +130,13 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     case SwiftSpeechToTextMethods.has_permission.rawValue:
       hasPermission(result)
     case SwiftSpeechToTextMethods.initialize.rawValue:
-      initialize(result)
+        if #available(iOS 13.0, *) {
+            Task {
+                initialize(result)
+            }
+        } else {
+            initialize(result)
+        }
     case SwiftSpeechToTextMethods.listen.rawValue:
       guard let argsArr = call.arguments as? [String: AnyObject],
         let partialResults = argsArr["partialResults"] as? Bool,
@@ -164,17 +170,43 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         }
         return
       }
-
-      listenForSpeech(
-        result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice,
-        listenMode: listenMode, sampleRate: sampleRate, autoPunctuation: autoPunctuation,
-        enableHaptics: enableHaptics)
+        if #available(iOS 13.0, *) {
+            Task {
+                listenForSpeech(
+                    result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice,
+                    listenMode: listenMode, sampleRate: sampleRate, autoPunctuation: autoPunctuation,
+                    enableHaptics: enableHaptics)
+            }
+        } else {
+            listenForSpeech(
+                result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice,
+                listenMode: listenMode, sampleRate: sampleRate, autoPunctuation: autoPunctuation,
+                enableHaptics: enableHaptics)
+        }
     case SwiftSpeechToTextMethods.stop.rawValue:
-      stopSpeech(result)
+        if #available(iOS 13.0, *) {
+            Task {
+                stopSpeech(result)
+            }
+        } else {
+            stopSpeech(result)
+        }
     case SwiftSpeechToTextMethods.cancel.rawValue:
-      cancelSpeech(result)
+        if #available(iOS 13.0, *) {
+            Task {
+                cancelSpeech(result)
+            }
+        } else {
+            cancelSpeech(result)
+        }
     case SwiftSpeechToTextMethods.locales.rawValue:
-      locales(result)
+        if #available(iOS 13.0, *) {
+            Task {
+                locales(result)
+            }
+        } else {
+            locales(result)
+        }
     default:
       os_log("Unrecognized method: %{PUBLIC}@", log: pluginLog, type: .error, call.method)
       DispatchQueue.main.async {

@@ -1,13 +1,13 @@
 # Changelog
 
-## 7.3.0-beta.1
+## 7.3.0-beta.2
 
 ### New
 * Windows speech support thanks to @asherchok for the PR.
 
 ### Fix
 * Issue with numeric conversion for Web thanks to @uniqdev-id for the PR.
-
+* iOS now performs speech work on a separate thread
 
 ## 7.2.0
 
