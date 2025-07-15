@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.3.0-beta.2
+## 7.3.0-beta.3
 
 ### New
 * Windows speech support thanks to @asherchok for the PR.
