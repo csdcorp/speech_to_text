@@ -44,3 +44,5 @@ flutter:
       macos:
         pluginClass: SpeechToTextPlugin
         sharedDarwinSource: true
+      windows:
+        pluginClass: SpeechToTextPlugin
