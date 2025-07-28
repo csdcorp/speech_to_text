@@ -1,6 +1,6 @@
 name: speech_to_text_windows
 description: Windows implementation of speech_to_text plugin using UWP Speech Recognition APIs
-version: 1.0.0+beta.1
+version: 1.0.0+beta.2
 homepage: https://github.com/csdcorp/speech_to_text
 
 environment:
