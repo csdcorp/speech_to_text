@@ -63,6 +63,7 @@ class SpeechListenOptions {
   final sampleRate;
   final autoPunctuation;
   final enableHapticFeedback;
+  final speechInputPossiblyCompleteSilenceLengthMs;
 
   SpeechListenOptions(
       {
@@ -95,7 +96,13 @@ class SpeechListenOptions {
       /// If true haptic feedback will be enabled during the listen session.
       /// Usually haptics are suppressed during speech recognition to avoid
       /// interference with the microphone. Currently only supported on iOS.
-      this.enableHapticFeedback = false});
+      this.enableHapticFeedback = false,
+
+      /// The length of silence in milliseconds that is considered to be
+      /// the end of a speech input. This is used to determine when
+      /// the speech input is complete and no more speech is expected,
+      /// currently only supported on android.
+      this.speechInputPossiblyCompleteSilenceLengthMs = 500});
 
   SpeechListenOptions copyWith(
       {bool? cancelOnError,
@@ -104,7 +111,8 @@ class SpeechListenOptions {
       ListenMode? listenMode,
       int? sampleRate,
       bool? autoPunctuation,
-      bool? enableHapticFeedback}) {
+      bool? enableHapticFeedback,
+      int? speechInputPossiblyCompleteSilenceLengthMs}) {
     return SpeechListenOptions(
         cancelOnError: cancelOnError ?? this.cancelOnError,
         partialResults: partialResults ?? this.partialResults,
@@ -113,7 +121,10 @@ class SpeechListenOptions {
         sampleRate: sampleRate ?? this.sampleRate,
         autoPunctuation: autoPunctuation ?? this.autoPunctuation,
         enableHapticFeedback:
-            enableHapticFeedback ?? this.enableHapticFeedback);
+            enableHapticFeedback ?? this.enableHapticFeedback,
+        speechInputPossiblyCompleteSilenceLengthMs:
+            speechInputPossiblyCompleteSilenceLengthMs ??
+                this.speechInputPossiblyCompleteSilenceLengthMs);
   }
 }
 

@@ -112,6 +112,7 @@ public class SpeechToTextPlugin :
     private var previousRecognizerLang: String? = null
     private var previousPartialResults: Boolean = true
     private var previousListenMode: ListenMode = ListenMode.deviceDefault
+    private var previousSpeechInputPossiblyCompleteSilenceLengthMs: Int? = null
     private var lastFinalTime: Long = 0
     private var speechStartTime: Long = 0
     private var minRms: Float = 1000.0F
@@ -198,7 +199,9 @@ public class SpeechToTextPlugin :
                                 "listenMode is required", null)
                         return
                     }
-                    startListening(result, localeId, partialResults, listenModeIndex, onDevice )
+                    val speechInputPossiblyCompleteSilenceLengthMs =
+                        call.argument<Int>("speechInputPossiblyCompleteSilenceLengthMs") ?: 500 // default value
+                    startListening(result, localeId, partialResults, listenModeIndex, onDevice, speechInputPossiblyCompleteSilenceLengthMs )
                 }
                 "stop" -> stopListening(result)
                 "cancel" -> cancelListening(result)
@@ -262,7 +265,7 @@ public class SpeechToTextPlugin :
     }
 
     private fun startListening(result: Result, languageTag: String, partialResults: Boolean,
-                               listenModeIndex: Int, onDevice: Boolean) {
+                               listenModeIndex: Int, onDevice: Boolean, speechInputCompleteSilenceMs: Int) {
         if (sdkVersionTooLow() || isNotInitialized() || isListening()) {
             result.success(false)
             return
@@ -270,13 +273,13 @@ public class SpeechToTextPlugin :
         var listenMode = enumValues<ListenMode>()[listenModeIndex]
 
         resultSent = false
-        createRecognizer(onDevice, listenMode)
+        createRecognizer(onDevice, listenMode, speechInputCompleteSilenceMs)
         minRms = 1000.0F
         maxRms = -100.0F
         debugLog("Start listening")
 
         optionallyStartBluetooth()
-        setupRecognizerIntent(languageTag, partialResults, listenMode, onDevice )
+        setupRecognizerIntent(languageTag, partialResults, listenMode, onDevice, speechInputCompleteSilenceMs )
         handler.post {
             run {
                 speechRecognizer?.startListening(recognizerIntent)
@@ -569,7 +572,7 @@ public class SpeechToTextPlugin :
         return list.firstOrNull()?.serviceInfo?.let { ComponentName(it.packageName, it.name) }
     }
 
-    private fun createRecognizer(onDevice: Boolean, listenMode: ListenMode) {
+    private fun createRecognizer(onDevice: Boolean, listenMode: ListenMode, speechInputCompleteSilenceMs: Int) {
         if ( null != speechRecognizer && onDevice == lastOnDevice ) {
             return
         }
@@ -616,18 +619,20 @@ public class SpeechToTextPlugin :
             }
         }
         debugLog("before setup intent")
-        setupRecognizerIntent(defaultLanguageTag, true, listenMode, false )
+        setupRecognizerIntent(defaultLanguageTag, true, listenMode, false, speechInputCompleteSilenceMs )
         debugLog("after setup intent")
     }
 
-    private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean, listenMode: ListenMode, onDevice: Boolean ) {
+    private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean, listenMode: ListenMode, onDevice: Boolean, speechInputCompleteSilenceMs: Int ) {
         debugLog("setupRecognizerIntent")
         if (previousRecognizerLang == null ||
                 previousRecognizerLang != languageTag ||
-                partialResults != previousPartialResults || previousListenMode != listenMode ) {
+                partialResults != previousPartialResults || previousListenMode != listenMode ||
+                previousSpeechInputPossiblyCompleteSilenceLengthMs != speechInputCompleteSilenceMs ) {
             previousRecognizerLang = languageTag;
             previousPartialResults = partialResults
             previousListenMode = listenMode
+            previousSpeechInputPossiblyCompleteSilenceLengthMs = speechInputCompleteSilenceMs
             handler.post {
                 run {
                     recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -655,6 +660,8 @@ public class SpeechToTextPlugin :
                             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, onDevice );
                         }
                         putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,10)
+
+                        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, speechInputCompleteSilenceMs)
                     }
                 }
             }
