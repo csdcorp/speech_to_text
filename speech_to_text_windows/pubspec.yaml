@@ -9,6 +9,7 @@ environment:
 
 flutter:
   plugin:
+    implements: speech_to_text_platform_interface
     platforms:
       windows:
         pluginClass: SpeechToTextWindowsPlugin
