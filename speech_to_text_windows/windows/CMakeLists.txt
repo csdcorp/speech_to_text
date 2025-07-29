@@ -7,8 +7,8 @@ set(PLUGIN_NAME "speech_to_text_windows_plugin")
 
 # Define the plugin library target
 add_library(${PLUGIN_NAME} SHARED
-  "speech_to_text_windows_plugin.h"
-  "speech_to_text_windows_plugin.cpp"
+  "windows/speech_to_text_windows_plugin.h"
+  "windows/speech_to_text_windows_plugin.cpp"
 )
 
 # Apply standard Flutter plugin settings
