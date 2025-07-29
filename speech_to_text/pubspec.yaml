@@ -46,4 +46,4 @@ flutter:
         pluginClass: SpeechToTextPlugin
         sharedDarwinSource: true
       windows: 
-        defaultPackage: speech_to_text_windows
+        default_package: speech_to_text_windows
