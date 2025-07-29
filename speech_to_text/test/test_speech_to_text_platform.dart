@@ -31,11 +31,11 @@ class TestSpeechToTextPlatform extends SpeechToTextPlatform {
   static const double firstConfidence = 0.85;
   static const double secondConfidence = 0.62;
   static const String firstRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"finalResult":false}';
+      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"resultType":${ResultType.partial.value}}';
   static const String secondRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":false}';
+      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"resultType":${ResultType.partial.value}}';
   static const String finalRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":true}';
+      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"resultType":${ResultType.finalResult.value}}';
   static const SpeechRecognitionWords firstWords =
       SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
   static const SpeechRecognitionWords secondWords =

@@ -264,7 +264,7 @@ void main() {
         expect(speech.isListening, isFalse);
       });
     });
-    test('creates finalResult true if none provided', () async {
+    test('creates resultType finalResult if none provided', () async {
       fakeAsync((fa) {
         speech.initialize(finalTimeout: Duration(milliseconds: 100));
         fa.flushMicrotasks();
@@ -277,7 +277,7 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 100 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2100));
-        expect(listener.results.last.finalResult, isTrue);
+        expect(listener.results.last.resultTypeValue, isTrue ? ResultType.finalResult : ResultType.partialResult);
       });
     });
     test('respects finalTimeout', () async {
@@ -293,10 +293,10 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 200 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2200));
-        expect(listener.results.last.finalResult, isFalse);
+        expect(listener.results.last.resultTypeValue, isFalse ? ResultType.partialResult : ResultType.finalResult);
       });
     });
-    test('returns only one finalResult true if provided', () async {
+    test('returns only one resultType finalResult if provided', () async {
       fakeAsync((fa) {
         speech.initialize(finalTimeout: Duration(milliseconds: 100));
         fa.flushMicrotasks();
@@ -309,11 +309,11 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 100 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2100));
-        expect(listener.results.last.finalResult, isTrue);
+        expect(listener.results.last.resultTypeValue, isTrue ? ResultType.finalResult : ResultType.partialResult);
         expect(listener.results, hasLength(1));
       });
     });
-    test('returns only one finalResult true if provided after finalTimeout',
+    test('returns only one resultType finalResult if provided after finalTimeout',
         () async {
       fakeAsync((fa) {
         speech.initialize(finalTimeout: Duration(milliseconds: 100));
@@ -326,7 +326,7 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 100 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2100));
-        expect(listener.results.last.finalResult, isTrue);
+        expect(listener.results.last.resultTypeValue, isTrue ? ResultType.finalResult : ResultType.partialResult);
         testPlatform
             .onTextRecognition!(TestSpeechChannelHandler.finalRecognizedJson);
         fa.flushMicrotasks();

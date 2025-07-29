@@ -7,7 +7,7 @@ part 'speech_recognition_result.g.dart';
 ///
 /// Depending on the platform behaviour the words may come in all
 /// at once at the end or as partial results as each word is
-/// recognized. Use the [finalResult] flag to determine if the
+/// recognized. Use the [resultType] flag to determine if the
 /// result is considered final by the platform.
 @JsonSerializable(explicitToJson: true)
 class SpeechRecognitionResult {
@@ -34,7 +34,14 @@ class SpeechRecognitionResult {
 
   /// False means the words are an interim result, true means
   /// they are the final recognition.
-  final bool finalResult;
+  final int resultType;
+
+  @JsonKey(ignore: true)
+  bool get finalResult => resultType == ResultType.finalResult.value;
+
+  @JsonKey(ignore: true)
+  ResultType get resultTypeValue =>
+      ResultType.fromValue(resultType);
 
   /// The confidence that the [recognizedWords] are correct.
   ///
@@ -60,11 +67,11 @@ class SpeechRecognitionResult {
   bool get hasConfidenceRating =>
       alternates.isNotEmpty ? alternates.first.hasConfidenceRating : false;
 
-  SpeechRecognitionResult(this.alternates, this.finalResult);
+  SpeechRecognitionResult(this.alternates, this.resultType);
 
   @override
   String toString() {
-    return 'SpeechRecognitionResult words: $alternates, final: $finalResult';
+    return 'SpeechRecognitionResult words: $alternates, resultType: $resultTypeValue';
   }
 
   @override
@@ -72,7 +79,7 @@ class SpeechRecognitionResult {
     return identical(this, other) ||
         other is SpeechRecognitionResult &&
             recognizedWords == other.recognizedWords &&
-            finalResult == other.finalResult;
+            resultTypeValue == other.resultTypeValue;
   }
 
   @override
@@ -83,7 +90,7 @@ class SpeechRecognitionResult {
   Map<String, dynamic> toJson() => _$SpeechRecognitionResultToJson(this);
 
   SpeechRecognitionResult toFinal() {
-    return SpeechRecognitionResult(alternates, true);
+    return SpeechRecognitionResult(alternates, ResultType.finalResult.value);
   }
 }
 
@@ -153,4 +160,25 @@ class SpeechRecognitionWords {
   factory SpeechRecognitionWords.fromJson(Map<String, dynamic> json) =>
       _$SpeechRecognitionWordsFromJson(json);
   Map<String, dynamic> toJson() => _$SpeechRecognitionWordsToJson(this);
+}
+
+enum ResultType {
+  partial(0),
+  intermediate(1),
+  finalResult(2),
+  ;
+
+  final int value;
+
+  const ResultType(this.value);
+
+  static ResultType fromValue(int value) {
+    return ResultType.values.firstWhere(
+          (e) => e.value == value,
+      orElse: () =>
+      throw ArgumentError(
+      'Invalid ResultType value: $value',
+      ),
+    );
+  }
 }

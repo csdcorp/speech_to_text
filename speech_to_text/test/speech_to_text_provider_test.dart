@@ -73,7 +73,7 @@ void main() {
         var result = speechListener.recognitionResult;
         expect(result?.recognizedWords,
             TestSpeechChannelHandler.secondRecognizedWords);
-        expect(result?.finalResult, isTrue);
+        expect(result?.resultType, isTrue ? ResultType.finalResult : ResultType.partialResult);
       });
     });
     test('hasResult false after listening before new results', () async {
@@ -97,7 +97,7 @@ void main() {
         var result = speechListener.recognitionResult;
         expect(result?.recognizedWords,
             TestSpeechChannelHandler.firstRecognizedWords);
-        expect(result?.finalResult, isFalse);
+        expect(result?.resultType, isFalse ? ResultType.partialResult : ResultType.finalResult);
       });
     });
   });

@@ -73,6 +73,20 @@ enum class ListenMode {
     confirmation,
 }
 
+enum class ResultType {
+    partial,
+    intermediate,
+    finalResult,
+}
+
+fun ResultType.intValue(): Int {
+    return when (this) {
+        ResultType.partial -> 0
+        ResultType.intermediate -> 1
+        ResultType.finalResult -> 2
+    }
+}
+
 const val pluginChannelName = "plugin.csdcorp.com/speech_to_text"
 
 @TargetApi(8)
@@ -427,7 +441,15 @@ public class SpeechToTextPlugin :
         val userSaid = speechBundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         if (null != userSaid && userSaid.isNotEmpty()) {
             val speechResult = JSONObject()
-            speechResult.put("finalResult", isFinal)
+            val finalResult = speechBundle.getBoolean("final_result", false)
+            val resultType = if (isFinal) {
+                ResultType.finalResult
+            } else if (finalResult) {
+                ResultType.intermediate
+            } else {
+                ResultType.partial
+            }
+            speechResult.put("resultType", resultType.intValue())
             val confidence = speechBundle.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
             val alternates = JSONArray()
             for (resultIndex in 0..userSaid.size - 1) {
