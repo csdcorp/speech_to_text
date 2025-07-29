@@ -5,10 +5,16 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 # This value is used when generating builds using this plugin, so it must not be changed
 set(PLUGIN_NAME "speech_to_text_windows_plugin")
 
+list(APPEND PLUGIN_SOURCES
+  "speech_to_text_windows_plugin.cpp"
+  "speech_to_text_windows_plugin.h"
+)
+
 # Define the plugin library target
 add_library(${PLUGIN_NAME} SHARED
-  "windows/speech_to_text_windows_plugin.h"
-  "windows/speech_to_text_windows_plugin.cpp"
+  "include/speech_to_text_windows/speech_to_text_windows.h"
+  "speech_to_text_windows.cpp"
+  ${PLUGIN_SOURCES}
 )
 
 # Apply standard Flutter plugin settings
@@ -48,10 +54,6 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-# Make sure the plugin headers are available with correct path
-target_include_directories(${PLUGIN_NAME} PUBLIC
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-)
 
 # Link Flutter libraries
 target_link_libraries(${PLUGIN_NAME} PRIVATE 
