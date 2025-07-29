@@ -54,6 +54,10 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
+# Make sure the plugin headers are available with correct path
+target_include_directories(${PLUGIN_NAME} PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 
 # Link Flutter libraries
 target_link_libraries(${PLUGIN_NAME} PRIVATE 
