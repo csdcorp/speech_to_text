@@ -18,7 +18,7 @@ dependencies:
     sdk: flutter
   meta: ^1.1.7
   web: ^1.0.0
-  speech_to_text_windows: ^1.0.0+beta.4
+  speech_to_text_windows: ^1.0.0+beta.5
 
 dev_dependencies:
   flutter_test:
