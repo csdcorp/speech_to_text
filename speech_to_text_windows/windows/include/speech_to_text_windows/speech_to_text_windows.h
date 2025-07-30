@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-FLUTTER_PLUGIN_EXPORT void LocalAuthPluginRegisterWithRegistrar(
+FLUTTER_PLUGIN_EXPORT void SpeechToTextWindowsRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar);
 
 #if defined(__cplusplus)
