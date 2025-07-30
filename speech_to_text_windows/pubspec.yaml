@@ -1,6 +1,6 @@
 name: speech_to_text_windows
 description: Windows implementation of speech_to_text plugin using UWP Speech Recognition APIs
-version: 1.0.0+beta.5
+version: 1.0.0+beta.6
 homepage: https://github.com/csdcorp/speech_to_text
 
 environment:
@@ -13,7 +13,7 @@ flutter:
     platforms:
       windows:
         pluginClass: SpeechToTextWindowsPlugin
-        fileName: speech_to_text_windows.dart
+        dartPluginClass: SpeechToTextWindows
 
 dependencies:
   flutter:
