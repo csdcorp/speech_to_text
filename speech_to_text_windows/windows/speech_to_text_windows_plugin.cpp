@@ -12,6 +12,9 @@
 
 namespace speech_to_text_windows {
 
+#define PARTIAL_RESULT 0
+#define FINAL_RESULT 2
+
 void SpeechToTextWindowsPlugin::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows *registrar) {
   auto channel =
@@ -329,7 +332,7 @@ void SpeechToTextWindowsPlugin::GetLocales(
 void SpeechToTextWindowsPlugin::SendTextRecognition(const std::string& text, bool is_final) {
   if (m_channel) {
     std::string json_result = "{\"recognizedWords\":\"" + text + 
-                             "\",\"finalResult\":" + (is_final ? "true" : "false") + "}";
+                             "\",\"finalResult\":" + (is_final ? std::to_string(FINAL_RESULT) : std::to_string(PARTIAL_RESULT)) + "}";
     std::cout << "Sending to Flutter: " << json_result << std::endl;
     m_channel->InvokeMethod("textRecognition", 
         std::make_unique<flutter::EncodableValue>(json_result));
