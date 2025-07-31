@@ -216,7 +216,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
   }
 
   void _onResult(web.SpeechRecognitionEvent event) {
-    var isFinal = false;
+    var resultType = ResultType.partial;
     var recogResults = <SpeechRecognitionWords>[];
     var results = event.results;
 
@@ -243,7 +243,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
       ++resultIndex;
     }
     recogResults = balanced.getAlternates(_aggregateResults);
-    var result = SpeechRecognitionResult(recogResults, isFinal);
+    var result = SpeechRecognitionResult(recogResults, resultType.value);
     onTextRecognition?.call(jsonEncode(result.toJson()));
     _resultSent = true;
   }
