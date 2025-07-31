@@ -650,7 +650,7 @@ class SpeechToText {
       }
       // print('  ${alternate.recognizedWords} ${alternate.confidence}');
     }
-    return SpeechRecognitionResult(alternates, result.finalResult);
+    return SpeechRecognitionResult(alternates, result.resultType);
   }
 
   void _onFinalTimeout() {

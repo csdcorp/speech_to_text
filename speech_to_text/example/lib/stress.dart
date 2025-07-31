@@ -260,7 +260,7 @@ class _MyAppState extends State<MyApp> {
 
   void resultListener(SpeechRecognitionResult result) {
     setState(() {
-      lastWords = '${result.recognizedWords} - ${result.finalResult}';
+      lastWords = '${result.recognizedWords} - ${result.resultTypeValue}';
     });
   }
 
