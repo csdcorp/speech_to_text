@@ -69,6 +69,9 @@ class SpeechRecognitionResult {
 
   SpeechRecognitionResult(this.alternates, this.resultType);
 
+  SpeechRecognitionResult.init(this.alternates, ResultType resultType)
+      : resultType = resultType.value;
+
   @override
   String toString() {
     return 'SpeechRecognitionResult words: $alternates, resultType: $resultTypeValue';

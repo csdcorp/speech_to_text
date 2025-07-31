@@ -243,7 +243,7 @@ class SpeechToTextPlugin extends SpeechToTextPlatform {
       ++resultIndex;
     }
     recogResults = balanced.getAlternates(_aggregateResults);
-    var result = SpeechRecognitionResult(recogResults, resultType.value);
+    var result = SpeechRecognitionResult.init(recogResults, resultType);
     onTextRecognition?.call(jsonEncode(result.toJson()));
     _resultSent = true;
   }

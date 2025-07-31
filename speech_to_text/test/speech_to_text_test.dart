@@ -368,9 +368,9 @@ void main() {
     test('aggregates phrases if provided', () async {
       await speech.initialize();
       await speech.listen(onResult: listener.onSpeechResult);
-      final resultWithAggregaes = SpeechRecognitionResult([
+      final resultWithAggregaes = SpeechRecognitionResult.init([
         TestSpeechChannelHandler.firstPhrases,
-      ], false);
+      ], ResultType.partialResult);
       testPlatform.onTextRecognition!(jsonEncode(resultWithAggregaes.toJson()));
       expect(listener.speechResults, 1);
       expect(
@@ -384,9 +384,9 @@ void main() {
       await speech.initialize();
       speech.unexpectedPhraseAggregator = (phrases) => phrases.join('. ');
       await speech.listen(onResult: listener.onSpeechResult);
-      final resultWithAggregaes = SpeechRecognitionResult([
+      final resultWithAggregaes = SpeechRecognitionResult.init([
         TestSpeechChannelHandler.firstPhrases,
-      ], false);
+      ], ResultType.partialResult);
       testPlatform.onTextRecognition!(jsonEncode(resultWithAggregaes.toJson()));
       expect(listener.speechResults, 1);
       final expectedAggregate =
