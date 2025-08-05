@@ -63,7 +63,7 @@ class SpeechListenOptions {
   final sampleRate;
   final autoPunctuation;
   final enableHapticFeedback;
-  final speechInputPossiblyCompleteSilenceLengthMs;
+  final int? speechInputPossiblyCompleteSilenceLengthMs;
 
   SpeechListenOptions(
       {
@@ -102,7 +102,7 @@ class SpeechListenOptions {
       /// the end of a speech input. This is used to determine when
       /// the speech input is complete and no more speech is expected,
       /// currently only supported on android.
-      this.speechInputPossiblyCompleteSilenceLengthMs = 500});
+      this.speechInputPossiblyCompleteSilenceLengthMs});
 
   SpeechListenOptions copyWith(
       {bool? cancelOnError,

@@ -112,7 +112,7 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
       "enableHaptics": options?.enableHapticFeedback ?? false,
       "autoPunctuation": options?.autoPunctuation ?? false,
       "speechInputPossiblyCompleteSilenceLengthMs":
-          options?.speechInputPossiblyCompleteSilenceLengthMs ?? 500,
+          options?.speechInputPossiblyCompleteSilenceLengthMs ?? null,
     };
     if (null != localeId) {
       listenParams["localeId"] = localeId;
