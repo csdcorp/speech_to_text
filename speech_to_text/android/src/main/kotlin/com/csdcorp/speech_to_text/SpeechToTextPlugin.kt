@@ -133,6 +133,8 @@ public class SpeechToTextPlugin :
     private var maxRms: Float = -100.0F
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val defaultLanguageTag: String = Locale.getDefault().toLanguageTag()
+    private var timer: Timer? = null
+    private lateinit var timerTask: TimerTask
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
 
@@ -214,7 +216,14 @@ public class SpeechToTextPlugin :
                         return
                     }
                     val speechInputPossiblyCompleteSilenceLengthMs =
-                        call.argument<Int?>("speechInputPossiblyCompleteSilenceLengthMs") // default value
+                        call.argument<Int?>("speechInputPossiblyCompleteSilenceLengthMs")
+                            ?.let {
+                                if (it > MAX_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MS) {
+                                    MAX_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MS
+                                } else {
+                                    it
+                                }
+                            } // default value
                     startListening(result, localeId, partialResults, listenModeIndex, onDevice, speechInputPossiblyCompleteSilenceLengthMs )
                 }
                 "stop" -> stopListening(result)
@@ -411,6 +420,10 @@ public class SpeechToTextPlugin :
         debugLog("Notify status:" + status)
         channel?.invokeMethod(SpeechToTextCallbackMethods.notifyStatus.name, status)
         if ( !isRecording ) {
+            if (timer != null) {
+                timer?.cancel()
+                timer = null
+            }
             val doneStatus = when( resultSent) {
                 false -> SpeechToTextStatus.doneNoResult.name
                 else -> SpeechToTextStatus.done.name
@@ -720,7 +733,30 @@ public class SpeechToTextPlugin :
 
     override fun onPartialResults(results: Bundle?) = updateResults(results, false)
     override fun onResults(results: Bundle?) = updateResults(results, true)
-    override fun onEndOfSpeech() = notifyListening(isRecording = false)
+    override fun onBeginningOfSpeech() {
+        if (timer != null) {
+            timer?.cancel()
+            timer = null
+        }
+    }
+
+    override fun onEndOfSpeech() {
+        (previousSpeechInputPossiblyCompleteSilenceLengthMs ?: 1000).also {
+            timerTask = object : TimerTask() {
+                override fun run() {
+                    timer = null
+                    handler.post {
+                        run {
+                            notifyListening(isRecording = false)
+                        }
+                    }
+                }
+            }
+            timer = Timer().apply {
+                schedule(timerTask, it.toLong())
+            }
+        }
+    }
 
     override fun onError(errorCode: Int) {
         val delta = System.currentTimeMillis() - speechStartTime
@@ -787,7 +823,10 @@ public class SpeechToTextPlugin :
     override fun onReadyForSpeech(p0: Bundle?) {}
     override fun onBufferReceived(p0: ByteArray?) {}
     override fun onEvent(p0: Int, p1: Bundle?) {}
-    override fun onBeginningOfSpeech() {}
+
+    companion object {
+        private const val MAX_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MS = 10000 // 10 seconds
+    }
 }
 
 // See https://stackoverflow.com/questions/10538791/how-to-set-the-language-in-speech-recognition-on-android/10548680#10548680
