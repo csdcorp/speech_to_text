@@ -163,9 +163,9 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
   /// available after `listen` is called.
   void resultListener(SpeechRecognitionResult result) {
     _logEvent(
-        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+        'Result listener final: ${result.resultTypeValue}, words: ${result.recognizedWords}');
     setState(() {
-      lastWords = '${result.recognizedWords} - ${result.finalResult}';
+      lastWords = '${result.recognizedWords} - ${result.resultTypeValue}';
     });
   }
 
