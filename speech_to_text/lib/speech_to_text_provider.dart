@@ -208,9 +208,11 @@ class SpeechToTextProvider extends ChangeNotifier {
   void _onListenResult(SpeechRecognitionResult result) {
     _lastResult = result;
     _recognitionController.add(SpeechRecognitionEvent(
-        result.finalResult
-            ? SpeechRecognitionEventType.finalRecognitionEvent
-            : SpeechRecognitionEventType.partialRecognitionEvent,
+        switch (result.resultTypeValue){
+          ResultType.finalResult => SpeechRecognitionEventType.finalRecognitionEvent,
+          ResultType.intermediateResult => SpeechRecognitionEventType.intermediateRecognitionEvent,
+          ResultType.partialResult => SpeechRecognitionEventType.partialRecognitionEvent,
+        },
         result,
         null,
         isListening,

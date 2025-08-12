@@ -39,11 +39,11 @@ class TestSpeechChannelHandler {
   static const double firstConfidence = 0.85;
   static const double secondConfidence = 0.62;
   static const String firstRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"finalResult":false}';
+      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"resultType":${ResultType.partial.value}';
   static const String secondRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":false}';
+      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"resultType":${ResultType.partial.value}}';
   static const String finalRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"finalResult":true}';
+      '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"resultType":${ResultType.finalResult.value}}';
   static const SpeechRecognitionWords firstWords =
       SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
   static const SpeechRecognitionWords secondWords =
@@ -55,13 +55,13 @@ class TestSpeechChannelHandler {
   static const firstAggregatePhrases =
       '$firstRecognizedWords $secondRecognizedWords';
   static final SpeechRecognitionResult firstRecognizedResult =
-      SpeechRecognitionResult([firstWords], false);
+      SpeechRecognitionResult.init([firstWords], ResultType.partial);
   static final SpeechRecognitionResult secondRecognizedResult =
-      SpeechRecognitionResult([secondWords], false);
+      SpeechRecognitionResult.init([secondWords], ResultType.partial);
   static final SpeechRecognitionResult finalRecognizedResult =
-      SpeechRecognitionResult([secondWords], true);
+      SpeechRecognitionResult.init([secondWords], ResultType.finalResult);
   static final SpeechRecognitionResult firstPhrasesResult =
-      SpeechRecognitionResult([firstPhrases], true);
+      SpeechRecognitionResult.init([firstPhrases], ResultType.finalResult);
   static const String transientErrorJson =
       '{"errorMsg":"network","permanent":false}';
   static const String permanentErrorJson =

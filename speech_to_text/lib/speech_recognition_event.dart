@@ -11,6 +11,11 @@ enum SpeechRecognitionEventType {
   /// partial events were requested.
   partialRecognitionEvent,
 
+  /// Sent when the recognizer recognizes some speech on the input but it is
+  /// not final yet. This is used to provide intermediate results
+  /// during a listen session.
+  intermediateRecognitionEvent,
+
   /// Sent when there is an error from the platform speech recognizer.
   errorEvent,
 
