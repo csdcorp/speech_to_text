@@ -1,13 +1,15 @@
 # Changelog
 
-## 7.3.0-beta.3
+## 7.3.0
 
 ### New
-* Windows speech support thanks to @asherchok for the PR.
+* Partial Windows speech support thanks to @asherchok for the PR. This is the first draft. 
+version of Windows support and is not yet working properly. However it should now be 
+possible to build for Windows without even if speech recognition does not work properly. 
 
 ### Fix
 * Issue with numeric conversion for Web thanks to @uniqdev-id for the PR.
-* iOS now performs speech work on a separate thread
+* iOS now performs speech work on a separate thread to avoid UI pauses
 
 ## 7.2.0
 

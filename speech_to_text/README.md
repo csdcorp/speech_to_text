@@ -27,7 +27,9 @@ _speech: means most speech recognition features work. Platforms with build but n
 7.3.0
 * Now supports speech recognition on Windows with many thanks to @asherchok 
 for the PR! Note that Windows support is currently in beta, if anyone can try 
-it out please provide feedback. 
+it out please provide feedback, there are known issues and this is not yet 
+ready for production use. 
+* iOS and Mac speech recognition does more work in the background avoiding UI pauses
 
 7.0.0 
 * Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for the PR!
