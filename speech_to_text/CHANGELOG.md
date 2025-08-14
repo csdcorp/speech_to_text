@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.3.1 (Pending)
+
+### Fix
+* Fixed Swift concurrency error with captured variables in Task closure on iOS - resolves build failure with "Reference to captured var 'localeStr' in concurrently-executing code"
+
 ## 7.3.0
 
 ### New

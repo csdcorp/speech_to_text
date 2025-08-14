@@ -171,11 +171,18 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         return
       }
         if #available(iOS 13.0, *) {
+            let capturedLocaleStr = localeStr
+            let capturedPartialResults = partialResults
+            let capturedOnDevice = onDevice
+            let capturedListenMode = listenMode
+            let capturedSampleRate = sampleRate
+            let capturedAutoPunctuation = autoPunctuation
+            let capturedEnableHaptics = enableHaptics
             Task {
                 listenForSpeech(
-                    result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice,
-                    listenMode: listenMode, sampleRate: sampleRate, autoPunctuation: autoPunctuation,
-                    enableHaptics: enableHaptics)
+                    result, localeStr: capturedLocaleStr, partialResults: capturedPartialResults, onDevice: capturedOnDevice,
+                    listenMode: capturedListenMode, sampleRate: capturedSampleRate, autoPunctuation: capturedAutoPunctuation,
+                    enableHaptics: capturedEnableHaptics)
             }
         } else {
             listenForSpeech(
