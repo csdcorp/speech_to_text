@@ -195,7 +195,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "7.3.0-beta.3"
+    version: "7.4.0-beta.1"
   speech_to_text_platform_interface:
     dependency: transitive
     description:
@@ -208,10 +208,10 @@ packages:
     dependency: transitive
     description:
       name: speech_to_text_windows
-      sha256: e4549217198bcf5b62581ca6e0c17d8c67b1b94dce0ba883a39d7d6b475530ff
+      sha256: "2c9846d18253c7bbe059a276297ef9f27e8a2745dead32192525beb208195072"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0+beta.1"
+    version: "1.0.0+beta.8"
   stack_trace:
     dependency: transitive
     description:

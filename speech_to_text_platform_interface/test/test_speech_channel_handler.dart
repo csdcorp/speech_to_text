@@ -54,11 +54,11 @@ class TestSpeechChannelHandler {
   // static const SpeechRecognitionWords secondWords =
   //     SpeechRecognitionWords(secondRecognizedWords, secondConfidence);
   // static final SpeechRecognitionResult firstRecognizedResult =
-  //     SpeechRecognitionResult([firstWords], false);
+  //     SpeechRecognitionResult.init([firstWords], ResultType.partial);
   // static final SpeechRecognitionResult secondRecognizedResult =
-  //     SpeechRecognitionResult([secondWords], false);
+  //     SpeechRecognitionResult.init([secondWords], ResultType.partial);
   // static final SpeechRecognitionResult finalRecognizedResult =
-  //     SpeechRecognitionResult([secondWords], true);
+  //     SpeechRecognitionResult.init([secondWords], ResultType.finalResult);
   static const String transientErrorJson =
       '{"errorMsg":"network","permanent":false}';
   static const String permanentErrorJson =

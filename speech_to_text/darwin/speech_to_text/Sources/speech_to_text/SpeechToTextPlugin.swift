@@ -51,6 +51,11 @@ public enum ListenMode: Int {
   case confirmation = 3
 }
 
+public enum ResultType: Int {
+  case partial = 0
+  case finalResult = 2
+}
+
 struct SpeechRecognitionWords: Codable {
   let recognizedWords: String
   let recognizedPhrases: [String]?
@@ -59,7 +64,7 @@ struct SpeechRecognitionWords: Codable {
 
 struct SpeechRecognitionResult: Codable {
   let alternates: [SpeechRecognitionWords]
-  let finalResult: Bool
+  let resultType: Int
 }
 
 struct SpeechRecognitionError: Codable {
@@ -956,7 +961,7 @@ private class SpeechResultAggregator {
                 recognizedWords: transcription.formattedString, recognizedPhrases: nil, confidence: confidenceIn(transcription))
             speechWords.append(words)
         }
-        return SpeechRecognitionResult(alternates: speechWords, finalResult: isFinal )
+        return SpeechRecognitionResult(alternates: speechWords, resultType: isFinal ? ResultType.finalResult.rawValue : ResultType.partial.rawValue )
 
     }
     

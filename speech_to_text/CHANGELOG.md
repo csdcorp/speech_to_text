@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.3.1 (Pending)
+## 7.4.0-beta.1
+
+### New
+* Android now respects the pauseFor value
 
 ### Fix
 * Fixed Swift concurrency error with captured variables in Task closure on iOS - resolves build failure with "Reference to captured var 'localeStr' in concurrently-executing code"
