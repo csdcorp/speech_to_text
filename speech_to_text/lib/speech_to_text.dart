@@ -474,7 +474,7 @@ class SpeechToText {
     _partialResults = partialResults;
     _notifyFinalTimer?.cancel();
     _notifyFinalTimer = null;
-    final usedOptions = listenOptions ??
+    var usedOptions = listenOptions ??
         SpeechListenOptions(
           partialResults: partialResults || null != pauseFor,
           onDevice: onDevice,
@@ -485,6 +485,8 @@ class SpeechToText {
           listenFor: listenFor,
           localeId: localeId,
         );
+    usedOptions = usedOptions.copyWith(
+        pauseFor: pauseFor, listenFor: listenFor, localeId: localeId);
     try {
       var started = await SpeechToTextPlatform.instance
           .listen(localeId: localeId, options: usedOptions);

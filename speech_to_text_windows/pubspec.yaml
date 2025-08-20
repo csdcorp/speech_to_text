@@ -18,7 +18,7 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
-  speech_to_text_platform_interface: ^2.4.0-beta.1
+  speech_to_text_platform_interface: ^2.4.0-beta.2
 
 dev_dependencies:
   flutter_test:

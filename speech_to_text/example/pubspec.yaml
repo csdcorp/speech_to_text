@@ -12,6 +12,7 @@ dependencies:
 
   speech_to_text:
     path: ../
+    version: ^7.4.0-beta.2
   provider: ^6.0.5
 
 dev_dependencies:
