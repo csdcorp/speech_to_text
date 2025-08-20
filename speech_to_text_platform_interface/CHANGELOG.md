@@ -1,3 +1,6 @@
+## 2.4.0-beta.1
+- New properties on SpeechListenOptions for pauseFor, listenFor and localeId
+
 ## 2.3.0
 - Added copyWith to SpeechListenOptions
 

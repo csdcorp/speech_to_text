@@ -63,56 +63,70 @@ class SpeechListenOptions {
   final sampleRate;
   final autoPunctuation;
   final enableHapticFeedback;
-  final int? speechInputPossiblyCompleteSilenceLengthMs;
+  final Duration? pauseFor;
+  final Duration? listenFor;
+  final String? localeId;
 
-  SpeechListenOptions(
-      {
-      /// If true the listen session will automatically be canceled on a permanent error.
-      this.cancelOnError = false,
+  SpeechListenOptions({
+    /// If true the listen session will automatically be canceled on a permanent error.
+    this.cancelOnError = false,
 
-      /// If true the listen session will report partial results as they
-      /// are recognized. When false only the final results will be reported.
-      this.partialResults = true,
+    /// If true the listen session will report partial results as they
+    /// are recognized. When false only the final results will be reported.
+    this.partialResults = true,
 
-      /// If true the listen session will only use on device recognition. If
-      /// it cannot do this the listen attempt will fail. This is usually only
-      /// needed for sensitive content where privacy or security is a concern.
-      /// If false the listen session will use both on device and network
-      /// recognition.
-      this.onDevice = false,
+    /// If true the listen session will only use on device recognition. If
+    /// it cannot do this the listen attempt will fail. This is usually only
+    /// needed for sensitive content where privacy or security is a concern.
+    /// If false the listen session will use both on device and network
+    /// recognition.
+    this.onDevice = false,
 
-      /// The listen mode to use, currently only supported on iOS.
-      this.listenMode = ListenMode.confirmation,
+    /// The listen mode to use, currently only supported on iOS.
+    this.listenMode = ListenMode.confirmation,
 
-      /// The sample rate to use, currently only needed on iOS for some use
-      /// cases. Occasionally some devices crash with `sampleRate != device's
-      /// supported sampleRate`, try 44100 if seeing crashes.
-      this.sampleRate = 0,
+    /// The sample rate to use, currently only needed on iOS for some use
+    /// cases. Occasionally some devices crash with `sampleRate != device's
+    /// supported sampleRate`, try 44100 if seeing crashes.
+    this.sampleRate = 0,
 
-      /// If true the listen session will automatically add punctuation to
-      /// the recognized text. This is only supported on iOS.
-      this.autoPunctuation = false,
+    /// If true the listen session will automatically add punctuation to
+    /// the recognized text. This is only supported on iOS.
+    this.autoPunctuation = false,
 
-      /// If true haptic feedback will be enabled during the listen session.
-      /// Usually haptics are suppressed during speech recognition to avoid
-      /// interference with the microphone. Currently only supported on iOS.
-      this.enableHapticFeedback = false,
+    /// If true haptic feedback will be enabled during the listen session.
+    /// Usually haptics are suppressed during speech recognition to avoid
+    /// interference with the microphone. Currently only supported on iOS.
+    this.enableHapticFeedback = false,
 
-      /// The length of silence in milliseconds that is considered to be
-      /// the end of a speech input. This is used to determine when
-      /// the speech input is complete and no more speech is expected,
-      /// currently only supported on android.
-      this.speechInputPossiblyCompleteSilenceLengthMs});
+    /// The length of time to pause before the speech input is considered
+    /// complete. This is used to determine when to stop listening for speech
+    /// input.
+    this.pauseFor = null,
 
-  SpeechListenOptions copyWith(
-      {bool? cancelOnError,
-      bool? partialResults,
-      bool? onDevice,
-      ListenMode? listenMode,
-      int? sampleRate,
-      bool? autoPunctuation,
-      bool? enableHapticFeedback,
-      int? speechInputPossiblyCompleteSilenceLengthMs}) {
+    /// The length of time to listen for speech input before stopping.
+    /// This is used to limit the duration of the listen session. If null,
+    /// the listen session will continue until the user stops it or a timeout
+    /// occurs.
+    this.listenFor = null,
+
+    /// The locale to use for the listen session, if null the system default
+    /// locale will be used. This is only supported on iOS and Android.
+    this.localeId = null,
+  });
+
+  SpeechListenOptions copyWith({
+    bool? cancelOnError,
+    bool? partialResults,
+    bool? onDevice,
+    ListenMode? listenMode,
+    int? sampleRate,
+    bool? autoPunctuation,
+    bool? enableHapticFeedback,
+    Duration? pauseFor,
+    Duration? listenFor,
+    String? localeId,
+  }) {
     return SpeechListenOptions(
         cancelOnError: cancelOnError ?? this.cancelOnError,
         partialResults: partialResults ?? this.partialResults,
@@ -120,11 +134,10 @@ class SpeechListenOptions {
         listenMode: listenMode ?? this.listenMode,
         sampleRate: sampleRate ?? this.sampleRate,
         autoPunctuation: autoPunctuation ?? this.autoPunctuation,
-        enableHapticFeedback:
-            enableHapticFeedback ?? this.enableHapticFeedback,
-        speechInputPossiblyCompleteSilenceLengthMs:
-            speechInputPossiblyCompleteSilenceLengthMs ??
-                this.speechInputPossiblyCompleteSilenceLengthMs);
+        enableHapticFeedback: enableHapticFeedback ?? this.enableHapticFeedback,
+        pauseFor: pauseFor ?? this.pauseFor,
+        listenFor: listenFor ?? this.listenFor,
+        localeId: localeId ?? this.localeId);
   }
 }
 

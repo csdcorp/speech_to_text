@@ -111,11 +111,11 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
       "sampleRate": options?.sampleRate ?? sampleRate,
       "enableHaptics": options?.enableHapticFeedback ?? false,
       "autoPunctuation": options?.autoPunctuation ?? false,
-      "speechInputPossiblyCompleteSilenceLengthMs":
-          options?.speechInputPossiblyCompleteSilenceLengthMs ?? null,
+      "pauseFor": options?.pauseFor?.inMilliseconds ?? null,
+      "listenFor": options?.listenFor?.inMilliseconds ?? null,
     };
-    if (null != localeId) {
-      listenParams["localeId"] = localeId;
+    if (null != (localeId ?? options?.localeId)) {
+      listenParams["localeId"] = (localeId ?? options?.localeId);
     }
     return await _channel.invokeMethod<bool>('listen', listenParams) ?? false;
   }
