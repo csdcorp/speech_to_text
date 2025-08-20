@@ -199,18 +199,18 @@ packages:
   speech_to_text_platform_interface:
     dependency: transitive
     description:
-      name: speech_to_text_platform_interface
-      sha256: a1935847704e41ee468aad83181ddd2423d0833abe55d769c59afca07adb5114
-      url: "https://pub.dev"
-    source: hosted
+      path: speech_to_text_platform_interface
+      ref: HEAD
+      resolved-ref: c24de533b5daabd4300ce97f4456460351ce9d5e
+      url: "https://github.com/csdcorp/speech_to_text"
+    source: git
     version: "2.3.0"
   speech_to_text_windows:
     dependency: transitive
     description:
-      name: speech_to_text_windows
-      sha256: "2c9846d18253c7bbe059a276297ef9f27e8a2745dead32192525beb208195072"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../speech_to_text_windows"
+      relative: true
+    source: path
     version: "1.0.0+beta.8"
   stack_trace:
     dependency: transitive

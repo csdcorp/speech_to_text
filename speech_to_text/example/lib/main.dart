@@ -622,7 +622,9 @@ Future<SpeechExampleConfig> showSetUp(BuildContext context,
   updatedOptions = updatedOptions.copyWith(
       listenFor:
           int.tryParse(listenController.text) ?? updatedOptions.listenFor,
-      pauseFor: int.tryParse(pauseController.text) ?? updatedOptions.pauseFor);
+      pauseFor: int.tryParse(pauseController.text) ?? updatedOptions.pauseFor,
+      options: updatedOptions.options
+          .copyWith(speechInputPossiblyCompleteSilenceLengthMs: 50000));
   return updatedOptions;
 }
 

@@ -443,9 +443,11 @@ class SpeechToText {
   /// session. See [SpeechListenOptions] for details.
   Future listen(
       {SpeechResultListener? onResult,
+      @Deprecated('Use SpeechListenOptions.listenFor instead')
       Duration? listenFor,
+      @Deprecated('Use SpeechListenOptions.pauseFor instead')
       Duration? pauseFor,
-      String? localeId,
+      @Deprecated('Use SpeechListenOptions.localeId instead') String? localeId,
       SpeechSoundLevelChange? onSoundLevelChange,
       @Deprecated('Use SpeechListenOptions.cancelOnError instead')
       cancelOnError = false,
@@ -479,6 +481,9 @@ class SpeechToText {
           listenMode: listenMode,
           sampleRate: sampleRate,
           cancelOnError: cancelOnError,
+          pauseFor: pauseFor,
+          listenFor: listenFor,
+          localeId: localeId,
         );
     try {
       var started = await SpeechToTextPlatform.instance
