@@ -1,5 +1,6 @@
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
@@ -73,7 +74,7 @@ void main() {
         var result = speechListener.recognitionResult;
         expect(result?.recognizedWords,
             TestSpeechChannelHandler.secondRecognizedWords);
-        expect(result?.resultType, isTrue ? ResultType.finalResult : ResultType.partialResult);
+        expect(result?.finalResult, isTrue);
       });
     });
     test('hasResult false after listening before new results', () async {
@@ -97,7 +98,7 @@ void main() {
         var result = speechListener.recognitionResult;
         expect(result?.recognizedWords,
             TestSpeechChannelHandler.firstRecognizedWords);
-        expect(result?.resultType, isFalse ? ResultType.partialResult : ResultType.finalResult);
+        expect(result?.finalResult, isFalse);
       });
     });
   });

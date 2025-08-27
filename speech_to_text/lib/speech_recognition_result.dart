@@ -40,8 +40,7 @@ class SpeechRecognitionResult {
   bool get finalResult => resultType == ResultType.finalResult.value;
 
   @JsonKey(ignore: true)
-  ResultType get resultTypeValue =>
-      ResultType.fromValue(resultType);
+  ResultType get resultTypeValue => ResultType.fromValue(resultType);
 
   /// The confidence that the [recognizedWords] are correct.
   ///
@@ -177,10 +176,9 @@ enum ResultType {
 
   static ResultType fromValue(int value) {
     return ResultType.values.firstWhere(
-          (e) => e.value == value,
-      orElse: () =>
-      throw ArgumentError(
-      'Invalid ResultType value: $value',
+      (e) => e.value == value,
+      orElse: () => throw ArgumentError(
+        'Invalid ResultType value: $value',
       ),
     );
   }

@@ -277,7 +277,7 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 100 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2100));
-        expect(listener.results.last.resultTypeValue, isTrue ? ResultType.finalResult : ResultType.partialResult);
+        expect(listener.results.last.finalResult, isTrue);
       });
     });
     test('respects finalTimeout', () async {
@@ -293,7 +293,7 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 200 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2200));
-        expect(listener.results.last.resultTypeValue, isFalse ? ResultType.partialResult : ResultType.finalResult);
+        expect(listener.results.last.finalResult, isFalse);
       });
     });
     test('returns only one resultType finalResult if provided', () async {
@@ -309,11 +309,12 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 100 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2100));
-        expect(listener.results.last.resultTypeValue, isTrue ? ResultType.finalResult : ResultType.partialResult);
+        expect(listener.results.last.resultTypeValue, ResultType.finalResult);
         expect(listener.results, hasLength(1));
       });
     });
-    test('returns only one resultType finalResult if provided after finalTimeout',
+    test(
+        'returns only one resultType finalResult if provided after finalTimeout',
         () async {
       fakeAsync((fa) {
         speech.initialize(finalTimeout: Duration(milliseconds: 100));
@@ -326,7 +327,7 @@ void main() {
         // 2200 because it is the 2 second duration of the pauseFor then
         // 100 milliseconds to create the synthetic result
         fa.elapse(Duration(milliseconds: 2100));
-        expect(listener.results.last.resultTypeValue, isTrue ? ResultType.finalResult : ResultType.partialResult);
+        expect(listener.results.last.finalResult, isTrue);
         testPlatform
             .onTextRecognition!(TestSpeechChannelHandler.finalRecognizedJson);
         fa.flushMicrotasks();
@@ -370,7 +371,7 @@ void main() {
       await speech.listen(onResult: listener.onSpeechResult);
       final resultWithAggregaes = SpeechRecognitionResult.init([
         TestSpeechChannelHandler.firstPhrases,
-      ], ResultType.partialResult);
+      ], ResultType.partial);
       testPlatform.onTextRecognition!(jsonEncode(resultWithAggregaes.toJson()));
       expect(listener.speechResults, 1);
       expect(
@@ -386,7 +387,7 @@ void main() {
       await speech.listen(onResult: listener.onSpeechResult);
       final resultWithAggregaes = SpeechRecognitionResult.init([
         TestSpeechChannelHandler.firstPhrases,
-      ], ResultType.partialResult);
+      ], ResultType.partial);
       testPlatform.onTextRecognition!(jsonEncode(resultWithAggregaes.toJson()));
       expect(listener.speechResults, 1);
       final expectedAggregate =

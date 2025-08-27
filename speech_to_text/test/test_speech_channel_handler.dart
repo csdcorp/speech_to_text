@@ -38,11 +38,11 @@ class TestSpeechChannelHandler {
   static const String secondRecognizedWords = 'hello there';
   static const double firstConfidence = 0.85;
   static const double secondConfidence = 0.62;
-  static const String firstRecognizedJson =
-      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"resultType":${ResultType.partial.value}';
-  static const String secondRecognizedJson =
+  static final String firstRecognizedJson =
+      '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"resultType":${ResultType.partial.value}}';
+  static final String secondRecognizedJson =
       '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"resultType":${ResultType.partial.value}}';
-  static const String finalRecognizedJson =
+  static final String finalRecognizedJson =
       '{"alternates":[{"recognizedWords":"$secondRecognizedWords","confidence":$secondConfidence}],"resultType":${ResultType.finalResult.value}}';
   static const SpeechRecognitionWords firstWords =
       SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);

@@ -864,6 +864,7 @@ extension SpeechToTextPlugin: AVAudioPlayerDelegate {
   }
 }
 
+@available(iOS 10.0, macOS 10.15, *)
 private class SpeechResultAggregator {
     private var speechTranscriptions: [SFTranscription]
     private var previousTranscriptions: [[SFTranscription]]
