@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.4.0-beta.3
+## 7.4.0-beta.4
 
 ### New
 * Android now respects the pauseFor value
