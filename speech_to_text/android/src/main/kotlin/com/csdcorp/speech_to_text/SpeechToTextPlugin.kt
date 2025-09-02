@@ -217,13 +217,6 @@ public class SpeechToTextPlugin :
                     }
                     val pauseFor =
                         call.argument<Int?>("pauseFor")
-                            ?.let {
-                                if (it > MAX_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MS) {
-                                    MAX_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MS
-                                } else {
-                                    it
-                                }
-                            } // default value
                     startListening(result, localeId, partialResults, listenModeIndex, onDevice, pauseFor )
                 }
                 "stop" -> stopListening(result)
@@ -824,9 +817,6 @@ public class SpeechToTextPlugin :
     override fun onBufferReceived(p0: ByteArray?) {}
     override fun onEvent(p0: Int, p1: Bundle?) {}
 
-    companion object {
-        private const val MAX_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MS = 10000 // 10 seconds
-    }
 }
 
 // See https://stackoverflow.com/questions/10538791/how-to-set-the-language-in-speech-recognition-on-android/10548680#10548680
