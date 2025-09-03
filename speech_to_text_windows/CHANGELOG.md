@@ -1,6 +1,6 @@
 # speech_to_text_windows releases
 
-## 1.0.0-beta.12
+## 1.0.1-beta.12
 
 ### New
 * First implementation of Windows for speech_to_text
