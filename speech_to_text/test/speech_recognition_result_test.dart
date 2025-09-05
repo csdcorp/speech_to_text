@@ -4,15 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 void main() {
-  final firstRecognizedWords = 'hello';
-  final secondRecognizedWords = 'hello there';
-  final firstConfidence = 0.85;
-  final secondConfidence = 0.62;
+  const firstRecognizedWords = 'hello';
+  const secondRecognizedWords = 'hello there';
+  const firstConfidence = 0.85;
+  const secondConfidence = 0.62;
   final firstRecognizedJson =
       '{"alternates":[{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}],"resultType":${ResultType.partial.value}}';
-  final firstWords =
+  const firstWords =
       SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
-  final secondWords =
+  const secondWords =
       SpeechRecognitionWords(secondRecognizedWords, null, secondConfidence);
 
   setUp(() {});

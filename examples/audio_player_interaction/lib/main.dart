@@ -145,7 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
     _currentActivity = 'listening';
     ++_loopCount;
     // await Future.delayed(Duration(seconds: 1));
-    _speechToText.listen(listenFor: Duration(seconds: 5));
+    _speechToText.listen(
+      listenOptions: SpeechListenOptions(
+        listenFor: Duration(seconds: 5),
+      ),
+    );
     setState(() {});
   }
 

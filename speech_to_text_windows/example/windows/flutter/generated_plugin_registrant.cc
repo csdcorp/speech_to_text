@@ -6,9 +6,9 @@
 
 #include "generated_plugin_registrant.h"
 
-#include <speech_to_text_windows/speech_to_text_windows_plugin.h>
+#include <speech_to_text_windows/speech_to_text_windows.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
-  SpeechToTextWindowsPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("SpeechToTextWindowsPlugin"));
+  SpeechToTextWindowsRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("SpeechToTextWindows"));
 }
