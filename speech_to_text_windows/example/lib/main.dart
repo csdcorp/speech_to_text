@@ -4,11 +4,11 @@ import 'package:speech_to_text_windows/speech_to_text_windows.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   if (defaultTargetPlatform == TargetPlatform.windows) {
     SpeechToTextWindows.registerWith();
   }
-  
+
   runApp(const MyApp());
 }
 
@@ -58,14 +58,14 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
           _lastWords = text;
         });
       };
-      
+
       _speechToText.onStatus = (status) {
         setState(() {
           _status = status;
           _isListening = status == 'listening';
         });
       };
-      
+
       _speechToText.onError = (error) {
         setState(() {
           _status = 'Error: $error';
@@ -77,7 +77,7 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
       _speechEnabled = await _speechToText.initialize(
         debugLogging: true,
       );
-      
+
       if (_speechEnabled) {
         final localeResults = await _speechToText.locales();
         _locales = localeResults.cast<String>();
@@ -90,7 +90,7 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
         _status = 'Initialization error: $e';
       });
     }
-    
+
     setState(() {});
   }
 
@@ -100,7 +100,9 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
     try {
       await _speechToText.listen(
         localeId: _selectedLocale,
-        partialResults: true,
+        options: SpeechListenOptions(
+          partialResults: true,
+        ),
       );
     } catch (e) {
       setState(() {
@@ -150,9 +152,9 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Locale Selection
             if (_locales.isNotEmpty)
               Card(
@@ -174,10 +176,12 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
                             _selectedLocale = newValue;
                           });
                         },
-                        items: _locales.map<DropdownMenuItem<String>>((String locale) {
+                        items: _locales
+                            .map<DropdownMenuItem<String>>((String locale) {
                           final parts = locale.split(':');
                           final localeId = parts.isNotEmpty ? parts[0] : locale;
-                          final displayName = parts.length > 1 ? parts[1] : localeId;
+                          final displayName =
+                              parts.length > 1 ? parts[1] : localeId;
                           return DropdownMenuItem<String>(
                             value: localeId,
                             child: Text('$displayName ($localeId)'),
@@ -188,9 +192,9 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
                   ),
                 ),
               ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Recognition Results
             Expanded(
               child: Card(
@@ -214,7 +218,9 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
                           ),
                           child: SingleChildScrollView(
                             child: Text(
-                              _lastWords.isEmpty ? 'Say something...' : _lastWords,
+                              _lastWords.isEmpty
+                                  ? 'Say something...'
+                                  : _lastWords,
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                           ),
@@ -225,20 +231,22 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Control Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
-                  onPressed: _speechEnabled && !_isListening ? _startListening : null,
+                  onPressed:
+                      _speechEnabled && !_isListening ? _startListening : null,
                   icon: const Icon(Icons.mic),
                   label: const Text('Start Listening'),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _speechEnabled && _isListening ? _stopListening : null,
+                  onPressed:
+                      _speechEnabled && _isListening ? _stopListening : null,
                   icon: const Icon(Icons.mic_off),
                   label: const Text('Stop Listening'),
                   style: ElevatedButton.styleFrom(
@@ -247,11 +255,13 @@ class _SpeechToTextDemoState extends State<SpeechToTextDemo> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _speechEnabled ? () {
-                    setState(() {
-                      _lastWords = '';
-                    });
-                  } : null,
+                  onPressed: _speechEnabled
+                      ? () {
+                          setState(() {
+                            _lastWords = '';
+                          });
+                        }
+                      : null,
                   icon: const Icon(Icons.clear),
                   label: const Text('Clear'),
                 ),

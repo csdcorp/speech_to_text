@@ -8,7 +8,7 @@ import 'package:speech_to_text/speech_to_text_provider.dart';
 /// Note that the provider is initialized elsewhere and just accessed
 /// here.
 class RecognitionResultsWidget extends StatelessWidget {
-  const RecognitionResultsWidget({Key? key}) : super(key: key);
+  const RecognitionResultsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

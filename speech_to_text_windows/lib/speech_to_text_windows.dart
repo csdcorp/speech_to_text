@@ -3,6 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
+export 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart'
+    show SpeechListenOptions;
+
 /// Windows implementation of the speech_to_text plugin using UWP Speech APIs
 class SpeechToTextWindows extends SpeechToTextPlatform {
   static const MethodChannel _channel = MethodChannel('speech_to_text_windows');
@@ -36,11 +39,11 @@ class SpeechToTextWindows extends SpeechToTextPlatform {
   }) async {
     // Set up method call handler when initialize is called
     _channel.setMethodCallHandler(_handleMethodCall);
-    
+
     final Map<String, dynamic> params = {
       'debugLogging': debugLogging,
     };
-    
+
     // Process Windows-specific options
     if (options != null) {
       for (final option in options) {
@@ -51,7 +54,8 @@ class SpeechToTextWindows extends SpeechToTextPlatform {
     }
 
     try {
-      final bool? result = await _channel.invokeMethod<bool>('initialize', params);
+      final bool? result =
+          await _channel.invokeMethod<bool>('initialize', params);
       return result ?? false;
     } catch (e) {
       if (kDebugMode) {
@@ -66,12 +70,10 @@ class SpeechToTextWindows extends SpeechToTextPlatform {
     String? localeId,
     @Deprecated('Use SpeechListenOptions.partialResults instead')
     partialResults = true,
-    @Deprecated('Use SpeechListenOptions.onDevice instead') 
-    onDevice = false,
+    @Deprecated('Use SpeechListenOptions.onDevice instead') onDevice = false,
     @Deprecated('Use SpeechListenOptions.listenMode instead')
     int listenMode = 0,
-    @Deprecated('Use SpeechListenOptions.sampleRate instead') 
-    sampleRate = 0,
+    @Deprecated('Use SpeechListenOptions.sampleRate instead') sampleRate = 0,
     SpeechListenOptions? options,
   }) async {
     final Map<String, dynamic> params = {
@@ -121,7 +123,8 @@ class SpeechToTextWindows extends SpeechToTextPlatform {
   @override
   Future<List<dynamic>> locales() async {
     try {
-      final List<dynamic>? result = await _channel.invokeMethod<List<dynamic>>('locales');
+      final List<dynamic>? result =
+          await _channel.invokeMethod<List<dynamic>>('locales');
       return result ?? [];
     } catch (e) {
       if (kDebugMode) {

@@ -9,7 +9,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 void main() => runApp(const SpeechSampleApp());
 
 class SpeechSampleApp extends StatefulWidget {
-  const SpeechSampleApp({Key? key}) : super(key: key);
+  const SpeechSampleApp({super.key});
 
   @override
   State<SpeechSampleApp> createState() => _SpeechSampleAppState();
@@ -134,11 +134,12 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
     // on some devices.
     speech.listen(
       onResult: resultListener,
-      listenFor: Duration(seconds: currentOptions.listenFor),
-      pauseFor: Duration(seconds: currentOptions.pauseFor),
-      localeId: currentOptions.localeId,
+      listenOptions: currentOptions.options.copyWith(
+        listenFor: Duration(seconds: currentOptions.listenFor),
+        pauseFor: Duration(seconds: currentOptions.pauseFor),
+        localeId: currentOptions.localeId,
+      ),
       onSoundLevelChange: soundLevelListener,
-      listenOptions: currentOptions.options,
     );
     setState(() {});
   }
@@ -205,10 +206,10 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
 /// Displays the most recently recognized words and the sound level.
 class RecognitionResultsWidget extends StatelessWidget {
   const RecognitionResultsWidget({
-    Key? key,
+    super.key,
     required this.lastWords,
     required this.level,
-  }) : super(key: key);
+  });
 
   final String lastWords;
   final double level;
@@ -255,9 +256,9 @@ class RecognitionResultsWidget extends StatelessWidget {
 /// recognizer
 class ErrorWidget extends StatelessWidget {
   const ErrorWidget({
-    Key? key,
+    super.key,
     required this.lastError,
-  }) : super(key: key);
+  });
 
   final String lastError;
 
@@ -287,8 +288,7 @@ class ErrorWidget extends StatelessWidget {
 class SpeechControlWidget extends StatelessWidget {
   const SpeechControlWidget(this.hasSpeech, this.isListening,
       this.startListening, this.stopListening, this.cancelListening,
-      {Key? key})
-      : super(key: key);
+      {super.key});
 
   final bool hasSpeech;
   final bool isListening;
@@ -322,11 +322,10 @@ class SessionOptionsWidget extends StatelessWidget {
   const SessionOptionsWidget(
       {required this.options,
       required this.localeNames,
-      Key? key,
+      super.key,
       required this.onChange,
       required this.listenForController,
-      required this.pauseForController})
-      : super(key: key);
+      required this.pauseForController});
 
   final SpeechExampleConfig options;
   final List<LocaleName> localeNames;
@@ -468,8 +467,7 @@ class SessionOptionsWidget extends StatelessWidget {
 }
 
 class InitSpeechWidget extends StatelessWidget {
-  const InitSpeechWidget(this.hasSpeech, this.initSpeechState, {Key? key})
-      : super(key: key);
+  const InitSpeechWidget(this.hasSpeech, this.initSpeechState, {super.key});
 
   final bool hasSpeech;
   final Future<void> Function() initSpeechState;
@@ -491,9 +489,9 @@ class InitSpeechWidget extends StatelessWidget {
 /// Display the current status of the listener
 class SpeechStatusWidget extends StatelessWidget {
   const SpeechStatusWidget({
-    Key? key,
+    super.key,
     required this.lastStatus,
-  }) : super(key: key);
+  });
 
   final String lastStatus;
 
@@ -627,7 +625,7 @@ Future<SpeechExampleConfig> showSetUp(BuildContext context,
 }
 
 class HelpWidget extends StatelessWidget {
-  const HelpWidget({Key? key}) : super(key: key);
+  const HelpWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -700,9 +698,9 @@ class HelpWidget extends StatelessWidget {
 /// and a circle that changes size based on the sound level.
 class MicrophoneWidget extends StatelessWidget {
   const MicrophoneWidget({
-    Key? key,
+    super.key,
     required this.level,
-  }) : super(key: key);
+  });
 
   final double level;
 

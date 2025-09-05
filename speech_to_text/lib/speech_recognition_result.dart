@@ -36,10 +36,10 @@ class SpeechRecognitionResult {
   /// they are the final recognition.
   final int resultType;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   bool get finalResult => resultType == ResultType.finalResult.value;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   ResultType get resultTypeValue => ResultType.fromValue(resultType);
 
   /// The confidence that the [recognizedWords] are correct.

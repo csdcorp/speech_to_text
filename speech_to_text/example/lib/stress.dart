@@ -8,7 +8,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -235,12 +235,15 @@ class _MyAppState extends State<MyApp> {
     lastWords = '';
     lastError = '';
     speech.listen(
-        onResult: resultListener,
+      onResult: resultListener,
+      onSoundLevelChange: soundLevelListener,
+      listenOptions: SpeechListenOptions(
         listenFor: const Duration(seconds: 10),
         localeId: _currentLocaleId,
-        onSoundLevelChange: soundLevelListener,
-        listenOptions:
-            SpeechListenOptions(cancelOnError: true, partialResults: true));
+        cancelOnError: true,
+        partialResults: true,
+      ),
+    );
     setState(() {});
   }
 

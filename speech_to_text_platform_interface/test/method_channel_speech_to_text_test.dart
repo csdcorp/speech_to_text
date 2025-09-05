@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text_platform_interface/method_channel_speech_to_text.dart';
+import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 import 'test_speech_channel_handler.dart';
 
@@ -87,19 +88,36 @@ void main() {
       expect(channelHandler.listenLocale, TestSpeechChannelHandler.localeId1);
     });
     test('passes onDevice parameter', () async {
-      expect(await speechToText?.listen(onDevice: true), isTrue);
+      expect(
+          await speechToText?.listen(
+            options: SpeechListenOptions(onDevice: true),
+          ),
+          isTrue);
       expect(channelHandler.onDevice, isTrue);
     });
     test('passes partialResults parameter', () async {
-      expect(await speechToText?.listen(partialResults: false), isTrue);
+      expect(
+          await speechToText?.listen(
+            options: SpeechListenOptions(partialResults: false),
+          ),
+          isTrue);
       expect(channelHandler.partialResults, isFalse);
     });
     test('passes listenMode parameter', () async {
-      expect(await speechToText?.listen(listenMode: 3), isTrue);
-      expect(channelHandler.listenMode, 3);
+      expect(
+        await speechToText?.listen(
+          options: SpeechListenOptions(listenMode: ListenMode.search),
+        ),
+        isTrue,
+      );
+      expect(channelHandler.listenMode, ListenMode.search.index);
     });
     test('passes sampleRate parameter', () async {
-      expect(await speechToText?.listen(sampleRate: 10000), isTrue);
+      expect(
+          await speechToText?.listen(
+            options: SpeechListenOptions(sampleRate: 10000),
+          ),
+          isTrue);
       expect(channelHandler.sampleRate, 10000);
     });
   });

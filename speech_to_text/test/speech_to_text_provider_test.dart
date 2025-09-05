@@ -1,6 +1,5 @@
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
