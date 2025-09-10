@@ -13,7 +13,6 @@ dependencies:
   speech_to_text_platform_interface: ^2.4.0-beta.2
   json_annotation: ^4.0.0
   clock: ^1.0.1
-  pedantic: ^1.9.2
   flutter_web_plugins:
     sdk: flutter
   meta: ^1.1.7

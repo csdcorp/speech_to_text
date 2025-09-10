@@ -4,15 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 
 void main() {
-  final firstRecognizedWords = 'hello';
-  final secondRecognizedWords = 'hello there';
-  final firstConfidence = 0.85;
-  final secondConfidence = 0.62;
-  final firstRecognizedJson =
+  const firstRecognizedWords = 'hello';
+  const secondRecognizedWords = 'hello there';
+  const firstConfidence = 0.85;
+  const secondConfidence = 0.62;
+  const firstRecognizedJson =
       '{"recognizedWords":"$firstRecognizedWords","confidence":$firstConfidence}';
-  final firstWords =
+  const firstWords =
       SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
-  final secondWords =
+  const secondWords =
       SpeechRecognitionWords(secondRecognizedWords, null, secondConfidence);
 
   setUp(() {});
@@ -32,7 +32,7 @@ void main() {
     });
     test('equals true for different object with same values', () {
       var firstWordsA =
-          SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
+          const SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
       expect(firstWords, firstWordsA);
     });
     test('equals false for different results', () {
@@ -43,7 +43,7 @@ void main() {
     });
     test('hash same for different object with same values', () {
       var firstWordsA =
-          SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
+          const SpeechRecognitionWords(firstRecognizedWords, null, firstConfidence);
       expect(firstWords.hashCode, firstWordsA.hashCode);
     });
     test('hash different for different results', () {
@@ -61,7 +61,7 @@ void main() {
       expect(secondWords.isConfident(threshold: 0.5), isTrue);
     });
     test('true when missing', () {
-      var words = SpeechRecognitionWords(
+      var words = const SpeechRecognitionWords(
           firstRecognizedWords, null, SpeechRecognitionWords.missingConfidence);
       expect(words.isConfident(), isTrue);
       expect(words.hasConfidenceRating, isFalse);
@@ -82,9 +82,9 @@ void main() {
       expect(words, roundtripWords);
     });
     test('roundtrips correctly with phrases', () {
-      final phrase1 = 'first part';
-      final phrase2 = 'second part';
-      final initialWords = SpeechRecognitionWords(
+      const phrase1 = 'first part';
+      const phrase2 = 'second part';
+      const initialWords = SpeechRecognitionWords(
           firstRecognizedWords, [phrase1, phrase2], firstConfidence);
       var roundTripJson = initialWords.toJson();
       var roundtripWords = SpeechRecognitionWords.fromJson(roundTripJson);

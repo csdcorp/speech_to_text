@@ -9,7 +9,7 @@ import 'package:speech_to_text_example/recognition_results_widget.dart';
 void main() => runApp(const ProviderDemoApp());
 
 class ProviderDemoApp extends StatefulWidget {
-  const ProviderDemoApp({Key? key}) : super(key: key);
+  const ProviderDemoApp({super.key});
 
   @override
   State<ProviderDemoApp> createState() => _ProviderDemoAppState();
@@ -47,7 +47,7 @@ class _ProviderDemoAppState extends State<ProviderDemoApp> {
 }
 
 class SpeechProviderExampleWidget extends StatefulWidget {
-  const SpeechProviderExampleWidget({Key? key}) : super(key: key);
+  const SpeechProviderExampleWidget({super.key});
 
   @override
   SpeechProviderExampleWidgetState createState() =>
