@@ -24,7 +24,8 @@ void SpeechToTextWindowsPlugin::RegisterWithRegistrar(
 
   auto plugin = std::make_unique<SpeechToTextWindowsPlugin>();
   plugin->m_channel = std::move(channel);
-
+  plugin->m_registrar = registrar;
+  
   plugin->m_channel->SetMethodCallHandler(
       [plugin_pointer = plugin.get()](const auto &call, auto result) {
         plugin_pointer->HandleMethodCall(call, std::move(result));
@@ -330,12 +331,14 @@ void SpeechToTextWindowsPlugin::GetLocales(
 }
 
 void SpeechToTextWindowsPlugin::SendTextRecognition(const std::string& text, bool is_final) {
-  if (m_channel) {
+  if (m_channel && m_registrar) {
     std::string json_result = "{\"alternates\":[{\"recognizedWords\":\"" + text + 
                              "\",\"confidence\":0.85}],\"resultType\":" + (is_final ? std::to_string(FINAL_RESULT) : std::to_string(PARTIAL_RESULT)) + "}";
     std::cout << "Sending to Flutter: " << json_result << std::endl;
-    m_channel->InvokeMethod("textRecognition", 
-        std::make_unique<flutter::EncodableValue>(json_result));
+    m_registrar->GetTaskRunner()->PostTask([channel = m_channel, json_result]() {
+      channel->InvokeMethod("textRecognition", 
+          std::make_unique<flutter::EncodableValue>(json_result));
+    });
   }
 }
 

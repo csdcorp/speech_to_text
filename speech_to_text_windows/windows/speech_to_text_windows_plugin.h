@@ -50,6 +50,7 @@ class SpeechToTextWindowsPlugin : public flutter::Plugin {
   bool m_listening;
 
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> m_channel;
+  flutter::PluginRegistrarWindows* m_registrar;
 };
 
 }  // namespace speech_to_text_windows
