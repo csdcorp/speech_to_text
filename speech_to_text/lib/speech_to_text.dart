@@ -485,15 +485,22 @@ class SpeechToText {
           listenFor: listenFor,
           localeId: localeId,
         );
-    usedOptions = usedOptions.copyWith(
-        pauseFor: pauseFor, listenFor: listenFor, localeId: localeId);
+    if (pauseFor != null) {
+      usedOptions = usedOptions.copyWith(pauseFor: pauseFor);
+    }
+    if (listenFor != null) {
+      usedOptions = usedOptions.copyWith(listenFor: listenFor);
+    }
+    if (localeId != null) {
+      usedOptions = usedOptions.copyWith(localeId: localeId);
+    }
     try {
       var started = await SpeechToTextPlatform.instance
-          .listen(localeId: localeId, options: usedOptions);
+          .listen(localeId: usedOptions.localeId, options: usedOptions);
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
         _lastSpeechEventAt = _listenStartedAt;
-        _setupListenAndPause(pauseFor, listenFor);
+        _setupListenAndPause(usedOptions.pauseFor, usedOptions.listenFor);
       }
     } on PlatformException catch (e) {
       throw ListenFailedException(e.message, e.details, e.stacktrace);
