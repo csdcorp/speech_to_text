@@ -9,11 +9,35 @@
 #include <iostream>
 #include <thread>
 #include <string>
+#include <functional>
 
 namespace speech_to_text_windows {
 
 #define PARTIAL_RESULT 0
 #define FINAL_RESULT 2
+
+// Flutter version detection: Check if GetTaskRunner() is available
+// This is a compile-time check to determine the dispatch method
+#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR)
+  #if (FLUTTER_VERSION_MAJOR > 3) || (FLUTTER_VERSION_MAJOR == 3 && FLUTTER_VERSION_MINOR >= 40)
+    #define HAS_TASK_RUNNER 1
+  #else
+    #define HAS_TASK_RUNNER 0
+  #endif
+#else
+  // Fallback: Try to detect by checking if GetTaskRunner() exists in the API
+  // If the method exists, the linker will succeed; otherwise use fallback
+  #ifdef __has_include
+    #if __has_include(<flutter/task_runner.h>)
+      #define HAS_TASK_RUNNER 1
+    #else
+      #define HAS_TASK_RUNNER 0
+    #endif
+  #else
+    // Conservative fallback for older compilers
+    #define HAS_TASK_RUNNER 0
+  #endif
+#endif
 
 void SpeechToTextWindowsPlugin::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows *registrar) {
@@ -72,6 +96,28 @@ SpeechToTextWindowsPlugin::~SpeechToTextWindowsPlugin() {
   }
   
   CoUninitialize();
+}
+
+// Template implementation for thread-safe dispatch to UI thread
+// This method chooses the appropriate dispatch mechanism based on Flutter version
+template<typename Callback>
+void SpeechToTextWindowsPlugin::DispatchToUIThread(Callback&& callback) {
+#if HAS_TASK_RUNNER
+  // Flutter 3.40+: Use the official TaskRunner API
+  // This is the recommended approach and eliminates threading warnings
+  if (m_registrar) {
+    std::cout << "[Dispatch] Using GetTaskRunner()->PostTask() (Flutter 3.40+)" << std::endl;
+    m_registrar->GetTaskRunner()->PostTask(std::forward<Callback>(callback));
+  } else {
+    std::cout << "[Dispatch] Warning: Registrar not available, executing directly" << std::endl;
+    callback();
+  }
+#else
+  // Flutter < 3.40: Direct invocation (generates warning but works)
+  // GetTaskRunner() is not available in older Flutter versions
+  std::cout << "[Dispatch] Using direct call (Flutter < 3.40, threading warning expected)" << std::endl;
+  callback();
+#endif
 }
 
 void SpeechToTextWindowsPlugin::HandleMethodCall(
@@ -331,12 +377,20 @@ void SpeechToTextWindowsPlugin::GetLocales(
 }
 
 void SpeechToTextWindowsPlugin::SendTextRecognition(const std::string& text, bool is_final) {
-  if (m_channel && m_registrar) {
-    std::string json_result = "{\"alternates\":[{\"recognizedWords\":\"" + text + 
-                             "\",\"confidence\":0.85}],\"resultType\":" + (is_final ? std::to_string(FINAL_RESULT) : std::to_string(PARTIAL_RESULT)) + "}";
+  if (m_channel) {
+    // Build JSON result with all required fields for compatibility
+    std::string json_result = "{\"recognizedWords\":\"" + text +
+                             "\",\"finalResult\":" + (is_final ? "true" : "false") +
+                             ",\"alternates\":[{\"recognizedWords\":\"" + text +
+                             "\",\"confidence\":0.85}],\"resultType\":" +
+                             (is_final ? std::to_string(FINAL_RESULT) : std::to_string(PARTIAL_RESULT)) + "}";
     std::cout << "Sending to Flutter: " << json_result << std::endl;
-    m_registrar->GetTaskRunner()->PostTask([channel = m_channel, json_result]() {
-      channel->InvokeMethod("textRecognition", 
+
+    // Dispatch to UI thread using version-aware helper
+    // Captures channel pointer and json_result by value for thread safety
+    auto channel = m_channel.get();
+    DispatchToUIThread([channel, json_result]() {
+      channel->InvokeMethod("textRecognition",
           std::make_unique<flutter::EncodableValue>(json_result));
     });
   }
@@ -345,16 +399,26 @@ void SpeechToTextWindowsPlugin::SendTextRecognition(const std::string& text, boo
 void SpeechToTextWindowsPlugin::SendError(const std::string& error) {
   if (m_channel) {
     std::cout << "Sending error: " << error << std::endl;
-    m_channel->InvokeMethod("notifyError", 
-        std::make_unique<flutter::EncodableValue>(error));
+    
+    // Dispatch to UI thread using version-aware helper
+    auto channel = m_channel.get();
+    DispatchToUIThread([channel, error]() {
+      channel->InvokeMethod("notifyError",
+          std::make_unique<flutter::EncodableValue>(error));
+    });
   }
 }
 
 void SpeechToTextWindowsPlugin::SendStatus(const std::string& status) {
   if (m_channel) {
     std::cout << "Sending status: " << status << std::endl;
-    m_channel->InvokeMethod("notifyStatus", 
-        std::make_unique<flutter::EncodableValue>(status));
+    
+    // Dispatch to UI thread using version-aware helper
+    auto channel = m_channel.get();
+    DispatchToUIThread([channel, status]() {
+      channel->InvokeMethod("notifyStatus",
+          std::make_unique<flutter::EncodableValue>(status));
+    });
   }
 }
 

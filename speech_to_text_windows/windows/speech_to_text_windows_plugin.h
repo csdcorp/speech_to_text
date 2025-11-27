@@ -39,6 +39,10 @@ class SpeechToTextWindowsPlugin : public flutter::Plugin {
   void SendError(const std::string& error);
   void SendStatus(const std::string& status);
 
+  // Thread-safe dispatch helper for platform channel messages
+  template<typename Callback>
+  void DispatchToUIThread(Callback&& callback);
+
   // SAPI Speech Recognition objects
   ISpRecognizer* m_cpRecognizer;
   ISpRecoContext* m_cpRecoContext;
