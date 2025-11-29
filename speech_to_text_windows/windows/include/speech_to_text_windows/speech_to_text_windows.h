@@ -1,8 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#ifndef FLUTTER_PLUGIN_LOCAL_AUTH_WINDOWS_PLUGIN_H_
-#define FLUTTER_PLUGIN_LOCAL_AUTH_WINDOWS_PLUGIN_H_
+#pragma once
 
 #include <flutter_plugin_registrar.h>
 
@@ -22,5 +21,3 @@ FLUTTER_PLUGIN_EXPORT void SpeechToTextWindowsRegisterWithRegistrar(
 #if defined(__cplusplus)
 }  // extern "C"
 #endif
-
-#endif  // FLUTTER_PLUGIN_LOCAL_AUTH_WINDOWS_PLUGIN_H_
