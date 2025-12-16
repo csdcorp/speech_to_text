@@ -1,12 +1,14 @@
 # Changelog
 
-## 7.4.0-beta.6
+## 7.4.0-beta.7
 
 ### New
 * Android now respects the pauseFor value
 
 ### Fix
 * Fixed Swift concurrency error with captured variables in Task closure on iOS - resolves build failure with "Reference to captured var 'localeStr' in concurrently-executing code"
+* Fixed communication threading issue for Windows version of the plugin
+* Fixed conditional compilation for Windows version of the plugin
 
 ## 7.3.0
 
