@@ -172,6 +172,7 @@ abstract class SpeechToTextPlatform extends PlatformInterface {
   void Function(String error)? onError;
   void Function(String status)? onStatus;
   void Function(double level)? onSoundLevel;
+  void Function(String message)? onDebugLog;
 
   /// Returns true if the user has already granted permission to access the
   /// microphone, does not prompt the user.
