@@ -117,6 +117,10 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     if (null != (localeId ?? options?.localeId)) {
       listenParams["localeId"] = (localeId ?? options?.localeId);
     }
+    final phrases = options?.contextualPhrases;
+    if (phrases != null && phrases.isNotEmpty) {
+      listenParams["contextualPhrases"] = phrases;
+    }
     return await _channel.invokeMethod<bool>('listen', listenParams) ?? false;
   }
 

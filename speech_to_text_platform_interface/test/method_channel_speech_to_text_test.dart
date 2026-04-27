@@ -120,6 +120,28 @@ void main() {
           isTrue);
       expect(channelHandler.sampleRate, 10000);
     });
+    test('passes contextualPhrases parameter when non-empty', () async {
+      expect(
+          await speechToText?.listen(
+            options: SpeechListenOptions(
+                contextualPhrases: const ['Nosema', 'varroa', 'brood box']),
+          ),
+          isTrue);
+      expect(
+          channelHandler.contextualPhrases, ['Nosema', 'varroa', 'brood box']);
+    });
+    test('omits contextualPhrases when null', () async {
+      expect(await speechToText?.listen(), isTrue);
+      expect(channelHandler.contextualPhrases, isNull);
+    });
+    test('omits contextualPhrases when empty', () async {
+      expect(
+          await speechToText?.listen(
+            options: SpeechListenOptions(contextualPhrases: const []),
+          ),
+          isTrue);
+      expect(channelHandler.contextualPhrases, isNull);
+    });
   });
   group('control methods invoked as expected', () {
     test('stop invoked', () async {

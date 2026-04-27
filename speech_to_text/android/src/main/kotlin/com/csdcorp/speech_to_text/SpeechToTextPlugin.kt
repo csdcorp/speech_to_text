@@ -127,6 +127,7 @@ public class SpeechToTextPlugin :
     private var previousPartialResults: Boolean = true
     private var previousListenMode: ListenMode = ListenMode.deviceDefault
     private var previousPauseFor: Int? = null
+    private var previousContextualPhrases: List<String>? = null
     private var lastFinalTime: Long = 0
     private var speechStartTime: Long = 0
     private var minRms: Float = 1000.0F
@@ -217,7 +218,9 @@ public class SpeechToTextPlugin :
                     }
                     val pauseFor =
                         call.argument<Int?>("pauseFor")
-                    startListening(result, localeId, partialResults, listenModeIndex, onDevice, pauseFor )
+                    val contextualPhrases =
+                        call.argument<List<String>>("contextualPhrases")
+                    startListening(result, localeId, partialResults, listenModeIndex, onDevice, pauseFor, contextualPhrases )
                 }
                 "stop" -> stopListening(result)
                 "cancel" -> cancelListening(result)
@@ -281,7 +284,8 @@ public class SpeechToTextPlugin :
     }
 
     private fun startListening(result: Result, languageTag: String, partialResults: Boolean,
-                               listenModeIndex: Int, onDevice: Boolean, pauseFor: Int?) {
+                               listenModeIndex: Int, onDevice: Boolean, pauseFor: Int?,
+                               contextualPhrases: List<String>?) {
         if (sdkVersionTooLow() || isNotInitialized() || isListening()) {
             result.success(false)
             return
@@ -295,7 +299,7 @@ public class SpeechToTextPlugin :
         debugLog("Start listening")
 
         optionallyStartBluetooth()
-        setupRecognizerIntent(languageTag, partialResults, listenMode, onDevice, pauseFor )
+        setupRecognizerIntent(languageTag, partialResults, listenMode, onDevice, pauseFor, contextualPhrases )
         handler.post {
             run {
                 speechRecognizer?.startListening(recognizerIntent)
@@ -647,20 +651,22 @@ public class SpeechToTextPlugin :
             }
         }
         debugLog("before setup intent")
-        setupRecognizerIntent(defaultLanguageTag, true, listenMode, false, pauseFor )
+        setupRecognizerIntent(defaultLanguageTag, true, listenMode, false, pauseFor, null )
         debugLog("after setup intent")
     }
 
-    private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean, listenMode: ListenMode, onDevice: Boolean, pauseFor: Int? ) {
+    private fun setupRecognizerIntent(languageTag: String, partialResults: Boolean, listenMode: ListenMode, onDevice: Boolean, pauseFor: Int?, contextualPhrases: List<String>? ) {
         debugLog("setupRecognizerIntent")
         if (previousRecognizerLang == null ||
                 previousRecognizerLang != languageTag ||
                 partialResults != previousPartialResults || previousListenMode != listenMode ||
-                previousPauseFor != pauseFor ) {
+                previousPauseFor != pauseFor ||
+                previousContextualPhrases != contextualPhrases ) {
             previousRecognizerLang = languageTag;
             previousPartialResults = partialResults
             previousListenMode = listenMode
             previousPauseFor = pauseFor
+            previousContextualPhrases = contextualPhrases
             handler.post {
                 run {
                     recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -691,6 +697,13 @@ public class SpeechToTextPlugin :
 
                         pauseFor?.also {
                             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, it)
+                        }
+
+                        // EXTRA_BIASING_STRINGS was added in Android 13 (API 33).
+                        // On earlier versions the recognizer silently ignores the
+                        // hint, which is the same behavior as not setting it.
+                        if (Build.VERSION.SDK_INT >= 33 && !contextualPhrases.isNullOrEmpty()) {
+                            putExtra(RecognizerIntent.EXTRA_BIASING_STRINGS, contextualPhrases.toTypedArray())
                         }
                     }
                 }

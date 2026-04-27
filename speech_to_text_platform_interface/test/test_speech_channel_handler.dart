@@ -30,6 +30,7 @@ class TestSpeechChannelHandler {
   bool? debugLogging;
   int? listenMode = 0;
   int? sampleRate = 0;
+  List<String>? contextualPhrases;
   dynamic initOption;
   static const String localeId1 = 'en_US';
   static const String localeId2 = 'fr_CA';
@@ -96,6 +97,8 @@ class TestSpeechChannelHandler {
         partialResults = methodCall.arguments['partialResults'];
         listenMode = methodCall.arguments['listenMode'];
         sampleRate = methodCall.arguments['sampleRate'];
+        contextualPhrases =
+            (methodCall.arguments['contextualPhrases'] as List?)?.cast<String>();
         // await _speech.processMethodCall(MethodCall(
         //     SpeechToText.notifyStatusMethod, listeningStatusResponse));
         return listenResult;
@@ -150,6 +153,7 @@ class TestSpeechChannelHandler {
     partialResults = false;
     listenMode = 0;
     sampleRate = 0;
+    contextualPhrases = null;
     initOption = null;
     debugLogging = null;
   }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 7.4.0-beta.9
+
+### New
+* Added `contextualPhrases` to `SpeechListenOptions` to bias recognition toward
+  domain-specific vocabulary or proper nouns. Maps to
+  `SFSpeechRecognitionRequest.contextualStrings` on iOS and
+  `RecognizerIntent.EXTRA_BIASING_STRINGS` on Android 13+ (silently ignored on
+  earlier Android versions and on web).
+
 ## 7.4.0-beta.8
 
 ### New
