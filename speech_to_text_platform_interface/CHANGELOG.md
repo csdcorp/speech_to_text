@@ -1,3 +1,8 @@
+## 2.5.0
+- New `contextualPhrases` property on `SpeechListenOptions` for biasing
+  recognition toward domain-specific vocabulary. Forwarded to platforms as
+  the `contextualPhrases` listen-method argument.
+
 ## 2.4.0
 - New properties on SpeechListenOptions for pauseFor, listenFor and localeId
 

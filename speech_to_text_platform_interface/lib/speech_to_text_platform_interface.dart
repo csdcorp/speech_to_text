@@ -66,6 +66,7 @@ class SpeechListenOptions {
   final Duration? pauseFor;
   final Duration? listenFor;
   final String? localeId;
+  final List<String>? contextualPhrases;
 
   SpeechListenOptions({
     /// If true the listen session will automatically be canceled on a permanent error.
@@ -113,6 +114,15 @@ class SpeechListenOptions {
     /// The locale to use for the listen session, if null the system default
     /// locale will be used. This is only supported on iOS and Android.
     this.localeId = null,
+
+    /// Phrases to bias recognition toward — domain-specific vocabulary,
+    /// proper nouns, or technical terms that the system might otherwise
+    /// mis-transcribe. On iOS this maps to
+    /// `SFSpeechRecognitionRequest.contextualStrings`. On Android this
+    /// maps to `RecognizerIntent.EXTRA_BIASING_STRINGS` and requires
+    /// API 33 (Android 13) or later — earlier versions silently ignore
+    /// the hint. Web and other platforms also ignore the hint.
+    this.contextualPhrases,
   });
 
   SpeechListenOptions copyWith({
@@ -126,6 +136,7 @@ class SpeechListenOptions {
     Duration? pauseFor,
     Duration? listenFor,
     String? localeId,
+    List<String>? contextualPhrases,
   }) {
     return SpeechListenOptions(
         cancelOnError: cancelOnError ?? this.cancelOnError,
@@ -137,7 +148,8 @@ class SpeechListenOptions {
         enableHapticFeedback: enableHapticFeedback ?? this.enableHapticFeedback,
         pauseFor: pauseFor ?? this.pauseFor,
         listenFor: listenFor ?? this.listenFor,
-        localeId: localeId ?? this.localeId);
+        localeId: localeId ?? this.localeId,
+        contextualPhrases: contextualPhrases ?? this.contextualPhrases);
   }
 }
 

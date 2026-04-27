@@ -165,6 +165,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       if let localeParam = argsArr["localeId"] as? String {
         localeStr = localeParam
       }
+      let contextualPhrases = argsArr["contextualPhrases"] as? [String]
       guard let listenMode = ListenMode(rawValue: listenModeIndex) else {
         DispatchQueue.main.async {
           result(
@@ -183,17 +184,18 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
             let capturedSampleRate = sampleRate
             let capturedAutoPunctuation = autoPunctuation
             let capturedEnableHaptics = enableHaptics
+            let capturedContextualPhrases = contextualPhrases
             Task {
                 listenForSpeech(
                     result, localeStr: capturedLocaleStr, partialResults: capturedPartialResults, onDevice: capturedOnDevice,
                     listenMode: capturedListenMode, sampleRate: capturedSampleRate, autoPunctuation: capturedAutoPunctuation,
-                    enableHaptics: capturedEnableHaptics)
+                    enableHaptics: capturedEnableHaptics, contextualPhrases: capturedContextualPhrases)
             }
         } else {
             listenForSpeech(
                 result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice,
                 listenMode: listenMode, sampleRate: sampleRate, autoPunctuation: autoPunctuation,
-                enableHaptics: enableHaptics)
+                enableHaptics: enableHaptics, contextualPhrases: contextualPhrases)
         }
     case SwiftSpeechToTextMethods.stop.rawValue:
         if #available(iOS 13.0, *) {
@@ -483,7 +485,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private func listenForSpeech(
     _ result: @escaping FlutterResult, localeStr: String?, partialResults: Bool,
     onDevice: Bool, listenMode: ListenMode, sampleRate: Int, autoPunctuation: Bool,
-    enableHaptics: Bool
+    enableHaptics: Bool, contextualPhrases: [String]? = nil
   ) {
     if nil != currentTask || listening {
       sendBoolResult(false, result)
@@ -556,6 +558,9 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       currentRequest.shouldReportPartialResults = true
       if #available(iOS 13.0, *), onDevice {
         currentRequest.requiresOnDeviceRecognition = true
+      }
+      if let phrases = contextualPhrases, !phrases.isEmpty {
+        currentRequest.contextualStrings = phrases
       }
       switch listenMode {
       case ListenMode.dictation:
