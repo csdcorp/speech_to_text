@@ -55,6 +55,7 @@ enum class SpeechToTextCallbackMethods {
     notifyStatus,
     notifyError,
     soundLevelChange,
+    debugLog,
 }
 
 enum class SpeechToTextStatus {
@@ -248,6 +249,7 @@ public class SpeechToTextPlugin :
     private fun initialize(result: Result) {
         if (sdkVersionTooLow()) {
             result.success(false)
+
             return
         }
         recognizerStops = Build.VERSION.SDK_INT != brokenStopSdk || alwaysUseStop
@@ -784,7 +786,13 @@ public class SpeechToTextPlugin :
     private fun debugLog( msg: String ) {
         if ( debugLogging ) {
             Log.d( logTag, msg )
+            handler.post {
+                run {
+                    channel?.invokeMethod(SpeechToTextCallbackMethods.debugLog.name, msg)
+                }
+            }
         }
+
     }
 
     private fun sendError(errorMsg: String) {

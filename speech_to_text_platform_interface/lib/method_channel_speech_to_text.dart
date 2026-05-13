@@ -14,6 +14,7 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
   static const String notifyErrorMethod = 'notifyError';
   static const String notifyStatusMethod = 'notifyStatus';
   static const String soundLevelChangeMethod = "soundLevelChange";
+  static const String debugLogMethod = "debugLog";
 
   /// Returns true if the user has already granted permission to access the
   /// microphone, does not prompt the user.
@@ -148,6 +149,11 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
       case soundLevelChangeMethod:
         if (call.arguments is double && null != onSoundLevel) {
           onSoundLevel!(call.arguments);
+        }
+        break;
+      case debugLogMethod:
+        if (call.arguments is String && null != onDebugLog) {
+          onDebugLog!(call.arguments);
         }
         break;
       default:
