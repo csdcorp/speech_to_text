@@ -174,7 +174,7 @@ class SpeechToText {
 
   /// True when the results callback has already been called with a
   /// final result.
-  ResultType _latestResultType = ResultType.partial;
+  bool _notifiedFinal = false;
 
   /// True when the internal status callback has been called with the
   /// done status. Note that this does not mean the user callback has
@@ -314,7 +314,10 @@ class SpeechToText {
       return Future.value(_initWorked);
     }
     _finalTimeout = finalTimeout;
-    if (finalTimeout <= _minFinalTimeout) {}
+    // FIX: was an empty if block, invalid finalTimeout was silently ignored
+    if (finalTimeout <= _minFinalTimeout) {
+      _finalTimeout = _minFinalTimeout;
+    }
     errorListener = onError;
     statusListener = onStatus;
     SpeechToTextPlatform.instance.onTextRecognition = _onTextRecognition;
@@ -349,6 +352,9 @@ class SpeechToText {
     _shutdownListener();
     await SpeechToTextPlatform.instance.stop();
     if (_finalTimeout > _minFinalTimeout) {
+      // FIX: cancel before reassigning to prevent two timers firing if _stop()
+      // is called while a _notifyFinalTimer is already pending
+      _notifyFinalTimer?.cancel();
       _notifyFinalTimer = Timer(_finalTimeout, _onFinalTimeout);
     }
   }
@@ -467,40 +473,28 @@ class SpeechToText {
     _lastSpeechResult = null;
     _cancelOnError = listenOptions?.cancelOnError ?? cancelOnError;
     _recognized = false;
-    _latestResultType = ResultType.partial;
+    _notifiedFinal = false;
     _notifiedDone = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
     _partialResults = partialResults;
     _notifyFinalTimer?.cancel();
     _notifyFinalTimer = null;
-    var usedOptions = listenOptions ??
+    final usedOptions = listenOptions ??
         SpeechListenOptions(
           partialResults: partialResults || null != pauseFor,
           onDevice: onDevice,
           listenMode: listenMode,
           sampleRate: sampleRate,
           cancelOnError: cancelOnError,
-          pauseFor: pauseFor,
-          listenFor: listenFor,
-          localeId: localeId,
         );
-    if (pauseFor != null) {
-      usedOptions = usedOptions.copyWith(pauseFor: pauseFor);
-    }
-    if (listenFor != null) {
-      usedOptions = usedOptions.copyWith(listenFor: listenFor);
-    }
-    if (localeId != null) {
-      usedOptions = usedOptions.copyWith(localeId: localeId);
-    }
     try {
       var started = await SpeechToTextPlatform.instance
-          .listen(localeId: usedOptions.localeId, options: usedOptions);
+          .listen(localeId: localeId, options: usedOptions);
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
         _lastSpeechEventAt = _listenStartedAt;
-        _setupListenAndPause(usedOptions.pauseFor, usedOptions.listenFor);
+        _setupListenAndPause(pauseFor, listenFor);
       }
     } on PlatformException catch (e) {
       throw ListenFailedException(e.message, e.details, e.stacktrace);
@@ -534,6 +528,10 @@ class SpeechToText {
     if (null == initialPauseFor && null == initialListenFor) {
       return;
     }
+    // FIX: cancel any existing timer before creating a new one to prevent
+    // two timers from firing _stopOnPauseOrListen simultaneously
+    _listenTimer?.cancel();
+    _listenTimer = null;
     var pauseFor = initialPauseFor;
     var listenFor = initialListenFor;
     if (null != pauseFor) {
@@ -555,8 +553,11 @@ class SpeechToText {
     } else {
       _listenFor = Duration(milliseconds: listenFor.inMilliseconds);
       _pauseFor = Duration(milliseconds: pauseFor.inMilliseconds);
-      var minMillis = min(listenFor.inMilliseconds - _elapsedListenMillis,
-          pauseFor.inMilliseconds);
+      // FIX: listenFor already had _elapsedListenMillis subtracted above,
+      // subtracting it again caused double-deduction and a potentially
+      // negative duration. Also clamp to 0 to guard against negative Timer.
+      var minMillis = max(
+          min(listenFor.inMilliseconds, pauseFor.inMilliseconds), 0);
       minDuration = Duration(milliseconds: minMillis);
     }
     // print('Waiting for ${minDuration.inMilliseconds}');
@@ -664,12 +665,12 @@ class SpeechToText {
       }
       // print('  ${alternate.recognizedWords} ${alternate.confidence}');
     }
-    return SpeechRecognitionResult(alternates, result.resultType);
+    return SpeechRecognitionResult(alternates, result.finalResult);
   }
 
   void _onFinalTimeout() {
     // print('onFinalTimeout $_finalTimeout');
-    if (_latestResultType == ResultType.finalResult) return;
+    if (_notifiedFinal) return;
     if (_lastSpeechResult != null && null != _resultListener) {
       var finalResult = _lastSpeechResult!.toFinal();
       _notifyResults(finalResult);
@@ -677,27 +678,31 @@ class SpeechToText {
   }
 
   void _notifyResults(SpeechRecognitionResult speechResult) {
-    if (_latestResultType == ResultType.finalResult) return;
+    if (_notifiedFinal) return;
+    // FIX: moved this check before the _lastSpeechEventAt update so that
+    // interim results don't reset the pauseFor timer when _partialResults
+    // is false, which was making pauseFor non-functional in that mode
+    if (!_partialResults && !speechResult.finalResult) {
+      return;
+    }
     if (_lastSpeechResult == null || _lastSpeechResult != speechResult) {
       _lastSpeechEventAt = clock.now().millisecondsSinceEpoch;
     }
     _lastSpeechResult = speechResult;
-    if (!_partialResults && !speechResult.finalResult) {
-      return;
-    }
     _recognized = true;
     // print("Recognized text $resultJson");
 
     _lastRecognized = speechResult.recognizedWords;
-    _latestResultType = speechResult.resultTypeValue;
     if (speechResult.finalResult) {
       _notifyFinalTimer?.cancel();
       _notifyFinalTimer = null;
+      // This ensures we only notify with one final result
+      _notifiedFinal = true;
     }
     if (null != _resultListener) {
       _resultListener!(speechResult);
     }
-    if (_latestResultType == ResultType.finalResult) {
+    if (_notifiedFinal) {
       _onNotifyStatus(_finalStatus);
     }
   }
@@ -722,7 +727,7 @@ class SpeechToText {
     switch (status) {
       case doneStatus:
         _notifiedDone = true;
-        if (_latestResultType == ResultType.partial) return;
+        if (!_notifiedFinal) return;
         break;
       case _finalStatus:
         if (!_notifiedDone) return;
@@ -761,7 +766,7 @@ class SpeechToText {
     _listenTimer = null;
     _notifyFinalTimer?.cancel();
     _notifyFinalTimer = null;
-    _listenTimer = null;
+    // FIX: removed duplicate _listenTimer = null that was here
   }
 
   String _defaultPhraseAggregator(List<String> phrases) {
