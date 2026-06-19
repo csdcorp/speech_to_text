@@ -1,10 +1,20 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
 export 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart'
     show SpeechListenOptions;
+
+const String _defaultModelName = 'vosk-model-small-en-us-0.15';
+const String _defaultModelUrl =
+    'https://alphacephei.com/vosk/models/$_defaultModelName.zip';
 
 /// The Vosk model directory must be supplied to [initialize] as a Linux
 /// platform option named `modelPath`, for example:
@@ -14,6 +24,19 @@ export 'package:speech_to_text_platform_interface/speech_to_text_platform_interf
 ///   SpeechConfigOption('linux', 'modelPath', '/opt/vosk/model'),
 /// ]);
 /// ```
+///
+/// Or, you can set the `autoDownloadModel` option to `true` to let the
+/// plugin download and cache the default small en-US model on first launch:
+///
+/// ```dart
+/// await speech.initialize(options: [
+///   SpeechConfigOption('linux', 'autoDownloadModel', true),
+/// ]);
+/// ```
+///
+/// The download is cached under the application support directory so it only
+/// happens once. A custom model can be downloaded by combining
+/// `autoDownloadModel` with `modelName` and `modelUrl` options.
 class SpeechToTextLinux extends SpeechToTextPlatform {
   static const MethodChannel _channel = MethodChannel('speech_to_text_linux');
 
@@ -40,20 +63,57 @@ class SpeechToTextLinux extends SpeechToTextPlatform {
     debugLogging = false,
     List<SpeechConfigOption>? options,
   }) async {
-    // set up method call handler so native callbacks reach the listeners.
     _channel.setMethodCallHandler(_handleMethodCall);
 
     final Map<String, dynamic> params = {
       'debugLogging': debugLogging,
     };
 
-    // process linux-specific options (e.g `modelPath`).
+    String? modelPath;
+    bool autoDownload = false;
+    String modelName = _defaultModelName;
+    String modelUrl = _defaultModelUrl;
+
     if (options != null) {
       for (final option in options) {
-        if (option.platform == 'linux') {
-          params[option.name] = option.value;
+        // only care if we are on linux
+        if (option.platform != 'linux') continue;
+        switch (option.name) {
+          case 'modelPath':
+            modelPath = option.value as String?;
+            break;
+          case 'autoDownloadModel':
+            autoDownload = option.value == true;
+            break;
+          case 'modelName':
+            if (option.value is String && (option.value as String).isNotEmpty) {
+              modelName = option.value;
+            }
+            break;
+          case 'modelUrl':
+            if (option.value is String && (option.value as String).isNotEmpty) {
+              modelUrl = option.value;
+            }
+            break;
+          default:
+            params[option.name] = option.value;
         }
       }
+    }
+
+    if ((modelPath == null || modelPath.isEmpty) && autoDownload) {
+      try {
+        modelPath = await _ensureCachedModel(modelName, modelUrl);
+      } catch (e) {
+        if (kDebugMode) {
+          print('Failed to download Vosk model: $e');
+        }
+        return false;
+      }
+    }
+
+    if (modelPath != null && modelPath.isNotEmpty) {
+      params['modelPath'] = modelPath;
     }
 
     try {
@@ -66,6 +126,40 @@ class SpeechToTextLinux extends SpeechToTextPlatform {
       }
       return false;
     }
+  }
+
+  // download & cache VOSK model
+  Future<String> _ensureCachedModel(String modelName, String modelUrl) async {
+    final supportDir = await getApplicationSupportDirectory();
+    final cacheRoot = Directory(p.join(supportDir.path, 'speech_to_text_linux'));
+    if (!cacheRoot.existsSync()) {
+      cacheRoot.createSync(recursive: true);
+    }
+    final modelDir = Directory(p.join(cacheRoot.path, modelName));
+    if (modelDir.existsSync() &&
+        File(p.join(modelDir.path, 'am', 'final.mdl')).existsSync()) {
+      return modelDir.path;
+    }
+
+    if (modelDir.existsSync()) {
+      modelDir.deleteSync(recursive: true);
+    }
+
+    if (kDebugMode) {
+      print('Downloading Vosk model from $modelUrl');
+    }
+    final response = await http.get(Uri.parse(modelUrl));
+    if (response.statusCode != 200) {
+      throw Exception(
+          'Failed to download Vosk model (HTTP ${response.statusCode})');
+    }
+    final archive = ZipDecoder().decodeBytes(response.bodyBytes);
+    await extractArchiveToDiskAsync(archive, cacheRoot.path);
+    if (!modelDir.existsSync()) {
+      throw Exception(
+          'Vosk model archive did not contain expected folder "$modelName"');
+    }
+    return modelDir.path;
   }
 
   @override

@@ -60,7 +60,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         onError: errorListener,
         onStatus: statusListener,
         debugLogging: currentOptions.debugLogging,
-        options: _platformConfigOptions(),
+        options: await _platformConfigOptions(),
       );
       if (hasSpeech) {
         speech.unexpectedPhraseAggregator = _punctAggregator;
@@ -91,18 +91,19 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
 
   /// Platform specific configuration passed to [SpeechToText.initialize].
   ///
-  /// The Linux implementation uses the offline Vosk engine, which needs the
-  /// path to an unpacked model directory. Provide it at runtime via the
-  /// `VOSK_MODEL_PATH` environment variable, e.g.
-  /// `VOSK_MODEL_PATH=/opt/vosk/model flutter run -d linux`.
-  List<SpeechConfigOption>? _platformConfigOptions() {
-    if (Platform.isLinux) {
-      final modelPath = Platform.environment['VOSK_MODEL_PATH'];
-      if (modelPath != null && modelPath.isNotEmpty) {
-        return [SpeechConfigOption('linux', 'modelPath', modelPath)];
-      }
+  /// On Linux the Vosk plugin needs a model directory. We default to
+  /// `autoDownloadModel: true`, which makes the plugin download and cache
+  /// the small en-US model on first launch. Override by setting
+  /// `VOSK_MODEL_PATH` to an existing model directory.
+  Future<List<SpeechConfigOption>?> _platformConfigOptions() async {
+    if (!Platform.isLinux) return null;
+    final envPath = Platform.environment['VOSK_MODEL_PATH'];
+    if (envPath != null &&
+        envPath.isNotEmpty &&
+        Directory(envPath).existsSync()) {
+      return [SpeechConfigOption('linux', 'modelPath', envPath)];
     }
-    return null;
+    return [SpeechConfigOption('linux', 'autoDownloadModel', true)];
   }
 
   @override
