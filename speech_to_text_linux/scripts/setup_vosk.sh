@@ -45,3 +45,7 @@ $SUDO rm -rf "$VOSK_PREFIX/$MODEL_NAME"
 $SUDO cp -r "$TMP_DIR/$MODEL_NAME" "$VOSK_PREFIX/$MODEL_NAME"
 
 print "installed Vosk $VOSK_VERSION to $VOSK_PREFIX"
+
+export VOSK_PREFIX
+# set to .zshrc & .bashrc
+echo "export VOSK_PREFIX=$VOSK_PREFIX" | tee -a ~/.zshrc ~/.bashrc
