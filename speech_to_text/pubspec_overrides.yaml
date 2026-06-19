@@ -1,0 +1,4 @@
+# Local development override, replace when uploaded
+dependency_overrides:
+  speech_to_text_linux:
+    path: ../speech_to_text_linux

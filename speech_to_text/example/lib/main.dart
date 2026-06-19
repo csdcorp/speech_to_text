@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -59,6 +60,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         onError: errorListener,
         onStatus: statusListener,
         debugLogging: currentOptions.debugLogging,
+        options: _platformConfigOptions(),
       );
       if (hasSpeech) {
         speech.unexpectedPhraseAggregator = _punctAggregator;
@@ -85,6 +87,22 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
 
   String _punctAggregator(List<String> phrases) {
     return phrases.join('. ');
+  }
+
+  /// Platform specific configuration passed to [SpeechToText.initialize].
+  ///
+  /// The Linux implementation uses the offline Vosk engine, which needs the
+  /// path to an unpacked model directory. Provide it at runtime via the
+  /// `VOSK_MODEL_PATH` environment variable, e.g.
+  /// `VOSK_MODEL_PATH=/opt/vosk/model flutter run -d linux`.
+  List<SpeechConfigOption>? _platformConfigOptions() {
+    if (Platform.isLinux) {
+      final modelPath = Platform.environment['VOSK_MODEL_PATH'];
+      if (modelPath != null && modelPath.isNotEmpty) {
+        return [SpeechConfigOption('linux', 'modelPath', modelPath)];
+      }
+    }
+    return null;
   }
 
   @override

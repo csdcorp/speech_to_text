@@ -5,7 +5,7 @@
 A library that exposes device specific speech recognition capability.
 
 This plugin contains a set of classes that make it easy to use the speech recognition
-capabilities of the underlying platform in Flutter. It supports Android, iOS, MacOS and web. The
+capabilities of the underlying platform in Flutter. It supports Android, iOS, MacOS, Linux, Windows and web. The
 target use cases for this library are commands and short phrases, not continuous spoken
 conversion or always on listening.
 
@@ -13,14 +13,19 @@ conversion or always on listening.
 
 | Support | Android | iOS | MacOS | Web\* | Linux | Windows |
 | :-----: | :-----: | :-: | :---: | :---: | :---: | :-----: |
-|  build  |   ✅    | ✅  |  ✅   |  ✅   |   ✘   |    ✅    |
-| speech  |   ✅    | ✅  |  ✅   |  ✅   |   ✘   |    ✅    |
+|  build  |   ✅    | ✅  |  ✅   |  ✅   |   ✅   |    ✅    |
+| speech  |   ✅    | ✅  |  ✅   |  ✅   |  ✅†   |    ✅    |
 
 _build: means you can build and run with the plugin on that platform_
 
 _speech: means most speech recognition features work. Platforms with build but not speech report false for `initialize`_
 
 \* _Only some browsers are supported, see [here](https://caniuse.com/?search=Web%20Speech%20API)_
+
+† _Linux performs recognition offline with the [Vosk](https://alphacephei.com/vosk/) engine. It
+requires the libvosk/libpulse build dependencies and a downloaded model path supplied via a
+`SpeechConfigOption('linux', 'modelPath', ...)`. See
+[speech_to_text_linux](https://github.com/csdcorp/speech_to_text/blob/main/speech_to_text_linux/README.md)._
 
 ## Recent Updates
 

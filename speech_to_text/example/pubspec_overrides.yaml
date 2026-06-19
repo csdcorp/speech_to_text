@@ -1,0 +1,6 @@
+# Local development override: resolve the unpublished Linux implementation from
+# the sibling package in this repository. Remove once speech_to_text_linux is
+# published to pub.dev.
+dependency_overrides:
+  speech_to_text_linux:
+    path: ../../speech_to_text_linux
