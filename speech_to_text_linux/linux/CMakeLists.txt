@@ -28,6 +28,75 @@ find_path(VOSK_INCLUDE_DIR
   PATHS /usr/local/include /usr/include
 )
 
+# if not locally found, download a prebuilt vosk & set VOSK_LIBRARY and VOSK_INCLUDE_DIR to the downloaded paths
+option(VOSK_AUTO_DOWNLOAD
+  "Download a prebuilt Vosk SDK when one is not found locally" ON)
+set(VOSK_VERSION "0.3.45" CACHE STRING
+  "Vosk SDK version to fetch when VOSK_AUTO_DOWNLOAD is enabled")
+
+if((NOT VOSK_LIBRARY OR NOT VOSK_INCLUDE_DIR) AND VOSK_AUTO_DOWNLOAD)
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
+    set(_vosk_arch "x86_64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+    set(_vosk_arch "aarch64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+    set(_vosk_arch "armv7l")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+    set(_vosk_arch "riscv64")
+  else()
+    message(FATAL_ERROR
+      "Vosk auto-download does not support processor '${CMAKE_SYSTEM_PROCESSOR}'. "
+      "Install Vosk manually and set VOSK_DIR, or pass -DVOSK_AUTO_DOWNLOAD=OFF.")
+  endif()
+
+  # xdg cache home is $HOME/.cache
+  if(DEFINED ENV{XDG_CACHE_HOME} AND NOT "$ENV{XDG_CACHE_HOME}" STREQUAL "")
+    set(_vosk_cache_root "$ENV{XDG_CACHE_HOME}/speech_to_text_linux")
+  elseif(DEFINED ENV{HOME} AND NOT "$ENV{HOME}" STREQUAL "")
+    set(_vosk_cache_root "$ENV{HOME}/.cache/speech_to_text_linux")
+  else()
+    set(_vosk_cache_root "${CMAKE_BINARY_DIR}/_vosk")
+  endif()
+
+  set(_vosk_name "vosk-linux-${_vosk_arch}-${VOSK_VERSION}")
+  set(_vosk_url
+    "https://github.com/alphacep/vosk-api/releases/download/v${VOSK_VERSION}/${_vosk_name}.zip")
+  set(_vosk_dir "${_vosk_cache_root}/${_vosk_name}")
+  set(_vosk_zip "${_vosk_cache_root}/${_vosk_name}.zip")
+
+  if(NOT EXISTS "${_vosk_dir}/libvosk.so" OR NOT EXISTS "${_vosk_dir}/vosk_api.h")
+    message(STATUS "speech_to_text_linux: fetching Vosk SDK from ${_vosk_url}")
+    file(MAKE_DIRECTORY "${_vosk_cache_root}")
+    file(DOWNLOAD "${_vosk_url}" "${_vosk_zip}"
+      SHOW_PROGRESS
+      STATUS _vosk_dl_status)
+    list(GET _vosk_dl_status 0 _vosk_dl_code)
+    if(NOT _vosk_dl_code EQUAL 0)
+      list(GET _vosk_dl_status 1 _vosk_dl_msg)
+      file(REMOVE "${_vosk_zip}")
+      message(FATAL_ERROR "Failed to download Vosk SDK: ${_vosk_dl_msg}")
+    endif()
+
+    find_program(_vosk_unzip unzip)
+    if(NOT _vosk_unzip)
+      file(REMOVE "${_vosk_zip}")
+      message(FATAL_ERROR
+        "speech_to_text_linux requires 'unzip' to extract the Vosk SDK. "
+        "Install it via your package manager (e.g. 'sudo pacman -S unzip' / 'sudo apt install unzip').")
+    endif()
+    execute_process(
+      COMMAND "${_vosk_unzip}" -q "${_vosk_zip}" -d "${_vosk_cache_root}"
+      RESULT_VARIABLE _vosk_extract_result)
+    file(REMOVE "${_vosk_zip}")
+    if(NOT _vosk_extract_result EQUAL 0)
+      message(FATAL_ERROR "Failed to extract Vosk SDK archive")
+    endif()
+  endif()
+
+  set(VOSK_LIBRARY "${_vosk_dir}/libvosk.so" CACHE FILEPATH "" FORCE)
+  set(VOSK_INCLUDE_DIR "${_vosk_dir}" CACHE PATH "" FORCE)
+endif()
+
 if(NOT VOSK_LIBRARY OR NOT VOSK_INCLUDE_DIR)
   message(FATAL_ERROR
     "Could not find the Vosk library (libvosk.so) and/or vosk_api.h. "
