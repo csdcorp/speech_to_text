@@ -16,27 +16,26 @@ const String _defaultModelName = 'vosk-model-small-en-us-0.15';
 const String _defaultModelUrl =
     'https://alphacephei.com/vosk/models/$_defaultModelName.zip';
 
-/// The Vosk model directory must be supplied to [initialize] as a Linux
-/// platform option named `modelPath`, for example:
+/// By default [initialize] downloads and caches the small en-US Vosk model
+/// under the application support directory on first launch. Override that
+/// behaviour with these Linux platform options:
+///
+/// * `modelPath` (String) - use an existing model on disk; skips download.
+/// * `autoDownloadModel` (bool) - pass `false` to disable the default
+///   download (initialization will fail if no `modelPath` is supplied).
+/// * `modelName` (String) - cache folder name; must match the folder
+///   contained in the downloaded archive.
+/// * `modelUrl` (String) - URL of the model zip to fetch.
 ///
 /// ```dart
+/// // Default: small en-US model is fetched & cached.
+/// await speech.initialize();
+///
+/// // Explicit path:
 /// await speech.initialize(options: [
 ///   SpeechConfigOption('linux', 'modelPath', '/opt/vosk/model'),
 /// ]);
 /// ```
-///
-/// Or, you can set the `autoDownloadModel` option to `true` to let the
-/// plugin download and cache the default small en-US model on first launch:
-///
-/// ```dart
-/// await speech.initialize(options: [
-///   SpeechConfigOption('linux', 'autoDownloadModel', true),
-/// ]);
-/// ```
-///
-/// The download is cached under the application support directory so it only
-/// happens once. A custom model can be downloaded by combining
-/// `autoDownloadModel` with `modelName` and `modelUrl` options.
 class SpeechToTextLinux extends SpeechToTextPlatform {
   static const MethodChannel _channel = MethodChannel('speech_to_text_linux');
 
@@ -70,7 +69,7 @@ class SpeechToTextLinux extends SpeechToTextPlatform {
     };
 
     String? modelPath;
-    bool autoDownload = false;
+    bool? autoDownloadExplicit;
     String modelName = _defaultModelName;
     String modelUrl = _defaultModelUrl;
 
@@ -83,7 +82,7 @@ class SpeechToTextLinux extends SpeechToTextPlatform {
             modelPath = option.value as String?;
             break;
           case 'autoDownloadModel':
-            autoDownload = option.value == true;
+            autoDownloadExplicit = option.value == true;
             break;
           case 'modelName':
             if (option.value is String && (option.value as String).isNotEmpty) {
@@ -101,7 +100,10 @@ class SpeechToTextLinux extends SpeechToTextPlatform {
       }
     }
 
-    if ((modelPath == null || modelPath.isEmpty) && autoDownload) {
+    final shouldDownload = (modelPath == null || modelPath.isEmpty) &&
+        (autoDownloadExplicit ?? true);
+
+    if (shouldDownload) {
       try {
         modelPath = await _ensureCachedModel(modelName, modelUrl);
       } catch (e) {

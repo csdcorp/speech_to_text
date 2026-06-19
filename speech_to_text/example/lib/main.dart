@@ -91,10 +91,15 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
 
   /// Platform specific configuration passed to [SpeechToText.initialize].
   ///
-  /// On Linux the Vosk plugin needs a model directory. We default to
-  /// `autoDownloadModel: true`, which makes the plugin download and cache
-  /// the small en-US model on first launch. Override by setting
-  /// `VOSK_MODEL_PATH` to an existing model directory.
+  /// On Linux the plugin defaults to downloading and caching the small en-US
+  /// Vosk model. You can set any of the following to bypass the default model.
+  /// ```dart
+  /// Platform.environment['VOSK_MODEL_PATH'] = '...' // path to a model
+  /// SpeechConfigOption('linux', 'modelPath', ...) // path to a model
+  /// SpeechConfigOption('linux', 'modelName', 'vosk-model-en-us-0.22') // name of a model thats in the cache
+  /// SpeechConfigOption('linux', 'modelUrl', 'https://example.com/model') // direct download URL
+  /// ```
+  /// 
   Future<List<SpeechConfigOption>?> _platformConfigOptions() async {
     if (!Platform.isLinux) return null;
     final envPath = Platform.environment['VOSK_MODEL_PATH'];
@@ -103,7 +108,7 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         Directory(envPath).existsSync()) {
       return [SpeechConfigOption('linux', 'modelPath', envPath)];
     }
-    return [SpeechConfigOption('linux', 'autoDownloadModel', true)];
+    return null;
   }
 
   @override
