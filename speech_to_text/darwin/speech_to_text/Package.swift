@@ -8,7 +8,7 @@ let package = Package(
     name: "speech_to_text",
     platforms: [
         .iOS("12.0"),
-        .macOS("10.14")
+        .macOS("10.15")
     ],
     products: [
         .library(name: "speech-to-text", targets: ["speech_to_text"])
