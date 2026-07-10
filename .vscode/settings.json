@@ -2,5 +2,6 @@
     "files.associations": {
         "xstring": "cpp",
         "mutex": "cpp"
-    }
+    },
+    "cmake.ignoreCMakeListsMissing": true
 }

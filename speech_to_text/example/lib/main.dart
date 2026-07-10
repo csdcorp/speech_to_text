@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -60,7 +59,6 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
         onError: errorListener,
         onStatus: statusListener,
         debugLogging: currentOptions.debugLogging,
-        options: await _platformConfigOptions(),
       );
       if (hasSpeech) {
         speech.unexpectedPhraseAggregator = _punctAggregator;
@@ -87,28 +85,6 @@ class _SpeechSampleAppState extends State<SpeechSampleApp> {
 
   String _punctAggregator(List<String> phrases) {
     return phrases.join('. ');
-  }
-
-  /// Platform specific configuration passed to [SpeechToText.initialize].
-  ///
-  /// On Linux the plugin defaults to downloading and caching the small en-US
-  /// Vosk model. You can set any of the following to bypass the default model.
-  /// ```dart
-  /// Platform.environment['VOSK_MODEL_PATH'] = '...' // path to a model
-  /// SpeechConfigOption('linux', 'modelPath', ...) // path to a model
-  /// SpeechConfigOption('linux', 'modelName', 'vosk-model-en-us-0.22') // name of a model thats in the cache
-  /// SpeechConfigOption('linux', 'modelUrl', 'https://example.com/model') // direct download URL
-  /// ```
-  /// 
-  Future<List<SpeechConfigOption>?> _platformConfigOptions() async {
-    if (!Platform.isLinux) return null;
-    final envPath = Platform.environment['VOSK_MODEL_PATH'];
-    if (envPath != null &&
-        envPath.isNotEmpty &&
-        Directory(envPath).existsSync()) {
-      return [SpeechConfigOption('linux', 'modelPath', envPath)];
-    }
-    return null;
   }
 
   @override

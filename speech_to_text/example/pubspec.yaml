@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   speech_to_text:
     path: ../
+  # seperate package for linux
+  speech_to_text_linux: ^0.0.1
 
   provider: ^6.0.5
 

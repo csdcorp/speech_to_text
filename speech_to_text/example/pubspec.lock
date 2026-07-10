@@ -364,13 +364,6 @@ packages:
       relative: true
     source: path
     version: "7.4.0"
-  speech_to_text_linux:
-    dependency: "direct overridden"
-    description:
-      path: "../../speech_to_text_linux"
-      relative: true
-    source: path
-    version: "0.0.1"
   speech_to_text_platform_interface:
     dependency: transitive
     description:

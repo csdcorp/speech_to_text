@@ -18,7 +18,6 @@ dependencies:
   meta: ^1.1.7
   web: ^1.0.0
   speech_to_text_windows: ^1.0.1
-  speech_to_text_linux: ^0.0.1
 
 dev_dependencies:
   flutter_test:
@@ -47,5 +46,3 @@ flutter:
         sharedDarwinSource: true
       windows:
         default_package: speech_to_text_windows
-      linux:
-        default_package: speech_to_text_linux

@@ -22,10 +22,7 @@ _speech: means most speech recognition features work. Platforms with build but n
 
 \* _Only some browsers are supported, see [here](https://caniuse.com/?search=Web%20Speech%20API)_
 
-† _Linux performs recognition offline with the [Vosk](https://alphacephei.com/vosk/) engine. It
-requires the libvosk/libpulse build dependencies and a downloaded model path supplied via a
-`SpeechConfigOption('linux', 'modelPath', ...)`. See
-[speech_to_text_linux](https://github.com/csdcorp/speech_to_text/blob/main/speech_to_text_linux/README.md)._
+† _Linux support is provided by the separate [speech_to_text_linux](https://pub.dev/packages/speech_to_text_linux) plugin, which is not included by default. Add it to your app's `pubspec.yaml` alongside `speech_to_text` and it registers itself automatically. It performs recognition offline with the [Vosk](https://alphacephei.com/vosk/) engine and requires the libvosk/libpulse build dependencies; a model is downloaded automatically on first use, or supply your own via `SpeechConfigOption('linux', 'modelPath', ...)`. See the [speech_to_text_linux README](https://github.com/DwifteJB/speech_to_text_linux/blob/main/README.md)._
 
 ## Recent Updates
 
