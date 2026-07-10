@@ -1,6 +1,11 @@
 # Changelog
 
-## 7.4.0-beta
+## 7.5.0-beta.1
+
+- Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
+- Migrates to built-in Kotlin
+
+## 7.4.0
 
 ### New
 * Android now respects the pauseFor value
