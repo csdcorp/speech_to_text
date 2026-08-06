@@ -4,6 +4,10 @@
 
 - Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
 - Migrates to built-in Kotlin
+- Adds native handling for the `has_on_device_support` platform method on iOS,
+  macOS and Android, so callers can check whether the device can recognize
+  speech offline before requesting `onDevice` recognition. Requires
+  speech_to_text_platform_interface 2.5.0.
 
 ## 7.4.0
 

@@ -1,3 +1,7 @@
+## 2.5.0
+- Added hasOnDeviceSupport, so callers can check whether the device can
+  recognize speech offline before requesting onDevice recognition
+
 ## 2.4.0
 - New properties on SpeechListenOptions for pauseFor, listenFor and localeId
 

@@ -176,6 +176,7 @@ public class SpeechToTextPlugin :
         try {
             when (call.method) {
                 "has_permission" -> hasPermission(result)
+                "has_on_device_support" -> hasOnDeviceSupport(result)
                 "initialize" -> {
                     var dlog = call.argument<Boolean>("debugLogging")
                     if (null != dlog) {
@@ -243,6 +244,29 @@ public class SpeechToTextPlugin :
                     Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
             result.success(hasPerm)
         }
+    }
+
+    /**
+     * Reports whether this device can recognize speech with no network
+     * connection.
+     *
+     * Android answers this once for the device rather than per language, so
+     * the localeId the caller passes is accepted and ignored — the argument
+     * exists because iOS support IS per-locale. Below API 31 there is no
+     * on-device recognizer to ask about, so the answer is false.
+     */
+    private fun hasOnDeviceSupport(result: Result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            result.success(false)
+            return
+        }
+        debugLog("Start has_on_device_support")
+        val localContext = pluginContext
+        if (localContext == null) {
+            result.success(false)
+            return
+        }
+        result.success(SpeechRecognizer.isOnDeviceRecognitionAvailable(localContext))
     }
 
     private fun initialize(result: Result) {

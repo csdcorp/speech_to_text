@@ -28,6 +28,21 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     return await _channel.invokeMethod<bool>('has_permission') ?? false;
   }
 
+  /// Returns true if the device can recognize speech without a network
+  /// connection, for [localeId] where the platform makes that distinction.
+  ///
+  /// Defaults to false rather than throwing when a platform has no handler
+  /// for this method, so an app that checks before requesting on-device
+  /// recognition degrades to the network recognizer instead of failing.
+  @override
+  Future<bool> hasOnDeviceSupport({String? localeId}) async {
+    return await _channel.invokeMethod<bool>(
+          'has_on_device_support',
+          <String, Object?>{'localeId': localeId},
+        ) ??
+        false;
+  }
+
   @override
   Future<bool> initialize(
       {debugLogging = false, List<SpeechConfigOption>? options}) async {
