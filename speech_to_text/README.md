@@ -314,6 +314,24 @@ property of any of the values returned in `locales`. A call looks like this:
 
 ## Troubleshooting
 
+### The recognizer transcribes the app's own text-to-speech output
+
+If your app plays audio while listening — text-to-speech, for example — the
+microphone picks up the speaker and the recognizer transcribes your own output.
+On iOS and macOS you can ask the platform to remove it by enabling acoustic
+echo cancellation when you initialize:
+
+```dart
+await speech.initialize(
+  options: [SpeechToText.iosVoiceProcessing],
+);
+```
+
+This configures the audio input to use the voice processing I/O unit. It is off
+by default because voice processing also applies automatic gain control and a
+narrower frequency response, which can reduce recognition accuracy for apps that
+never play audio while listening — so enable it only if you need it.
+
 ### Speech recognition not working on iOS Simulator
 
 If speech recognition is not working on your simulator try going to the Settings app in the simulator:

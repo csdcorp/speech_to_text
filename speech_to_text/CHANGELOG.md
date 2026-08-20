@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### New
+* New `SpeechToText.iosVoiceProcessing` config option enables the iOS/macOS voice
+  processing I/O unit, applying acoustic echo cancellation so audio the device is
+  playing is removed from the captured signal. Useful when the app speaks (TTS)
+  while listening. Off by default. See #591.
+
 ## 7.5.0-beta.1
 
 - Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
