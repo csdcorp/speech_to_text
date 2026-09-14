@@ -534,6 +534,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
               code: SpeechToTextErrors.onDeviceError.rawValue,
               message: "on device recognition is not supported on this device",
               details: nil))
+          return
         }
       }
 
