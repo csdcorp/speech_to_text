@@ -4,6 +4,9 @@
 
 - Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
 - Migrates to built-in Kotlin
+- Fixes iOS `listen` continuing after the unsupported-`onDevice` error, which
+  left the microphone active with no listener and blocked all later listen
+  calls for the life of the process.
 
 ## 7.4.0
 
