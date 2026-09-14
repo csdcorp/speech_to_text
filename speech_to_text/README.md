@@ -24,19 +24,17 @@ _speech: means most speech recognition features work. Platforms with build but n
 
 ## Recent Updates
 
+7.6.0
+* Better support for on device mode
+* Improve handling of speech recognition during audio 
+playbeack on the same device with the new iosVoiceProcessing option for initialize. 
+
 7.3.0
 * Now supports speech recognition on Windows with many thanks to @asherchok 
 for the PR! Note that Windows support is currently in beta, if anyone can try 
 it out please provide feedback, there are known issues and this is not yet 
 ready for production use. 
 * iOS and Mac speech recognition does more work in the background avoiding UI pauses
-
-7.0.0 
-* Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for the PR!
-* Now supports WASM compliation for web with many thanks to yeikel16 for the PR!
-
-6.6.0 `listen` now uses 'SpeechListenOptions' to specify the options for the current listen session, including new
-options for controlling haptics and punctuation during recognition on iOS.
 
 _Note_: Feedback from any test devices is welcome.
 
