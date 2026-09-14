@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.5.0-beta.1
+## 7.5.0
 
 - Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
 - Migrates to built-in Kotlin
