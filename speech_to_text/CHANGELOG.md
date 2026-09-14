@@ -4,6 +4,7 @@
 
 - Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
 - Migrates to built-in Kotlin
+- Android: `cancel()` now destroys and recreates the `SpeechRecognizer`, so a `listen()` right after it is no longer rejected with `error_client` and the cancelled session's late error no longer reaches the new session
 
 ## 7.4.0
 
