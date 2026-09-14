@@ -13,6 +13,7 @@ import os.log
 
 public enum SwiftSpeechToTextMethods: String {
   case has_permission
+  case has_on_device_support
   case initialize
   case listen
   case stop
@@ -134,6 +135,9 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case SwiftSpeechToTextMethods.has_permission.rawValue:
       hasPermission(result)
+    case SwiftSpeechToTextMethods.has_on_device_support.rawValue:
+      let argsArr = call.arguments as? [String: AnyObject]
+      hasOnDeviceSupport(result, localeStr: argsArr?["localeId"] as? String)
     case SwiftSpeechToTextMethods.initialize.rawValue:
         if #available(iOS 13.0, *) {
             Task {
@@ -238,6 +242,25 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
 
     DispatchQueue.main.async {
       result(has)
+    }
+  }
+
+  /// Reports whether this device can recognize speech without a network
+  /// connection for the given locale.
+  ///
+  /// Deliberately builds a throwaway recognizer rather than reading the
+  /// `onDeviceStatus` captured during setup: support is per-locale, and
+  /// `listenForSpeech` replaces `recognizer` with whatever locale the last
+  /// session used, so that field does not answer the question a caller is
+  /// asking about the NEXT session. Querying must not mutate `recognizer`
+  /// either, hence the local instance.
+  private func hasOnDeviceSupport(_ result: @escaping FlutterResult, localeStr: String?) {
+    if #available(iOS 13.0, macOS 10.15, *) {
+      let supported =
+        SFSpeechRecognizer(locale: getLocale(localeStr))?.supportsOnDeviceRecognition ?? false
+      sendBoolResult(supported, result)
+    } else {
+      sendBoolResult(false, result)
     }
   }
 

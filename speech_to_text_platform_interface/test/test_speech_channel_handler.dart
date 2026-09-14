@@ -21,6 +21,8 @@ class TestSpeechChannelHandler {
   bool stopInvoked = false;
   bool localesInvoked = false;
   bool? hasPermissionResult = true;
+  bool? hasOnDeviceSupportResult = true;
+  String? onDeviceSupportLocale;
   String listeningStatusResponse = 'listening';
   String? listenLocale = 'en_US';
   List<String>? locales = [];
@@ -72,6 +74,9 @@ class TestSpeechChannelHandler {
     switch (methodCall.method) {
       case 'has_permission':
         return hasPermissionResult;
+      case 'has_on_device_support':
+        onDeviceSupportLocale = methodCall.arguments['localeId'];
+        return hasOnDeviceSupportResult;
       case 'initialize':
         initInvoked = true;
         initOption = methodCall.arguments[androidAlwaysUseStop.name];
@@ -142,6 +147,8 @@ class TestSpeechChannelHandler {
     stopInvoked = false;
     localesInvoked = false;
     hasPermissionResult = true;
+    hasOnDeviceSupportResult = true;
+    onDeviceSupportLocale = null;
     listeningStatusResponse = 'listening';
     listenLocale = 'en_US';
     locales = [];

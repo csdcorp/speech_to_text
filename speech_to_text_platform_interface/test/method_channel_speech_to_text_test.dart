@@ -31,6 +31,34 @@ void main() {
     });
   });
 
+  group('hasOnDeviceSupport', () {
+    test('true if platform reports true', () async {
+      expect(await speechToText?.hasOnDeviceSupport(), isTrue);
+    });
+    test('false if platform reports false', () async {
+      channelHandler.hasOnDeviceSupportResult = false;
+      expect(await speechToText?.hasOnDeviceSupport(), isFalse);
+    });
+    test('false if the platform has no handler for it', () async {
+      // A platform that predates this method returns null rather than
+      // throwing. Answering false makes an app that checks before requesting
+      // on-device recognition fall back to the network recognizer, which is
+      // the behaviour it would have had without the check at all.
+      channelHandler.hasOnDeviceSupportResult = null;
+      expect(await speechToText?.hasOnDeviceSupport(), isFalse);
+    });
+    test('passes the locale through', () async {
+      // iOS support is per-locale, so the answer is only meaningful for the
+      // locale the session will actually use.
+      await speechToText?.hasOnDeviceSupport(localeId: 'fr_FR');
+      expect(channelHandler.onDeviceSupportLocale, 'fr_FR');
+    });
+    test('sends a null locale when none is given', () async {
+      await speechToText?.hasOnDeviceSupport();
+      expect(channelHandler.onDeviceSupportLocale, isNull);
+    });
+  });
+
   group('initialize', () {
     test('true if platform reports true', () async {
       expect(await speechToText?.initialize(), isTrue);
