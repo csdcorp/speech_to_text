@@ -1,18 +1,23 @@
 # Changelog
 
 ## 7.6.0-beta.1
-- Adds native handling for the `has_on_device_support` platform method on iOS,
+* Adds native handling for the `has_on_device_support` platform method on iOS,
   macOS and Android, so callers can check whether the device can recognize
   speech offline before requesting `onDevice` recognition. Requires
   speech_to_text_platform_interface 2.5.0.
-- Fixes iOS `listen` continuing after the unsupported-`onDevice` error, which
+* Fixes iOS `listen` continuing after the unsupported-`onDevice` error, which
   left the microphone active with no listener and blocked all later listen
   calls for the life of the process.
+* New `SpeechToText.iosVoiceProcessing` config option enables the iOS/macOS voice
+  processing I/O unit, applying acoustic echo cancellation so audio the device is
+  playing is removed from the captured signal. Useful when the app speaks (TTS)
+  while listening. Off by default. See #591.
+
 
 ## 7.5.0
 
-- Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
-- Migrates to built-in Kotlin
+* Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
+* Migrates to built-in Kotlin
 
 ## 7.4.0
 

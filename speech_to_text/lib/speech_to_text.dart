@@ -147,6 +147,21 @@ class SpeechToText {
   static final SpeechConfigOption iosNoBluetooth =
       SpeechConfigOption('ios', 'noBluetooth', true);
 
+  /// Configures the iOS/macOS audio input to use the voice processing I/O
+  /// unit, which applies acoustic echo cancellation so that audio the device
+  /// is playing is removed from the captured signal.
+  ///
+  /// Use this if your app plays audio (text-to-speech, for example) while
+  /// listening, and you find the recognizer transcribing your own output.
+  /// Without it the microphone hears the speaker and the recognizer treats
+  /// that audio as speech, which can create a feedback loop.
+  ///
+  /// Off by default: voice processing also applies automatic gain control and
+  /// a narrower, telephony-oriented frequency response, which can reduce
+  /// recognition accuracy for apps that never play audio while listening.
+  static final SpeechConfigOption iosVoiceProcessing =
+      SpeechConfigOption('ios', 'voiceProcessing', true);
+
   /// On some mobile web browsers, notably Chrome on Android, the speech
   /// results behave differently. The default behaviour is to aggregate
   /// separate phrases into a single result and return it. On
