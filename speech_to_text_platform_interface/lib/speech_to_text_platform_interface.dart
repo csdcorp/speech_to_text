@@ -185,6 +185,27 @@ abstract class SpeechToTextPlatform extends PlatformInterface {
     throw UnimplementedError('hasPermission() has not been implemented.');
   }
 
+  /// Returns true if the device can recognize speech without a network
+  /// connection, for [localeId] where the platform makes that distinction.
+  ///
+  /// Use this before passing `onDevice: true` to [listen]. On iOS an
+  /// on-device request that the device cannot satisfy fails the listen
+  /// session; on Android it silently falls back to the network recognizer.
+  /// Checking first lets a caller get the same "prefer on-device, fall back"
+  /// behaviour on both.
+  ///
+  /// [localeId] is the BCP-47 tag the session will use, or null for the
+  /// system locale. **iOS support is per-locale**, so a device that supports
+  /// on-device recognition for one language may not for another; Android
+  /// reports a single device-wide answer and ignores this argument.
+  ///
+  /// Returns false where the platform is too old to support on-device
+  /// recognition at all (iOS below 13, Android below API 31), and false
+  /// rather than throwing on platforms with no implementation.
+  Future<bool> hasOnDeviceSupport({String? localeId}) {
+    throw UnimplementedError('hasOnDeviceSupport() has not been implemented.');
+  }
+
   /// Initialize speech recognition services, returns true if
   /// successful, false if failed.
   ///
