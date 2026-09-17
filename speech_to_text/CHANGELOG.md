@@ -12,7 +12,11 @@
   processing I/O unit, applying acoustic echo cancellation so audio the device is
   playing is removed from the captured signal. Useful when the app speaks (TTS)
   while listening. Off by default. See #591.
-
+* Added `contextualPhrases` to `SpeechListenOptions` to bias recognition toward
+  domain-specific vocabulary or proper nouns. Maps to
+  `SFSpeechRecognitionRequest.contextualStrings` on iOS and
+  `RecognizerIntent.EXTRA_BIASING_STRINGS` on Android 13+ (silently ignored on
+  earlier Android versions and on web).
 
 ## 7.5.0
 
