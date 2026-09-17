@@ -1,4 +1,6 @@
 ## 2.5.0
+- Added hasOnDeviceSupport, so callers can check whether the device can
+  recognize speech offline before requesting onDevice recognition
 - New `contextualPhrases` property on `SpeechListenOptions` for biasing
   recognition toward domain-specific vocabulary. Forwarded to platforms as
   the `contextualPhrases` listen-method argument.

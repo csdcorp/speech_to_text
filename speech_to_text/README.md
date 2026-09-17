@@ -1,6 +1,6 @@
 # speech_to_text
 
-[![pub package](https://img.shields.io/badge/pub-v7.3.0-blue)](https://pub.dartlang.org/packages/speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
+[![pub package](https://img.shields.io/badge/pub-v7.6.0-blue)](https://pub.dartlang.org/packages/ speech_to_text) [![build status](https://github.com/csdcorp/speech_to_text/workflows/Test/badge.svg)](https://github.com/csdcorp/speech_to_text/actions?query=workflow%3ATest) [![codecov](https://codecov.io/gh/csdcorp/speech_to_text/branch/main/graph/badge.svg?token=4LV3HESMS4)](undefined)
 
 A library that exposes device specific speech recognition capability.
 
@@ -24,19 +24,17 @@ _speech: means most speech recognition features work. Platforms with build but n
 
 ## Recent Updates
 
+7.6.0
+* Better support for on device mode
+* Improve handling of speech recognition during audio 
+playbeack on the same device with the new iosVoiceProcessing option for initialize. 
+
 7.3.0
 * Now supports speech recognition on Windows with many thanks to @asherchok 
 for the PR! Note that Windows support is currently in beta, if anyone can try 
 it out please provide feedback, there are known issues and this is not yet 
 ready for production use. 
 * iOS and Mac speech recognition does more work in the background avoiding UI pauses
-
-7.0.0 
-* Now supports speech recognition on MacOS with many thanks to @alexrabin-sentracam for the PR!
-* Now supports WASM compliation for web with many thanks to yeikel16 for the PR!
-
-6.6.0 `listen` now uses 'SpeechListenOptions' to specify the options for the current listen session, including new
-options for controlling haptics and punctuation during recognition on iOS.
 
 _Note_: Feedback from any test devices is welcome.
 
@@ -313,6 +311,24 @@ property of any of the values returned in `locales`. A call looks like this:
 ```
 
 ## Troubleshooting
+
+### The recognizer transcribes the app's own text-to-speech output
+
+If your app plays audio while listening — text-to-speech, for example — the
+microphone picks up the speaker and the recognizer transcribes your own output.
+On iOS and macOS you can ask the platform to remove it by enabling acoustic
+echo cancellation when you initialize:
+
+```dart
+await speech.initialize(
+  options: [SpeechToText.iosVoiceProcessing],
+);
+```
+
+This configures the audio input to use the voice processing I/O unit. It is off
+by default because voice processing also applies automatic gain control and a
+narrower frequency response, which can reduce recognition accuracy for apps that
+never play audio while listening — so enable it only if you need it.
 
 ### Speech recognition not working on iOS Simulator
 

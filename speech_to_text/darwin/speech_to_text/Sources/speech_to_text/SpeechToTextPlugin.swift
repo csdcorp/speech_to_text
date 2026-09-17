@@ -13,6 +13,7 @@ import os.log
 
 public enum SwiftSpeechToTextMethods: String {
   case has_permission
+  case has_on_device_support
   case initialize
   case listen
   case stop
@@ -87,6 +88,16 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private var successSound: AVAudioPlayer?
   private var cancelSound: AVAudioPlayer?
 
+  /// When true the recognizer's audio input node is configured to use the
+  /// voice processing I/O unit, which applies acoustic echo cancellation.
+  /// Off by default because voice processing also applies automatic gain
+  /// control and a narrower frequency response, which can reduce recognition
+  /// accuracy for apps that never play audio while listening.
+  ///
+  /// Not inside the os(iOS) block below: initAudioEngine, which reads this,
+  /// is shared with macOS.
+  private var enableVoiceProcessing: Bool = false
+
   #if os(iOS)
     private var rememberedAudioCategory: AVAudioSession.Category?
     private var rememberedAudioCategoryOptions: AVAudioSession.CategoryOptions?
@@ -134,7 +145,14 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case SwiftSpeechToTextMethods.has_permission.rawValue:
       hasPermission(result)
+    case SwiftSpeechToTextMethods.has_on_device_support.rawValue:
+      let argsArr = call.arguments as? [String: AnyObject]
+      hasOnDeviceSupport(result, localeStr: argsArr?["localeId"] as? String)
     case SwiftSpeechToTextMethods.initialize.rawValue:
+        if let argsArr = call.arguments as? [String: AnyObject],
+           let voiceProcessing = argsArr["voiceProcessing"] as? Bool {
+            enableVoiceProcessing = voiceProcessing
+        }
         if #available(iOS 13.0, *) {
             Task {
                 initialize(result)
@@ -240,6 +258,25 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
 
     DispatchQueue.main.async {
       result(has)
+    }
+  }
+
+  /// Reports whether this device can recognize speech without a network
+  /// connection for the given locale.
+  ///
+  /// Deliberately builds a throwaway recognizer rather than reading the
+  /// `onDeviceStatus` captured during setup: support is per-locale, and
+  /// `listenForSpeech` replaces `recognizer` with whatever locale the last
+  /// session used, so that field does not answer the question a caller is
+  /// asking about the NEXT session. Querying must not mutate `recognizer`
+  /// either, hence the local instance.
+  private func hasOnDeviceSupport(_ result: @escaping FlutterResult, localeStr: String?) {
+    if #available(iOS 13.0, macOS 10.15, *) {
+      let supported =
+        SFSpeechRecognizer(locale: getLocale(localeStr))?.supportsOnDeviceRecognition ?? false
+      sendBoolResult(supported, result)
+    } else {
+      sendBoolResult(false, result)
     }
   }
 
@@ -363,6 +400,21 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     if inputNode == nil {
       os_log("Error no input node", log: pluginLog, type: .error)
       sendBoolResult(false, result)
+    }
+    // Opt-in acoustic echo cancellation. Must be enabled before any tap is
+    // installed and before the engine starts. Failure is non-fatal: the
+    // engine still records, just without cancellation.
+    if enableVoiceProcessing {
+      // macOS is not listed: its deployment target (10.15) already has this.
+      if #available(iOS 13.0, *) {
+        do {
+          try inputNode?.setVoiceProcessingEnabled(true)
+        } catch {
+          os_log(
+            "Could not enable voice processing: %@", log: pluginLog,
+            type: .error, error.localizedDescription)
+        }
+      }
     }
     return inputNode != nil
   }
@@ -513,6 +565,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
               code: SpeechToTextErrors.onDeviceError.rawValue,
               message: "on device recognition is not supported on this device",
               details: nil))
+          return
         }
       }
 
