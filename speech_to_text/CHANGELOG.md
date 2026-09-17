@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.6.0-beta.1
+## 7.6.0-beta.2
 * Adds native handling for the `has_on_device_support` platform method on iOS,
   macOS and Android, so callers can check whether the device can recognize
   speech offline before requesting `onDevice` recognition. Requires
