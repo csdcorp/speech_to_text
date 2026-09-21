@@ -170,6 +170,18 @@ void main() {
           isTrue);
       expect(channelHandler.contextualPhrases, isNull);
     });
+    test('passes preserveExistingAudioSession when true', () async {
+      expect(
+          await speechToText?.listen(
+            options: SpeechListenOptions(preserveExistingAudioSession: true),
+          ),
+          isTrue);
+      expect(channelHandler.preserveExistingAudioSession, isTrue);
+    });
+    test('omits preserveExistingAudioSession when false (default)', () async {
+      expect(await speechToText?.listen(), isTrue);
+      expect(channelHandler.preserveExistingAudioSession, isNull);
+    });
   });
   group('control methods invoked as expected', () {
     test('stop invoked', () async {

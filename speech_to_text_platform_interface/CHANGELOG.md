@@ -1,3 +1,14 @@
+## Unreleased
+- New `preserveExistingAudioSession` property on `SpeechListenOptions`.
+  When true, an existing `.playback`, `.playAndRecord`, or `.multiRoute`
+  audio session that predated recognition is kept ACTIVE on `stop` instead
+  of being deactivated. Forwarded to platforms as the
+  `preserveExistingAudioSession` listen-method argument; iOS implements
+  the behavior, other platforms currently ignore the flag. Default `false`
+  preserves the existing plugin behavior exactly for callers that do not
+  opt in. Recommended enabled when speech recognition runs in the same
+  process as WebRTC / LiveKit audio playback.
+
 ## 2.5.0
 - Added hasOnDeviceSupport, so callers can check whether the device can
   recognize speech offline before requesting onDevice recognition

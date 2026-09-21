@@ -136,6 +136,9 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     if (phrases != null && phrases.isNotEmpty) {
       listenParams["contextualPhrases"] = phrases;
     }
+    if (options?.preserveExistingAudioSession == true) {
+      listenParams["preserveExistingAudioSession"] = true;
+    }
     return await _channel.invokeMethod<bool>('listen', listenParams) ?? false;
   }
 

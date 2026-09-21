@@ -67,6 +67,7 @@ class SpeechListenOptions {
   final Duration? listenFor;
   final String? localeId;
   final List<String>? contextualPhrases;
+  final bool preserveExistingAudioSession;
 
   SpeechListenOptions({
     /// If true the listen session will automatically be canceled on a permanent error.
@@ -123,6 +124,35 @@ class SpeechListenOptions {
     /// API 33 (Android 13) or later — earlier versions silently ignore
     /// the hint. Web and other platforms also ignore the hint.
     this.contextualPhrases,
+
+    /// When true, the plugin will preserve an existing playback / call /
+    /// multi-route audio session across a recognition turn on iOS.
+    /// Currently only implemented on iOS; other platforms ignore the flag.
+    ///
+    /// Rationale: `AVAudioSession` is process-wide. If another subsystem
+    /// (e.g. WebRTC / LiveKit remote audio playback, an active `AVPlayer`,
+    /// a call session) had already activated the session before recognition
+    /// started, the plugin's default deactivation on `stop` tears that
+    /// subsystem's playout unit down along with the recognition session,
+    /// producing an audible "goes silent after first STT turn" regression
+    /// with no client-side signal.
+    ///
+    /// Behavior when true:
+    ///
+    /// 1. Before `listen`, the plugin captures the current audio session's
+    ///    `category`, `categoryOptions`, and `mode`.
+    /// 2. On `stop`, the captured configuration is restored.
+    /// 3. If the pre-recognition `category` was one of `.playback`,
+    ///    `.playAndRecord`, or `.multiRoute` — i.e. an existing media /
+    ///    call / multi-route session was already active — the audio
+    ///    session is kept ACTIVE. Otherwise the plugin falls through
+    ///    to its default deactivation with `.notifyOthersOnDeactivation`.
+    ///
+    /// Default is `false`, preserving the plugin's pre-existing behavior
+    /// exactly for callers that do not opt in. Recommended enabled when
+    /// speech recognition runs in the same process as WebRTC / LiveKit
+    /// audio playback.
+    this.preserveExistingAudioSession = false,
   });
 
   SpeechListenOptions copyWith({
@@ -137,6 +167,7 @@ class SpeechListenOptions {
     Duration? listenFor,
     String? localeId,
     List<String>? contextualPhrases,
+    bool? preserveExistingAudioSession,
   }) {
     return SpeechListenOptions(
         cancelOnError: cancelOnError ?? this.cancelOnError,
@@ -149,7 +180,9 @@ class SpeechListenOptions {
         pauseFor: pauseFor ?? this.pauseFor,
         listenFor: listenFor ?? this.listenFor,
         localeId: localeId ?? this.localeId,
-        contextualPhrases: contextualPhrases ?? this.contextualPhrases);
+        contextualPhrases: contextualPhrases ?? this.contextualPhrases,
+        preserveExistingAudioSession:
+            preserveExistingAudioSession ?? this.preserveExistingAudioSession);
   }
 }
 

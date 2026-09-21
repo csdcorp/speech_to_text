@@ -101,6 +101,13 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   #if os(iOS)
     private var rememberedAudioCategory: AVAudioSession.Category?
     private var rememberedAudioCategoryOptions: AVAudioSession.CategoryOptions?
+    private var rememberedAudioMode: AVAudioSession.Mode?
+    /// Set at the top of `listenForSpeech` from the `preserveExistingAudioSession`
+    /// listen option AND the pre-recognition category. When true,
+    /// `stopCurrentListen` restores the cached configuration and leaves the
+    /// session ACTIVE instead of deactivating — see the option's doc-comment
+    /// in speech_to_text_platform_interface for rationale and behavior.
+    private var preserveActiveAudioSession = false
     private let audioSession = AVAudioSession.sharedInstance()
   #endif
 
@@ -184,6 +191,8 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         localeStr = localeParam
       }
       let contextualPhrases = argsArr["contextualPhrases"] as? [String]
+      let preserveExistingAudioSession =
+        (argsArr["preserveExistingAudioSession"] as? Bool) ?? false
       guard let listenMode = ListenMode(rawValue: listenModeIndex) else {
         DispatchQueue.main.async {
           result(
@@ -203,17 +212,20 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
             let capturedAutoPunctuation = autoPunctuation
             let capturedEnableHaptics = enableHaptics
             let capturedContextualPhrases = contextualPhrases
+            let capturedPreserveExistingAudioSession = preserveExistingAudioSession
             Task {
                 listenForSpeech(
                     result, localeStr: capturedLocaleStr, partialResults: capturedPartialResults, onDevice: capturedOnDevice,
                     listenMode: capturedListenMode, sampleRate: capturedSampleRate, autoPunctuation: capturedAutoPunctuation,
-                    enableHaptics: capturedEnableHaptics, contextualPhrases: capturedContextualPhrases)
+                    enableHaptics: capturedEnableHaptics, contextualPhrases: capturedContextualPhrases,
+                    preserveExistingAudioSession: capturedPreserveExistingAudioSession)
             }
         } else {
             listenForSpeech(
                 result, localeStr: localeStr, partialResults: partialResults, onDevice: onDevice,
                 listenMode: listenMode, sampleRate: sampleRate, autoPunctuation: autoPunctuation,
-                enableHaptics: enableHaptics, contextualPhrases: contextualPhrases)
+                enableHaptics: enableHaptics, contextualPhrases: contextualPhrases,
+                preserveExistingAudioSession: preserveExistingAudioSession)
         }
     case SwiftSpeechToTextMethods.stop.rawValue:
         if #available(iOS 13.0, *) {
@@ -506,22 +518,43 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     #if os(iOS)
       do {
         if let rememberedAudioCategory = rememberedAudioCategory,
-          let rememberedAudioCategoryOptions = rememberedAudioCategoryOptions
+          let rememberedAudioCategoryOptions = rememberedAudioCategoryOptions,
+          let rememberedAudioMode = rememberedAudioMode
         {
           try self.audioSession.setCategory(
-            rememberedAudioCategory, options: rememberedAudioCategoryOptions)
+            rememberedAudioCategory,
+            mode: rememberedAudioMode,
+            options: rememberedAudioCategoryOptions)
         }
       } catch {
         os_log(
           "Error stopping listen: %{PUBLIC}@", log: pluginLog, type: .error,
           error.localizedDescription)
       }
-      do {
-        try self.audioSession.setActive(false, options: .notifyOthersOnDeactivation)
-      } catch {
-        os_log(
-          "Error deactivation: %{PUBLIC}@", log: pluginLog, type: .info, error.localizedDescription)
+      // AVAudioSession is process-wide. Deactivating it here also tears down
+      // any concurrent WebRTC / LiveKit / AVPlayer playout unit. When the
+      // caller opted in via `preserveExistingAudioSession` AND a media
+      // session was in fact already active before recognition borrowed the
+      // session (see `preserveActiveAudioSession` at listen time), restore
+      // that configuration and leave the session active. Otherwise fall
+      // through to the plugin's default deactivation.
+      if preserveActiveAudioSession {
+        do {
+          try self.audioSession.setActive(true)
+        } catch {
+          os_log(
+            "Error preserving active audio session: %{PUBLIC}@", log: pluginLog,
+            type: .info, error.localizedDescription)
+        }
+      } else {
+        do {
+          try self.audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+          os_log(
+            "Error deactivation: %{PUBLIC}@", log: pluginLog, type: .info, error.localizedDescription)
+        }
       }
+      preserveActiveAudioSession = false
 
     #endif
     self.invokeFlutter(
@@ -537,7 +570,8 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private func listenForSpeech(
     _ result: @escaping FlutterResult, localeStr: String?, partialResults: Bool,
     onDevice: Bool, listenMode: ListenMode, sampleRate: Int, autoPunctuation: Bool,
-    enableHaptics: Bool, contextualPhrases: [String]? = nil
+    enableHaptics: Bool, contextualPhrases: [String]? = nil,
+    preserveExistingAudioSession: Bool = false
   ) {
     if nil != currentTask || listening {
       sendBoolResult(false, result)
@@ -572,6 +606,16 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
       #if os(iOS)
         rememberedAudioCategory = self.audioSession.category
         rememberedAudioCategoryOptions = self.audioSession.categoryOptions
+        rememberedAudioMode = self.audioSession.mode
+        // Opt-in only. Preservation only makes sense when an EXISTING
+        // playback / call / multi-route session was already active before
+        // recognition borrowed the audio session — otherwise there's
+        // nothing to keep alive at stop() time. See the option's Dart
+        // doc-comment in speech_to_text_platform_interface for rationale.
+        self.preserveActiveAudioSession = preserveExistingAudioSession && (
+          rememberedAudioCategory == .playback ||
+          rememberedAudioCategory == .playAndRecord ||
+          rememberedAudioCategory == .multiRoute)
         try self.audioSession.setCategory(
           AVAudioSession.Category.playAndRecord,
           options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])

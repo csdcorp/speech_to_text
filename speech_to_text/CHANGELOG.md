@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+* iOS: new `preserveExistingAudioSession` `SpeechListenOptions` (default
+  `false`). When `true` AND an existing `.playback`, `.playAndRecord`, or
+  `.multiRoute` `AVAudioSession` was active before recognition, the plugin
+  now restores that configuration on `stop` and leaves the session ACTIVE
+  instead of deactivating it. Fixes a "goes silent after first STT turn"
+  regression for apps running speech recognition alongside WebRTC /
+  LiveKit remote-audio playback — because `AVAudioSession` is process-wide,
+  the plugin's default `setActive(false)` on stop was tearing the peer's
+  playout unit down along with recognition. Idle-session behavior
+  (recognition with no other media session in play) is unchanged.
+  See `csdcorp/speech_to_text#479` and
+  `livekit/client-sdk-flutter#996`.
+
 ## 7.6.0-beta.2
 * Adds native handling for the `has_on_device_support` platform method on iOS,
   macOS and Android, so callers can check whether the device can recognize

@@ -33,6 +33,7 @@ class TestSpeechChannelHandler {
   int? listenMode = 0;
   int? sampleRate = 0;
   List<String>? contextualPhrases;
+  bool? preserveExistingAudioSession;
   dynamic initOption;
   static const String localeId1 = 'en_US';
   static const String localeId2 = 'fr_CA';
@@ -104,6 +105,8 @@ class TestSpeechChannelHandler {
         sampleRate = methodCall.arguments['sampleRate'];
         contextualPhrases =
             (methodCall.arguments['contextualPhrases'] as List?)?.cast<String>();
+        preserveExistingAudioSession =
+            methodCall.arguments['preserveExistingAudioSession'] as bool?;
         // await _speech.processMethodCall(MethodCall(
         //     SpeechToText.notifyStatusMethod, listeningStatusResponse));
         return listenResult;
@@ -161,6 +164,7 @@ class TestSpeechChannelHandler {
     listenMode = 0;
     sampleRate = 0;
     contextualPhrases = null;
+    preserveExistingAudioSession = null;
     initOption = null;
     debugLogging = null;
   }
