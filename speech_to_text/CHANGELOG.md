@@ -17,6 +17,9 @@
   `SFSpeechRecognitionRequest.contextualStrings` on iOS and
   `RecognizerIntent.EXTRA_BIASING_STRINGS` on Android 13+ (silently ignored on
   earlier Android versions and on web).
+* Android: `cancel()` now destroys and recreates the `SpeechRecognizer`, so a
+  `listen()` right after it is no longer rejected with `error_client` and the
+  cancelled session's late error no longer reaches the new session.
 
 ## 7.5.0
 
