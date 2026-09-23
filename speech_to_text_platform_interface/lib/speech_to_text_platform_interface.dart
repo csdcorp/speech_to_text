@@ -125,19 +125,20 @@ class SpeechListenOptions {
     /// the hint. Web and other platforms also ignore the hint.
     this.contextualPhrases,
 
-    /// When true, the plugin will preserve an existing playback / call /
-    /// multi-route audio session across a recognition turn on iOS.
+    /// When true (default), the plugin preserves an existing playback /
+    /// call / multi-route audio session across a recognition turn on iOS
+    /// instead of tearing it down along with the recognition session.
     /// Currently only implemented on iOS; other platforms ignore the flag.
     ///
     /// Rationale: `AVAudioSession` is process-wide. If another subsystem
     /// (e.g. WebRTC / LiveKit remote audio playback, an active `AVPlayer`,
     /// a call session) had already activated the session before recognition
-    /// started, the plugin's default deactivation on `stop` tears that
-    /// subsystem's playout unit down along with the recognition session,
-    /// producing an audible "goes silent after first STT turn" regression
-    /// with no client-side signal.
+    /// started, unconditional deactivation on `stop` tears that subsystem's
+    /// playout unit down along with the recognition session, producing an
+    /// audible "goes silent after first STT turn" regression with no
+    /// client-side signal.
     ///
-    /// Behavior when true:
+    /// Behavior when true (default):
     ///
     /// 1. Before `listen`, the plugin captures the current audio session's
     ///    `category`, `categoryOptions`, and `mode`.
@@ -145,14 +146,20 @@ class SpeechListenOptions {
     /// 3. If the pre-recognition `category` was one of `.playback`,
     ///    `.playAndRecord`, or `.multiRoute` — i.e. an existing media /
     ///    call / multi-route session was already active — the audio
-    ///    session is kept ACTIVE. Otherwise the plugin falls through
-    ///    to its default deactivation with `.notifyOthersOnDeactivation`.
+    ///    session is kept ACTIVE. Otherwise (category was `.soloAmbient`,
+    ///    `.ambient`, `.record`, etc.) the plugin falls through to its
+    ///    default deactivation with `.notifyOthersOnDeactivation`.
     ///
-    /// Default is `false`, preserving the plugin's pre-existing behavior
-    /// exactly for callers that do not opt in. Recommended enabled when
-    /// speech recognition runs in the same process as WebRTC / LiveKit
-    /// audio playback.
-    this.preserveExistingAudioSession = false,
+    /// Standalone STT apps (no other media session active) see identical
+    /// behavior with the default because their pre-recognition category
+    /// is typically `.soloAmbient` (iOS default), which is NOT in the
+    /// preserve list — the code falls through to the historical
+    /// deactivation path.
+    ///
+    /// Set to `false` explicitly only if you have a specific reason to
+    /// force deactivation of another subsystem's audio session at
+    /// recognition end.
+    this.preserveExistingAudioSession = true,
   });
 
   SpeechListenOptions copyWith({

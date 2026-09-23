@@ -191,8 +191,12 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
         localeStr = localeParam
       }
       let contextualPhrases = argsArr["contextualPhrases"] as? [String]
+      // Default `true` when the key is missing: older
+      // speech_to_text_platform_interface versions won't send it, and we
+      // want them to inherit the new default behavior transparently. Newer
+      // versions always send the key with the caller's explicit value.
       let preserveExistingAudioSession =
-        (argsArr["preserveExistingAudioSession"] as? Bool) ?? false
+        (argsArr["preserveExistingAudioSession"] as? Bool) ?? true
       guard let listenMode = ListenMode(rawValue: listenModeIndex) else {
         DispatchQueue.main.async {
           result(
