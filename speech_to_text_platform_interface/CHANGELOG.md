@@ -1,3 +1,19 @@
+## Unreleased
+- New `preserveExistingAudioSession` property on `SpeechListenOptions`,
+  **defaults to `true`**. When true, an existing `.playback`,
+  `.playAndRecord`, or `.multiRoute` audio session that predated
+  recognition is kept ACTIVE on `stop` instead of being deactivated —
+  fixes the pre-existing behavior where STT could tear down an unrelated
+  media / call / WebRTC / LiveKit session on the shared process-wide
+  `AVAudioSession`. Standalone STT apps (no other media session in
+  play) see identical behavior with the default: their pre-recognition
+  category is typically `.soloAmbient`, which isn't in the preserve list,
+  so the code falls through to the historical deactivation path. Set to
+  `false` explicitly if you have a specific reason to force deactivation
+  of another subsystem's audio session at recognition end. Forwarded to
+  platforms as the `preserveExistingAudioSession` listen-method argument;
+  iOS implements the behavior, other platforms currently ignore the flag.
+
 ## 2.5.0
 - Added hasOnDeviceSupport, so callers can check whether the device can
   recognize speech offline before requesting onDevice recognition

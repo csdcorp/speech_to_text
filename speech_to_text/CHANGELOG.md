@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.6.0-beta.3
+## 7.6.0-beta.4
 * Adds native handling for the `has_on_device_support` platform method on iOS,
   macOS and Android, so callers can check whether the device can recognize
   speech offline before requesting `onDevice` recognition. Requires
@@ -20,6 +20,22 @@
 * Android: `cancel()` now destroys and recreates the `SpeechRecognizer`, so a
   `listen()` right after it is no longer rejected with `error_client` and the
   cancelled session's late error no longer reaches the new session.
+* iOS: new `preserveExistingAudioSession` `SpeechListenOptions`,
+  **defaults to `true`**. When enabled AND an existing `.playback`,
+  `.playAndRecord`, or `.multiRoute` `AVAudioSession` was active before
+  recognition, the plugin now restores that configuration on `stop` and
+  leaves the session ACTIVE instead of deactivating it. Fixes a "goes
+  silent after first STT turn" regression for apps running speech
+  recognition alongside WebRTC / LiveKit remote-audio playback — because
+  `AVAudioSession` is process-wide, the previous unconditional
+  `setActive(false)` on stop was tearing the peer's playout unit down
+  along with recognition. Standalone STT apps (no other media session in
+  play) see identical behavior with the default: their pre-recognition
+  category is typically `.soloAmbient`, which isn't in the preserve list,
+  so the code falls through to the historical deactivation path. Callers
+  who explicitly want the pre-existing unconditional deactivation can pass
+  `preserveExistingAudioSession: false`. See
+  `csdcorp/speech_to_text#479` and `livekit/client-sdk-flutter#996`.
 
 ## 7.5.0
 

@@ -136,6 +136,11 @@ class MethodChannelSpeechToText extends SpeechToTextPlatform {
     if (phrases != null && phrases.isNotEmpty) {
       listenParams["contextualPhrases"] = phrases;
     }
+    // Always send: an explicit `false` needs to reach the plugin (the plugin
+    // now defaults this to `true` if the key is missing, for backward-compat
+    // with older platform_interface versions).
+    listenParams["preserveExistingAudioSession"] =
+        options?.preserveExistingAudioSession ?? true;
     return await _channel.invokeMethod<bool>('listen', listenParams) ?? false;
   }
 
