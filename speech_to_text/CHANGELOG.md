@@ -1,6 +1,11 @@
 # Changelog
 
 ## 7.6.0-beta.4
+* Fixes an iOS crash (`EXC_BAD_ACCESS` in `AVAudioIONodeImpl` / `AVAudioIOUnit`)
+  when `listen`, `stop` or `cancel` overlapped, or when a finished recognition
+  task's late callback tore down the listen that followed it (#680). The
+  plugin's listen state now lives on one serial queue, and delegate callbacks
+  from a superseded recognition task are ignored.
 * Adds native handling for the `has_on_device_support` platform method on iOS,
   macOS and Android, so callers can check whether the device can recognize
   speech offline before requesting `onDevice` recognition. Requires
