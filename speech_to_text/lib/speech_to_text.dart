@@ -364,6 +364,8 @@ class SpeechToText {
     _shutdownListener();
     await SpeechToTextPlatform.instance.stop();
     if (_finalTimeout > _minFinalTimeout) {
+      // a second stop during the await above would leave two timers
+      _notifyFinalTimer?.cancel();
       _notifyFinalTimer = Timer(_finalTimeout, _onFinalTimeout);
     }
   }
@@ -776,7 +778,6 @@ class SpeechToText {
     _listenTimer = null;
     _notifyFinalTimer?.cancel();
     _notifyFinalTimer = null;
-    _listenTimer = null;
   }
 
   String _defaultPhraseAggregator(List<String> phrases) {

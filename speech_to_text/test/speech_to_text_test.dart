@@ -539,6 +539,18 @@ void main() {
       await speech.stop();
       expect(testPlatform.stopInvoked, true);
     });
+    test('keeps a single final timer when stop is called twice', () async {
+      fakeAsync((fa) {
+        speech.initialize(finalTimeout: const Duration(milliseconds: 100));
+        fa.flushMicrotasks();
+        speech.listen(onResult: listener.onSpeechResult);
+        fa.flushMicrotasks();
+        speech.stop();
+        speech.stop();
+        fa.flushMicrotasks();
+        expect(fa.pendingTimers, hasLength(1));
+      });
+    });
   });
 
   group('error', () {
