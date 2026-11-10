@@ -199,6 +199,10 @@ class SpeechToText {
 
   int _listenStartedAt = 0;
   int _lastSpeechEventAt = 0;
+
+  /// When [changePauseFor] last restarted the pause: the new pause is
+  /// waited for in full from then, even without a speech event.
+  int _pauseRestartedAt = 0;
   Duration? _pauseFor;
   Duration? _listenFor;
   Duration _finalTimeout = defaultFinalTimeout;
@@ -517,6 +521,7 @@ class SpeechToText {
       if (started) {
         _listenStartedAt = clock.now().millisecondsSinceEpoch;
         _lastSpeechEventAt = _listenStartedAt;
+        _pauseRestartedAt = _listenStartedAt;
         _setupListenAndPause(usedOptions.pauseFor, usedOptions.listenFor);
       }
     } on PlatformException catch (e) {
@@ -535,49 +540,44 @@ class SpeechToText {
     }
 
     if (_pauseFor != pauseFor) {
-      _listenTimer?.cancel();
-      _listenTimer = null;
-      // ignoreElapsePause ensures that the timer waits for the full pauseFor
-      // duration before stopping the listen
-      _setupListenAndPause(pauseFor, _listenFor, ignoreElapsedPause: true);
+      // The new pause is waited for in full, from now.
+      _pauseRestartedAt = clock.now().millisecondsSinceEpoch;
+      _setupListenAndPause(pauseFor, _listenFor);
     }
   }
 
-  void _setupListenAndPause(
-      Duration? initialPauseFor, Duration? initialListenFor,
-      {bool ignoreElapsedPause = false}) {
-    _pauseFor = null;
-    _listenFor = null;
-    if (null == initialPauseFor && null == initialListenFor) {
+  /// Keeps [pauseFor] and [listenFor] as given and arms the timer for
+  /// whichever runs out first.
+  ///
+  /// The durations are never reduced: each check measures the time elapsed
+  /// from the timestamps, so re-arming the timer does not shorten either.
+  void _setupListenAndPause(Duration? pauseFor, Duration? listenFor) {
+    _listenTimer?.cancel();
+    _listenTimer = null;
+    _pauseFor = pauseFor;
+    _listenFor = listenFor;
+    _armListenTimer();
+  }
+
+  void _armListenTimer() {
+    var listenFor = _listenFor;
+    var pauseFor = _pauseFor;
+    int? remainingMillis;
+    if (null != listenFor) {
+      remainingMillis = listenFor.inMilliseconds - _elapsedListenMillis;
+    }
+    if (null != pauseFor) {
+      var pauseRemaining = pauseFor.inMilliseconds - _elapsedPauseMillis;
+      remainingMillis = null == remainingMillis
+          ? pauseRemaining
+          : min(remainingMillis, pauseRemaining);
+    }
+    if (null == remainingMillis) {
       return;
     }
-    var pauseFor = initialPauseFor;
-    var listenFor = initialListenFor;
-    if (null != pauseFor) {
-      var remainingMillis = pauseFor.inMilliseconds -
-          (ignoreElapsedPause ? 0 : _elapsedSinceSpeechEvent);
-      pauseFor = Duration(milliseconds: max(remainingMillis, 0));
-    }
-    if (null != listenFor) {
-      var remainingMillis = listenFor.inMilliseconds - _elapsedListenMillis;
-      listenFor = Duration(milliseconds: max(remainingMillis, 0));
-    }
-    Duration minDuration;
-    if (null == pauseFor) {
-      _listenFor = Duration(milliseconds: listenFor!.inMilliseconds);
-      minDuration = listenFor;
-    } else if (null == listenFor) {
-      _pauseFor = Duration(milliseconds: pauseFor.inMilliseconds);
-      minDuration = pauseFor;
-    } else {
-      _listenFor = Duration(milliseconds: listenFor.inMilliseconds);
-      _pauseFor = Duration(milliseconds: pauseFor.inMilliseconds);
-      var minMillis = min(listenFor.inMilliseconds - _elapsedListenMillis,
-          pauseFor.inMilliseconds);
-      minDuration = Duration(milliseconds: minMillis);
-    }
-    // print('Waiting for ${minDuration.inMilliseconds}');
-    _listenTimer = Timer(minDuration, _stopOnPauseOrListen);
+    // print('Waiting for $remainingMillis');
+    _listenTimer = Timer(
+        Duration(milliseconds: max(remainingMillis, 0)), _stopOnPauseOrListen);
   }
 
   /// Milliseconds since the last listen was started, this is used for
@@ -585,22 +585,25 @@ class SpeechToText {
   int get _elapsedListenMillis =>
       clock.now().millisecondsSinceEpoch - _listenStartedAt;
 
-  /// Milliseconds since the last speech event was detected, this
-  /// is used for the pause calculations
-  int get _elapsedSinceSpeechEvent =>
-      clock.now().millisecondsSinceEpoch - _lastSpeechEventAt;
+  /// Milliseconds since the last speech event was detected, or since
+  /// [changePauseFor] restarted the pause if that is later, this is used
+  /// for the pause calculations
+  int get _elapsedPauseMillis =>
+      clock.now().millisecondsSinceEpoch -
+      max(_lastSpeechEventAt, _pauseRestartedAt);
 
   void _stopOnPauseOrListen() {
-    // print('Stop? $_elapsedListenMillis / $_elapsedSinceSpeechEvent');
+    // print('Stop? $_elapsedListenMillis / $_elapsedPauseMillis');
+    _listenTimer = null;
     var listenFor = _listenFor;
     var pauseFor = _pauseFor;
     if (null != listenFor && _elapsedListenMillis >= listenFor.inMilliseconds) {
       _stop();
     } else if (null != pauseFor &&
-        _elapsedSinceSpeechEvent >= pauseFor.inMilliseconds) {
+        _elapsedPauseMillis >= pauseFor.inMilliseconds) {
       _stop();
     } else {
-      _setupListenAndPause(_pauseFor, _listenFor);
+      _armListenTimer();
     }
   }
 

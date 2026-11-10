@@ -1,6 +1,13 @@
 # Changelog
 
 ## 7.6.0-beta.4
+* Fixes `pauseFor` and `listenFor` running out early once the timer had
+  re-armed: the remaining durations were stored in place of the requested ones
+  and the elapsed time taken off them again on every re-arm, so a session
+  spoken into with `pauseFor: 15s, listenFor: 120s` stopped after 30 to 40
+  seconds, on a pause of 5 to 10. `changePauseFor` now waits the new pause in
+  full from the call, and arming the timer cancels the pending one, which a
+  session the platform ended used to leave behind for the next session.
 * Adds native handling for the `has_on_device_support` platform method on iOS,
   macOS and Android, so callers can check whether the device can recognize
   speech offline before requesting `onDevice` recognition. Requires

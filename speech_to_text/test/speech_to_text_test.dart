@@ -278,6 +278,154 @@ void main() {
         expect(speech.isListening, isTrue);
       });
     });
+    group('timer re-arming', () {
+      // A partial result whose words differ from the previous one: the
+      // speech event that restarts the pause.
+      String partialJson(int i) =>
+          '{"alternates":[{"recognizedWords":"words $i","confidence":0.9}],'
+          '"resultType":${ResultType.partial.value}}';
+
+      void speakEvery(FakeAsync fa, Duration interval, Duration until) {
+        var i = 0;
+        while (fa.elapsed + interval <= until) {
+          fa.elapse(interval);
+          testPlatform.onTextRecognition!(partialJson(i++));
+          fa.flushMicrotasks();
+        }
+      }
+
+      test('keeps listening for the whole listenFor while speech continues',
+          () async {
+        fakeAsync((fa) {
+          speech.initialize();
+          fa.flushMicrotasks();
+          speech.listen(
+            listenOptions: SpeechListenOptions(
+              pauseFor: const Duration(seconds: 3),
+              listenFor: const Duration(seconds: 20),
+            ),
+          );
+          testPlatform.onStatus!(SpeechToText.listeningStatus);
+          fa.flushMicrotasks();
+          speakEvery(
+              fa, const Duration(seconds: 2), const Duration(seconds: 18));
+          fa.elapse(const Duration(milliseconds: 1900));
+          expect(speech.isListening, isTrue);
+          fa.elapse(const Duration(milliseconds: 200));
+          expect(speech.isListening, isFalse);
+        });
+      });
+
+      test('waits the whole pauseFor after the last speech event', () async {
+        fakeAsync((fa) {
+          speech.initialize();
+          fa.flushMicrotasks();
+          speech.listen(
+            listenOptions: SpeechListenOptions(
+              pauseFor: const Duration(seconds: 3),
+              listenFor: const Duration(seconds: 60),
+            ),
+          );
+          testPlatform.onStatus!(SpeechToText.listeningStatus);
+          fa.flushMicrotasks();
+          speakEvery(
+              fa, const Duration(seconds: 2), const Duration(seconds: 10));
+          fa.elapse(const Duration(milliseconds: 2900));
+          expect(speech.isListening, isTrue);
+          fa.elapse(const Duration(milliseconds: 200));
+          expect(speech.isListening, isFalse);
+        });
+      });
+
+      test('waits the whole pauseFor without listenFor', () async {
+        fakeAsync((fa) {
+          speech.initialize();
+          fa.flushMicrotasks();
+          speech.listen(
+            listenOptions: SpeechListenOptions(
+              pauseFor: const Duration(seconds: 3),
+            ),
+          );
+          testPlatform.onStatus!(SpeechToText.listeningStatus);
+          fa.flushMicrotasks();
+          speakEvery(
+              fa, const Duration(seconds: 2), const Duration(seconds: 10));
+          fa.elapse(const Duration(milliseconds: 2900));
+          expect(speech.isListening, isTrue);
+          fa.elapse(const Duration(milliseconds: 200));
+          expect(speech.isListening, isFalse);
+        });
+      });
+
+      test('keeps a single timer pending', () async {
+        fakeAsync((fa) {
+          speech.initialize();
+          fa.flushMicrotasks();
+          speech.listen(
+            listenOptions: SpeechListenOptions(
+              pauseFor: const Duration(seconds: 3),
+              listenFor: const Duration(seconds: 60),
+            ),
+          );
+          testPlatform.onStatus!(SpeechToText.listeningStatus);
+          fa.flushMicrotasks();
+          speakEvery(
+              fa, const Duration(seconds: 2), const Duration(seconds: 10));
+          speech.changePauseFor(const Duration(seconds: 5));
+          expect(fa.pendingTimers, hasLength(1));
+        });
+      });
+
+      test('a new session drops the timer of one the platform ended',
+          () async {
+        fakeAsync((fa) {
+          speech.initialize();
+          fa.flushMicrotasks();
+          speech.listen(
+            listenOptions: SpeechListenOptions(
+              listenFor: const Duration(seconds: 10),
+            ),
+          );
+          testPlatform.onStatus!(SpeechToText.listeningStatus);
+          fa.flushMicrotasks();
+          fa.elapse(const Duration(seconds: 2));
+          testPlatform.onStatus!(SpeechToText.notListeningStatus);
+          fa.flushMicrotasks();
+          speech.listen(
+            listenOptions: SpeechListenOptions(
+              listenFor: const Duration(seconds: 10),
+            ),
+          );
+          testPlatform.onStatus!(SpeechToText.listeningStatus);
+          fa.flushMicrotasks();
+          expect(fa.pendingTimers, hasLength(1));
+        });
+      });
+
+      test('changePauseFor waits the new pause in full once re-armed',
+          () async {
+        fakeAsync((fa) {
+          speech.initialize();
+          fa.flushMicrotasks();
+          speech.listen(
+            listenOptions: SpeechListenOptions(
+              pauseFor: const Duration(seconds: 2),
+              listenFor: const Duration(seconds: 60),
+            ),
+          );
+          testPlatform.onStatus!(SpeechToText.listeningStatus);
+          fa.flushMicrotasks();
+          fa.elapse(const Duration(seconds: 1));
+          speech.changePauseFor(const Duration(seconds: 10));
+          speakEvery(
+              fa, const Duration(seconds: 3), const Duration(seconds: 13));
+          fa.elapse(const Duration(milliseconds: 9900));
+          expect(speech.isListening, isTrue);
+          fa.elapse(const Duration(milliseconds: 200));
+          expect(speech.isListening, isFalse);
+        });
+      });
+    });
     test('Stop listen after late changePauseFor without initial pauseFor',
         () async {
       fakeAsync((fa) {
