@@ -546,6 +546,24 @@ void main() {
       expect(testPlatform.listenInvoked, true);
       expect(testPlatform.listenLocale, TestSpeechChannelHandler.localeId1);
     });
+    test('filters partial results when disabled in listenOptions', () async {
+      await speech.initialize();
+      await speech.listen(
+        onResult: listener.onSpeechResult,
+        listenOptions: SpeechListenOptions(partialResults: false),
+      );
+
+      testPlatform.notifyPartialWords();
+      expect(listener.results, isEmpty);
+
+      testPlatform.notifyFinalWords();
+      expect(listener.results, hasLength(1));
+      expect(listener.results.single.finalResult, isTrue);
+      expect(
+        listener.results.single.recognizedWords,
+        TestSpeechToTextPlatform.secondRecognizedWords,
+      );
+    });
     test('calls speech listener', () async {
       await speech.initialize();
       await speech.listen(onResult: listener.onSpeechResult);
