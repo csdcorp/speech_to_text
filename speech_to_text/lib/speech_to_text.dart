@@ -492,7 +492,7 @@ class SpeechToText {
     _notifiedDone = false;
     _resultListener = onResult;
     _soundLevelChange = onSoundLevelChange;
-    _partialResults = partialResults;
+    _partialResults = listenOptions?.partialResults ?? partialResults;
     _notifyFinalTimer?.cancel();
     _notifyFinalTimer = null;
     var usedOptions = listenOptions ??
