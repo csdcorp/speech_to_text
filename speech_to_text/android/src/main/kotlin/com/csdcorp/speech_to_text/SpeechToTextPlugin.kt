@@ -116,6 +116,7 @@ public class SpeechToTextPlugin :
     private var noBluetoothOpt: Boolean = false // user-defined option
     private var bluetoothDisabled = true // final bluetooth state (combines user-defined option and permissions)
     private var resultSent: Boolean = false
+    private var lastAlternates: JSONArray? = null
     private var lastOnDevice: Boolean = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
@@ -317,6 +318,7 @@ public class SpeechToTextPlugin :
         var listenMode = enumValues<ListenMode>()[listenModeIndex]
 
         resultSent = false
+        lastAlternates = null
         createRecognizer(onDevice, listenMode, pauseFor)
         minRms = 1000.0F
         maxRms = -100.0F
@@ -496,11 +498,21 @@ public class SpeechToTextPlugin :
                 alternates.put(speechWords)
             }
             speechResult.put("alternates", alternates)
+            lastAlternates = alternates
             val jsonResult = speechResult.toString()
             debugLog("Calling results callback")
             resultSent = true
             channel?.invokeMethod(SpeechToTextCallbackMethods.textRecognition.name,
                     jsonResult)
+        } else if (isFinal && null != lastAlternates) {
+            // The on-device recognizer ends a stopped session with an empty
+            // final when the partial results already hold every word.
+            debugLog("Empty final, sending the last result as final")
+            val speechResult = JSONObject()
+            speechResult.put("resultType", ResultType.finalResult.intValue())
+            speechResult.put("alternates", lastAlternates)
+            channel?.invokeMethod(SpeechToTextCallbackMethods.textRecognition.name,
+                    speechResult.toString())
         } else {
             debugLog("Results null or empty")
         }

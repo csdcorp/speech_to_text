@@ -1,6 +1,10 @@
 # Changelog
 
 ## 7.6.0-beta.4
+* Android: when the recognizer ends a stopped session with an empty final
+  result, the last result is now sent as the final one. Google's on-device
+  recognizer does this when the partial results already hold every word, so
+  before, no final result arrived until `finalTimeout` ran out.
 * Fixes `pauseFor` and `listenFor` running out early once the timer had
   re-armed: the remaining durations were stored in place of the requested ones
   and the elapsed time taken off them again on every re-arm, so a session
